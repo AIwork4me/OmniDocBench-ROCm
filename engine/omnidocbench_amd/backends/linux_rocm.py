@@ -13,8 +13,8 @@ class LinuxRocmBackend(Backend):
     eval-venv on a Linux/ROCm host.
 
     The metric_result filename follows OmniDocBench's ``build_save_name``
-    convention: ``m_<version>_quick_match_metric_result.json`` (the
-    ``m_`` prefix mirrors the dataset version tag used by the caller).
+    convention: ``<predictions_dir.name>_quick_match_metric_result.json``
+    (``build_save_name`` = basename(prediction_path) + "_" + match_method).
     """
 
     def __init__(self, checkout: Path | None = None):
@@ -36,9 +36,13 @@ class LinuxRocmBackend(Backend):
 
     def score(self, *, predictions_dir: Path, version: str, cdm: bool,
               run_stats_path: Path) -> Path:
+        # TODO Task 16: accept + plumb a pinned revision instead of hardcoding master
         checkout = self.ensure_checkout(revision="master")  # v1.6 = master; pinned by caller
+        # TODO Task 16: pass cdm flag + run_stats to pdf_validation / publish
         venv_python = str(eval_venv("linux-rocm") / "bin" / "python")
-        save = f"m_{version}_quick_match"
+        # OmniDocBench build_save_name = basename(prediction_path) + "_" + match_method
+        save = f"{predictions_dir.name}_quick_match"
+        # TODO Task 16: wire version into the scoring config
         cmd = [venv_python, str(checkout / PDF_VALIDATION),
                "--config", str(version), "--predictions", str(predictions_dir)]
         subprocess.run(cmd, cwd=checkout, check=True)
