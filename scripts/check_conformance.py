@@ -1,76 +1,19 @@
-"""Per-model repo conformance checker.
+"""Legacy entrypoint — re-exports the engine's conformance checker.
 
-Validates that a model repository satisfies the omnidocbench-amd contracts:
-required layout, README sections, examples, engine dependency, and a schema-valid
-``model_card.json``. Used in CI and before awarding a ``verified`` badge.
+The canonical implementation now lives in
+:mod:`omnidocbench_amd.conformance` (installed with the engine). This shim
+keeps existing callers working:
 
-Usage (CLI)::
+- Library: ``from scripts.check_conformance import check_repo`` (Task 9 tests)
+- CLI: ``python scripts/check_conformance.py <repo-path>`` (platform CI)
 
-    python scripts/check_conformance.py <repo-path>
-    # exits 0 (CONFORMANT) or 1 (NON-CONFORMANT + failure list)
+For new callers prefer the installed engine directly::
 
-Library::
-
-    from scripts.check_conformance import check_repo
-    report = check_repo(Path("path/to/model-repo"))
-    if report.ok: ...
+    omnidocbench-amd conformance <repo-path>
 """
-from __future__ import annotations
-import json, sys
-from dataclasses import dataclass, field
-from pathlib import Path
+from omnidocbench_amd.conformance import check_repo, ConformanceReport, main, REQUIRED_README_SECTIONS
 
-REQUIRED_README_SECTIONS = ["Install", "Demo", "Evaluation", "Reproducibility", "Known Gaps"]
-
-
-@dataclass
-class ConformanceReport:
-    ok: bool = True
-    failures: list[str] = field(default_factory=list)
-
-    def add(self, msg: str):
-        self.failures.append(msg); self.ok = False
-
-
-def check_repo(repo: Path) -> ConformanceReport:
-    repo = Path(repo); r = ConformanceReport()
-    if not (repo / "adapter" / "run_adapter.py").exists():
-        r.add("missing adapter/run_adapter.py")
-    if not (repo / "eval" / "configs" / "omnidocbench_v16.yaml").exists():
-        r.add("missing eval/configs/omnidocbench_v16.yaml")
-    for plat in ("linux-rocm", "windows-hip"):
-        d = repo / "results" / "omnidocbench" / "v16" / plat
-        if d.exists() and not any(d.iterdir()):
-            r.add(f"empty results/omnidocbench/v16/{plat}/ (declared but no artifacts)")
-    for readme in ("README.md", "README.zh-CN.md"):
-        p = repo / readme
-        if not p.exists():
-            r.add(f"missing {readme}"); continue
-        text = p.read_text(encoding="utf-8")
-        for sec in REQUIRED_README_SECTIONS:
-            if sec not in text:
-                r.add(f"{readme} missing required section: {sec}")
-    if not (repo / "examples").is_dir() or not any((repo / "examples").iterdir()):
-        r.add("missing examples/ demo")
-    pp = repo / "pyproject.toml"
-    if not pp.exists() or "omnidocbench-amd" not in pp.read_text():
-        r.add("pyproject.toml does not depend on omnidocbench-amd")
-    mc = repo / "model_card.json"
-    if mc.exists():
-        from omnidocbench_amd.schema import validate_artifact
-        try:
-            validate_artifact("model_card", json.loads(mc.read_text()))
-        except Exception as e:
-            r.add(f"model_card.json invalid: {e}")
-    return r
-
-
-def main(argv: list[str]) -> int:
-    report = check_repo(Path(argv[0]))
-    if report.ok:
-        print("CONFORMANT"); return 0
-    print("NON-CONFORMANT:"); [print(" -", f) for f in report.failures]; return 1
-
+__all__ = ["check_repo", "ConformanceReport", "main", "REQUIRED_README_SECTIONS"]
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    import sys; sys.exit(main(sys.argv[1:]))

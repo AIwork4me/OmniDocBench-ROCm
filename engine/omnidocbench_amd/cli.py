@@ -15,6 +15,7 @@ from pathlib import Path
 import omnidocbench_amd
 from .stages import stage_download, stage_infer, stage_publish, stage_score
 from .backends import get_backend
+from .conformance import check_repo
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -62,6 +63,11 @@ def main(argv: list[str] | None = None) -> int:
     rn = sub.add_parser("run")
     rn.add_argument("--stage", default="all")
     rn.add_argument("--platform", required=True)
+    rn.add_argument("--version", default="v16")
+    rn.add_argument("--revision", required=True)
+
+    cf = sub.add_parser("conformance")
+    cf.add_argument("repo_path")
 
     a = p.parse_args(argv)
 
@@ -93,6 +99,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "run":
         raise SystemExit("orchestrated 'run' is wired in Task 13 (needs all stages + backend)")
+    if a.cmd == "conformance":
+        report = check_repo(Path(a.repo_path))
+        if report.ok:
+            print("CONFORMANT"); return 0
+        print("NON-CONFORMANT:")
+        for f in report.failures:
+            print(" -", f)
+        return 1
     return 1
 
 
