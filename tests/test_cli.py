@@ -36,3 +36,46 @@ def test_cli_conformance_nonconformant_repo_exits_one(capsys):
     out = capsys.readouterr().out
     assert rc == 1
     assert "NON-CONFORMANT" in out
+
+
+def test_cli_run_all_orchestrates_four_stages_in_order(tmp_path):
+    """`run --stage all` calls download -> infer -> score -> publish in order."""
+    call_order: list[str] = []
+
+    with patch("omnidocbench_amd.cli.stage_download") as dl, \
+         patch("omnidocbench_amd.cli.stage_infer") as inf, \
+         patch("omnidocbench_amd.cli.stage_score") as sc, \
+         patch("omnidocbench_amd.cli.stage_publish") as pub, \
+         patch("omnidocbench_amd.cli.get_backend") as gb:
+        # Each side_effect records its stage name into the shared list.
+        dl.side_effect = lambda version, revision: (
+            call_order.append("download") or tmp_path / "dataset")
+        inf.side_effect = lambda **kw: (
+            call_order.append("infer") or {"count": 0, "ok": 0})
+        sc.side_effect = lambda **kw: (
+            call_order.append("score") or tmp_path / "metric.json")
+        pub.side_effect = lambda **kw: (
+            call_order.append("publish") or {"run_summary": "x", "provenance": "y"})
+        gb.return_value.score.return_value = tmp_path / "metric.json"
+
+        rc = main([
+            "run", "--stage", "all",
+            "--platform", "linux-rocm",
+            "--version", "v16",
+            "--revision", "v1.6",
+            "--adapter", "fake.py",
+            "--model-id", "m",
+            "--git-commit", "abc123",
+            "--results-dir", str(tmp_path),
+        ])
+
+    assert rc == 0
+    # Assert ORDER, not just that each was called.
+    assert call_order == ["download", "infer", "score", "publish"]
+    # All four stages invoked exactly once.
+    assert dl.call_count == 1
+    assert inf.call_count == 1
+    assert sc.call_count == 1
+    assert pub.call_count == 1
+    # download receives version + revision.
+    dl.assert_called_once_with("v16", "v1.6")
