@@ -1,0 +1,15 @@
+# heavy data — lives under $OMNIDOCBENCH_AMD_DATA (big disk), never in the repo
+data/
+predictions/
+*/.venv/
+.venv/
+*.gguf
+*.onnx
+eval/.omnidocbench/
+__pycache__/
+*.pyc
+.env.local
+# CDM toolchain outputs
+cdb-build/
+# superpowers SDD scratch space (task briefs/reports/ledger — not committed)
+.superpowers/sdd/

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "omnidocbench-amd"
+version = "0.1.0"
+description = "Shared dual-platform (Radeon/Linux + Ryzen AI MAX+ 395/Windows) OmniDocBench v1.6 eval engine + per-model repo template."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "huggingface_hub>=0.24",
+  "pydantic>=2",
+  "jsonschema>=4",
+  "pyyaml>=6",
+  "rich>=13",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov", "cookiecutter>=2"]
+download = ["huggingface_hub>=0.24"]
+
+[project.scripts]
+omnidocbench-amd = "omnidocbench_amd.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["engine/omnidocbench_amd"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"contracts/artifact-schema.json" = "omnidocbench_amd/data/artifact-schema.json"
