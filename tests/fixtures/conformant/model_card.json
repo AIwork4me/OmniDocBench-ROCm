@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "model_id": "fixture-model",
+  "model_version": "0.0.1",
+  "platforms": ["linux-rocm"],
+  "badge": {
+    "linux-rocm": "community",
+    "windows-hip": "community-wanted"
+  },
+  "eval_date": "2026-07-12",
+  "omnidocbench_version": "v1.6",
+  "overall": null,
+  "submetrics": {},
+  "hardware": {
+    "gpu": "fixture (no real GPU)",
+    "vram": "n/a",
+    "rocm_driver": "n/a"
+  },
+  "artifacts": {
+    "run_summary": "results/omnidocbench/v16/linux-rocm/run_summary.json",
+    "provenance": "results/omnidocbench/v16/linux-rocm/provenance.json"
+  }
+}

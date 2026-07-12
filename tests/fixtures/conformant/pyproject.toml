@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fixture-model-conformant"
+version = "0.0.1"
+description = "Conformant fixture repo for the omnidocbench-amd conformance checker."
+requires-python = ">=3.10"
+dependencies = [
+  "omnidocbench-amd>=0.1.0",
+]
+
+[project.scripts]
+fixture-demo = "adapter.run_adapter:main"

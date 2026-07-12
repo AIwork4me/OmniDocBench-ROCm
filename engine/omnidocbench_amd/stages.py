@@ -1,0 +1,86 @@
+"""Four-stage orchestrator: download -> infer -> score -> publish.
+
+Ports the gating + stage structure from
+``AIwork4me/PaddleOCR-VL-ROCm/eval/run_eval.py``. The adapter is invoked as a
+subprocess (filesystem-decoupled): the engine never imports it, only consumes
+``out_dir/<image_stem>.md`` + ``_run_stats.json``.
+"""
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import importlib.util
+from pathlib import Path
+
+from . import artifact_utils as au
+from .types import RunSummary
+from ._paths import dataset_dir, eval_venv, predictions_dir
+
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".gif"}
+
+
+def stage_download(version: str, revision: str | None = None) -> Path:
+    """Pin revision; fetch OmniDocBench manifest + images to dataset_dir(version)."""
+    from .download_omnidocbench import download_dataset
+    if revision is None:
+        raise SystemExit("OmniDocBench revision MUST be pinned for reproducibility (got None).")
+    target = dataset_dir(version)
+    resolved = download_dataset(repo_id="opendatalab/OmniDocBench", target=target, revision=revision)
+    print(f"[download] OmniDocBench {version} ready: {resolved}")
+    return target
+
+
+def stage_infer(*, adapter_path: Path, img_dir: Path, out_dir: Path,
+                platform: str, config: dict) -> dict:
+    """Invoke the adapter as a SUBPROCESS (filesystem-decoupled). Never import it."""
+    out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
+    cmd = [sys.executable, str(adapter_path),
+           "--img-dir", str(img_dir), "--out-dir", str(out_dir),
+           "--platform", platform]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise SystemExit(f"adapter failed ({proc.returncode}):\n{proc.stderr}")
+    rs_path = out_dir / "_run_stats.json"
+    if not rs_path.exists():
+        raise SystemExit(f"adapter wrote no _run_stats.json: {rs_path}")
+    return json.loads(rs_path.read_text(encoding="utf-8"))
+
+
+def _assert_full_set(run_stats_path: Path) -> None:
+    rs = json.loads(Path(run_stats_path).read_text(encoding="utf-8"))
+    if rs.get("limit_pages") is not None:
+        raise SystemExit(
+            f"Refusing to publish official evidence from limited predictions "
+            f"(limit_pages={rs['limit_pages']}). Run full unbounded inference first.")
+
+
+def stage_score(*, backend, predictions_dir: Path, version: str, cdm: bool,
+                run_stats_path: Path) -> Path:
+    """Run pdf_validation.py inside the backend's eval-venv (3.11)."""
+    return backend.score(predictions_dir=predictions_dir, version=version, cdm=cdm,
+                         run_stats_path=run_stats_path)
+
+
+def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,
+                  run_stats_path: Path, metric_result_path: Path, results_dir: Path,
+                  git_commit: str, engine_version: str, adapter_command: str,
+                  server_url: str = "", api_model_name: str = "",
+                  scoring_config_path: str = "", dataset_manifest_path: str = "",
+                  dataset_revision: str = "") -> dict:
+    _assert_full_set(run_stats_path)
+    save_name = f"{model_id}_{version}_quick_match{'_cdm' if cdm else ''}"
+    summary_path = results_dir / f"{save_name}_run_summary.json"
+    provenance_path = results_dir / f"{save_name}_provenance.json"
+    au.write_run_summary(save_name=save_name, run_stats_path=run_stats_path,
+                         metric_result_path=metric_result_path, destination=summary_path, cdm=cdm)
+    au.write_provenance(
+        destination=provenance_path, git_commit=git_commit, engine_version=engine_version,
+        model_id=model_id, platform=platform, server_url=server_url,
+        api_model_name=api_model_name, adapter_command=adapter_command,
+        scoring_config_path=Path(scoring_config_path),
+        dataset_manifest_path=Path(dataset_manifest_path),
+        dataset_revision=dataset_revision, predictions_dir=results_dir.parent,
+        metric_result_paths=[metric_result_path], run_summary_paths=[summary_path],
+        run_stats_path=run_stats_path)
+    return {"run_summary": str(summary_path), "provenance": str(provenance_path)}

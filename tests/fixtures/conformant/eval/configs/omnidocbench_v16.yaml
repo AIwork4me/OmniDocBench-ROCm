@@ -1,0 +1,11 @@
+# OmniDocBench v1.6 evaluation config for the conformant fixture repo.
+dataset_version: v16
+platform: linux-rocm
+# Path is resolved by the engine at eval time; fixture repo only declares shape.
+dataset_manifest: OmniDocBench/omnidocbench_v1_6/metadata.jsonl
+limit_pages: null
+metrics:
+  text_block: [Edit_dist]
+  reading_order: [Edit_dist]
+  table: [TEDS]
+  display_formula: [CDM]

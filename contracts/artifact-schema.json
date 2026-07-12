@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omnidocbench-amd/schemas/artifact-schema.json",
+  "schema_version": 1,
+  "$defs": {
+    "run_stats": {
+      "type": "object",
+      "required": ["schema_version", "count", "ok", "fail", "fallback", "limit_pages", "stats"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "count": {"type": "integer"},
+        "ok": {"type": "integer"},
+        "fail": {"type": "integer"},
+        "fallback": {"type": "integer"},
+        "limit_pages": {"type": ["integer", "null"]},
+        "engine": {"type": "string"},
+        "stats": {"type": "array", "items": {
+          "type": "object",
+          "required": ["image", "status"],
+          "properties": {
+            "image": {"type": "string"},
+            "status": {"type": "string"},
+            "error": {"type": "string"},
+            "seconds": {"type": "number"},
+            "attempts": {"type": "integer"}
+          }
+        }}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["schema_version", "created_at_utc", "git_commit", "platform", "engine_version", "model_id", "adapter_command", "dataset_manifest_path", "dataset_revision", "prediction_dir", "page_count", "ok_pages", "failed_pages", "metric_result_paths", "run_summary_paths", "run_stats_path"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "created_at_utc": {"type": "string"},
+        "git_commit": {"type": "string"},
+        "platform": {"enum": ["linux-rocm", "windows-hip"]},
+        "engine_version": {"type": "string"},
+        "model_id": {"type": "string"},
+        "adapter_command": {"type": "string"},
+        "vlm_server_url": {"type": "string"},
+        "api_model_name": {"type": "string"},
+        "scoring_config_path": {"type": "string"},
+        "dataset_manifest_path": {"type": "string"},
+        "dataset_revision": {"type": "string"},
+        "prediction_dir": {"type": "string"},
+        "page_count": {"type": "integer"},
+        "ok_pages": {"type": "integer"},
+        "failed_pages": {"type": "integer"},
+        "fallback_pages": {"type": "integer"},
+        "metric_result_paths": {"type": "array", "items": {"type": "string"}},
+        "run_summary_paths": {"type": "array", "items": {"type": "string"}},
+        "run_stats_path": {"type": "string"}
+      }
+    },
+    "run_summary": {
+      "type": "object",
+      "required": ["schema_version", "save_name", "engine", "cdm", "prediction_count", "ok_pages", "failed_pages", "fallback_pages", "readme_metrics", "metric_quality"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "save_name": {"type": "string"},
+        "engine": {"type": "string"},
+        "cdm": {"type": "boolean"},
+        "prediction_count": {"type": "integer"},
+        "ok_pages": {"type": "integer"},
+        "failed_pages": {"type": "integer"},
+        "fallback_pages": {"type": "integer"},
+        "readme_metrics": {
+          "type": "object",
+          "properties": {
+            "text_edit_dist": {"type": ["number", "null"]},
+            "reading_order_edit_dist": {"type": ["number", "null"]},
+            "table_teds_percent": {"type": ["number", "null"]},
+            "formula_cdm_percent": {"type": ["number", "null"]}
+          }
+        },
+        "metric_quality": {
+          "type": "object",
+          "required": ["formula_cdm"],
+          "properties": {"formula_cdm": {
+            "type": "object", "required": ["valid"],
+            "properties": {"valid": {"type": "boolean"}, "reason": {"type": "string"},
+              "sample_count": {"type": ["integer", "null"]}, "exception_case_count": {"type": ["integer", "null"]}}
+          }}
+        }
+      }
+    },
+    "model_card": {
+      "type": "object",
+      "required": ["schema_version", "model_id", "model_version", "platforms", "badge", "eval_date", "omnidocbench_version", "overall", "hardware", "artifacts"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "model_id": {"type": "string"},
+        "model_version": {"type": "string"},
+        "platforms": {"type": "array", "items": {"enum": ["linux-rocm", "windows-hip"]}},
+        "badge": {"type": "object",
+          "properties": {
+            "linux-rocm": {"enum": ["verified", "community", "community-wanted"]},
+            "windows-hip": {"enum": ["verified", "community", "community-wanted"]}
+          }},
+        "eval_date": {"type": "string"},
+        "omnidocbench_version": {"type": "string"},
+        "overall": {"type": ["number", "null"]},
+        "submetrics": {"type": "object"},
+        "hardware": {"type": "object",
+          "properties": {"gpu": {"type": "string"}, "vram": {"type": "string"}, "rocm_driver": {"type": "string"}}},
+        "artifacts": {"type": "object"}
+      }
+    }
+  }
+}

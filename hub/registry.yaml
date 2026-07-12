@@ -1,0 +1,35 @@
+# Hub model registry — source of truth for the comparison table.
+#
+# One entry per model repo. Consumed by scripts/generate_registry.py and
+# rendered into the hub site (mkdocs, sub-project 1) comparison table.
+#
+# Schema:
+#   - model_id:   short identifier used in URLs/table rows
+#     repo:        GitHub owner/repo for the per-model ROCm/HIP packaging
+#     platforms:   per-platform support entry
+#       linux-rocm:   {badge, overall}
+#       windows-hip:  {badge, overall}
+#
+# badge:   verified | community | community-wanted   (see contracts/badge-policy)
+# overall: OmniDocBench v1.6 overall score (number) or null when not yet measured.
+#
+# Status: the 3 v1 models ship as `community-wanted` on both platforms until
+# sub-project 4 onboards + verifies them. Scores are null until measured on AMD.
+
+- model_id: paddleocr-vl-1.6
+  repo: AIwork4me/PaddleOCR-VL-ROCm
+  platforms:
+    linux-rocm: {badge: community-wanted, overall: null}
+    windows-hip: {badge: community-wanted, overall: null}
+
+- model_id: unlimited-ocr
+  repo: AIwork4me/Unlimited-OCR-ROCm
+  platforms:
+    linux-rocm: {badge: community-wanted, overall: null}
+    windows-hip: {badge: community-wanted, overall: null}
+
+- model_id: mineru2.5
+  repo: AIwork4me/MinerU-ROCm
+  platforms:
+    linux-rocm: {badge: community-wanted, overall: null}
+    windows-hip: {badge: community-wanted, overall: null}

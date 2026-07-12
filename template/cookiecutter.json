@@ -1,0 +1,7 @@
+{
+  "repo_name": "Model-AMD",
+  "model_slug": "model",
+  "model_id": "model",
+  "model_version": "0.1.0",
+  "license": ["Apache-2.0", "MIT"]
+}
