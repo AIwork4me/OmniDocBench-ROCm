@@ -1,4 +1,4 @@
-# omnidocbench-amd
+# OmniDocBench-AMD
 
 The shared platform for the **AMD Doc Parsing** zone: run OmniDocBench v1.6
 open-source document-parsing models on AMD hardware (Radeon + Linux/ROCm, and

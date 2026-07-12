@@ -15,14 +15,14 @@ topology and the shared engine.
 
 ## The topology (Topology A)
 
-A single **platform repo** (`omnidocbench-amd/`) holds the shared contracts,
+A single **platform repo** (`OmniDocBench-AMD/`) holds the shared contracts,
 the dual-platform eval engine, the per-model repo template, and the hub
 registry. Each model lives in its **own** repo (`<Model>-AMD/`), generated
 from the template. The engine never imports an adapter — it consumes the
 adapter's filesystem output — so model repos can be in any stack.
 
 ```
-omnidocbench-amd/                         <- this repo (platform)
+OmniDocBench-AMD/                         <- this repo (platform)
   contracts/        adapter contract, artifact schema, conformance, badges
   engine/           omnidocbench_amd/  (pip package: stages, backends, cdm)
   template/         cookiecutter -> <Model>-AMD/

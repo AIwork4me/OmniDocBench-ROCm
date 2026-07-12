@@ -322,7 +322,7 @@ Cookiecutter `template/` generates a conformant `<Model>-AMD` repo (structure in
 
 ```
 1 Propose    open issue "I want to add model X" → maintainer confirms open-source + in scope + not duplicate
-2 Scaffold   cookiecutter gh:AIwork4me/omnidocbench-amd template → push to contributor fork
+2 Scaffold   cookiecutter gh:AIwork4me/OmniDocBench-AMD template → push to contributor fork
 3 Provision  make setup-linux / make setup-windows (idempotent; weights, server, CDM via engine)
 4 Implement  edit adapter/run_adapter.py (replace inference body; keep signature + .md convention; .env.local for paths)
 5 Demo       make demo → verify one image produces sane Markdown

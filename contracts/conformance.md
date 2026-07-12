@@ -48,7 +48,7 @@ headers (the checker matches the bare word, so `## Install` / `## 安装 (Instal
 ## Running
 
 ```bash
-# From the omnidocbench-amd repo (or any checkout with scripts/):
+# From the OmniDocBench-AMD repo (or any checkout with scripts/):
 python scripts/check_conformance.py path/to/model-repo
 # -> CONFORMANT (exit 0) | NON-CONFORMANT + failure list (exit 1)
 ```

@@ -1,4 +1,4 @@
-# omnidocbench-amd
+# OmniDocBench-AMD
 
 **AMD 文档解析专区**的共享平台：在 AMD 硬件（Radeon + Linux/ROCm，以及
 Ryzen AI MAX+ 395 + Windows/HIP）上运行 OmniDocBench v1.6 开源文档解析模型，

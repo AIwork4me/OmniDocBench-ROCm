@@ -66,7 +66,7 @@ OmniDocBench 的评测代码在 Python 3.12 下会坏（用了 `inspect.getargsp
 
 ### 第 1 步 — 提案（几分钟）
 
-在 `AIwork4me/omnidocbench-amd` 开一个 issue，标题「我想加入模型 X」。维护者确认：
+在 `AIwork4me/OmniDocBench-AMD` 开一个 issue，标题「我想加入模型 X」。维护者确认：
 
 - **开源**（权重 + 代码都开放）。闭源模型（Gemini、GPT、Mistral-OCR、mathpix、混元 OCR、优图 Parsing、Nanonets、GLM-OCR 等）永不支持。
 - **在范围内**——是文档解析模型（纯通用 VLM 除非有文档解析路径，否则不算）。
@@ -80,7 +80,7 @@ OmniDocBench 的评测代码在 Python 3.12 下会坏（用了 `inspect.getargsp
 
 ```bash
 pip install cookiecutter
-cookiecutter gh:AIwork4me/omnidocbench-amd --directory template
+cookiecutter gh:AIwork4me/OmniDocBench-AMD --directory template
 # 提示：repo_name (Model-AMD)、model_slug、model_id、model_version、license
 ```
 
@@ -166,7 +166,7 @@ make publish
 
 ### 第 8 步 — 提交（几分钟）
 
-向 `AIwork4me/omnidocbench-amd` 开 PR，把你的模型加进 `hub/registry.yaml`，`badge` 填 `community`（没有的平台填 `community-wanted`），附上你仓库的链接。CI 会对你的仓库跑 `check-conformance`。
+向 `AIwork4me/OmniDocBench-AMD` 开 PR，把你的模型加进 `hub/registry.yaml`，`badge` 填 `community`（没有的平台填 `community-wanted`），附上你仓库的链接。CI 会对你的仓库跑 `check-conformance`。
 
 **耗时：** 来回一轮。**完成标志：** 你的模型出现在对比表里，所贡献的平台带 `community` 徽章。
 
@@ -195,7 +195,7 @@ make publish
 - **报错 / 失败：** 先按症状搜 [`pitfalls.md`](pitfalls.md)——按你看到的现象组织，每条都有 根因 → 修复 → 验证。CDM 相关条目（`#cdm-zero`、`#grayscale`、`#mathcolor` 等）是仓库里最有价值的几页。
 - **架构 / 「怎么拼到一起的」：** [`architecture.md`](architecture.md)。
 - **你在实现的契约：** [`contracts/adapter.md`](../contracts/adapter.md)。
-- **问题 / 提案：** 在 `AIwork4me/omnidocbench-amd` 开 issue。维护者在 issue 里回复。
+- **问题 / 提案：** 在 `AIwork4me/OmniDocBench-AMD` 开 issue。维护者在 issue 里回复。
 
 仓库里维护着一份「适合新手的模型」清单（开源、文档全、接起来简单的模型）。想根据你的硬件要推荐，开 issue 问一声。
 
@@ -204,7 +204,7 @@ make publish
 ## 太长不看
 
 ```bash
-cookiecutter gh:AIwork4me/omnidocbench-amd --directory template   # 2 脚手架
+cookiecutter gh:AIwork4me/OmniDocBench-AMD --directory template   # 2 脚手架
 make setup-linux                                                   # 3 环境准备
 $EDITOR adapter/run_adapter.py adapter/adapter_config.py           # 4 实现
 make demo                                                          # 5 Demo

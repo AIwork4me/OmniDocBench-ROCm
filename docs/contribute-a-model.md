@@ -63,7 +63,7 @@ Each step has a rough time budget assuming the hardware + weights are ready.
 
 ### Step 1 — Propose (minutes)
 
-Open an issue in `AIwork4me/omnidocbench-amd` titled "I want to add model X".
+Open an issue in `AIwork4me/OmniDocBench-AMD` titled "I want to add model X".
 The maintainer confirms:
 
 - It's **open-source** (open weights + open code). Closed-source models
@@ -81,7 +81,7 @@ Generate a conformant repo from the cookiecutter template:
 
 ```bash
 pip install cookiecutter
-cookiecutter gh:AIwork4me/omnidocbench-amd --directory template
+cookiecutter gh:AIwork4me/OmniDocBench-AMD --directory template
 # prompts: repo_name (Model-AMD), model_slug, model_id, model_version, license
 ```
 
@@ -196,7 +196,7 @@ Then commit the `results/` bundle + `model_card.json`. This is your
 
 ### Step 8 — Submit (minutes)
 
-Open a PR to `AIwork4me/omnidocbench-amd` adding your model to
+Open a PR to `AIwork4me/OmniDocBench-AMD` adding your model to
 `hub/registry.yaml` with `badge: community` (or `community-wanted` for the
 platform you don't have) and a link to your repo. CI runs
 `check-conformance` on your repo.
@@ -241,7 +241,7 @@ with one.
   highest-value pages in the repo.
 - **Architecture / "how does it fit?":** [`architecture.md`](architecture.md).
 - **The contract you're implementing:** [`contracts/adapter.md`](../contracts/adapter.md).
-- **Questions / proposals:** open an issue in `AIwork4me/omnidocbench-amd`.
+- **Questions / proposals:** open an issue in `AIwork4me/OmniDocBench-AMD`.
   The maintainer responds on issue threads.
 
 A "good first model" list (models that are open-source, well-documented, and
@@ -253,7 +253,7 @@ you want a recommendation matched to your hardware.
 ## TL;DR
 
 ```bash
-cookiecutter gh:AIwork4me/omnidocbench-amd --directory template   # 2 Scaffold
+cookiecutter gh:AIwork4me/OmniDocBench-AMD --directory template   # 2 Scaffold
 make setup-linux                                                   # 3 Provision
 $EDITOR adapter/run_adapter.py adapter/adapter_config.py           # 4 Implement
 make demo                                                          # 5 Demo
