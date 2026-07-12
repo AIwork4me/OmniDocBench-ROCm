@@ -11,10 +11,8 @@ requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 dependencies = [
   "huggingface_hub>=0.24",
-  "pydantic>=2",
   "jsonschema>=4",
   "pyyaml>=6",
-  "rich>=13",
 ]
 
 [project.optional-dependencies]

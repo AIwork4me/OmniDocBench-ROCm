@@ -16,7 +16,7 @@ runtime types live in `engine/omnidocbench_amd/types.py`.
 ```python
 def run_adapter(img_dir: Path, out_dir: Path, *,
                 platform: Literal["linux-rocm", "windows-hip"],
-                config: AdapterConfig) -> RunSummary:
+                config: AdapterConfig) -> dict:
     """Write out_dir/<image_stem>.md (UTF-8) for every page image in img_dir."""
 ```
 
@@ -27,7 +27,10 @@ def run_adapter(img_dir: Path, out_dir: Path, *,
 | `platform` | **Explicit arg.** The adapter branches on platform-specific serving: vLLM/ROCm on Linux, llama.cpp/HIP-GGUF or vLLM-rocm-win on Windows. Never infer the platform from the OS — the engine tells you. |
 | `config` | An `AdapterConfig` (see §2). Carries weights paths, server URL, backend name, API model name. |
 
-Returns a standardized `RunSummary` (§3). The reference implementation in
+Returns the `RunSummary.to_run_stats()` dict (§3) — advisory/inspection only.
+The engine reads `_run_stats.json` from disk (not the return value), so the
+return type is `dict` to match the reference implementation and all real
+adapters (template + fixtures). The reference implementation in
 `template/{{cookiecutter.repo_name}}/adapter/run_adapter.py` is the worked
 example — copy it and replace the `_infer` body.
 

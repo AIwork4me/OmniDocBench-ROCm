@@ -45,7 +45,10 @@ def check_repo(repo: Path) -> ConformanceReport:
         r.add("missing eval/configs/omnidocbench_v16.yaml")
     for plat in ("linux-rocm", "windows-hip"):
         d = repo / "results" / "omnidocbench" / "v16" / plat
-        if d.exists() and not any(d.iterdir()):
+        # A declared results dir is "empty" if it holds no real artifacts —
+        # git placeholders like ``.gitkeep`` (and other dotfiles) don't count,
+        # they only keep an empty dir in version control.
+        if d.exists() and not any(p for p in d.iterdir() if not p.name.startswith(".")):
             r.add(f"empty results/omnidocbench/v16/{plat}/ (declared but no artifacts)")
     for readme in ("README.md", "README.zh-CN.md"):
         p = repo / readme
@@ -70,6 +73,9 @@ def check_repo(repo: Path) -> ConformanceReport:
 
 
 def main(argv: list[str]) -> int:
+    if not argv:
+        print("usage: check_conformance.py <repo-path>", file=sys.stderr)
+        return 2
     report = check_repo(Path(argv[0]))
     if report.ok:
         print("CONFORMANT"); return 0

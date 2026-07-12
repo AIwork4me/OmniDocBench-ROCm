@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "count": 1,
+  "ok": 1,
+  "fail": 0,
+  "fallback": 0,
+  "limit_pages": null,
+  "engine": "fixture",
+  "stats": [
+    {"image": "demo.png", "status": "ok", "error": "", "seconds": 0.01, "attempts": 1}
+  ]
+}

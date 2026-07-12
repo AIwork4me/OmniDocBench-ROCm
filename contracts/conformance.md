@@ -11,7 +11,7 @@ CI on every model repo and before awarding any badge.
 |---|-------|-----------------|
 | 1 | `adapter/run_adapter.py` exists | `missing adapter/run_adapter.py` |
 | 2 | `eval/configs/omnidocbench_v16.yaml` exists | `missing eval/configs/omnidocbench_v16.yaml` |
-| 3 | Each declared `results/omnidocbench/v16/<platform>/` dir is non-empty (checked for `linux-rocm` and `windows-hip`) | `empty results/omnidocbench/v16/<plat>/ (declared but no artifacts)` |
+| 3 | Each declared `results/omnidocbench/v16/<platform>/` dir holds a real artifact (checked for `linux-rocm` and `windows-hip`; git placeholders like `.gitkeep` don't count) | `empty results/omnidocbench/v16/<plat>/ (declared but no artifacts)` |
 | 4 | Both `README.md` and `README.zh-CN.md` exist | `missing <readme>` |
 | 5 | Each README contains the required section headers: **Install**, **Demo**, **Evaluation**, **Reproducibility**, **Known Gaps** | `<readme> missing required section: <sec>` |
 | 6 | `examples/` is a non-empty directory | `missing examples/ demo` |
