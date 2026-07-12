@@ -1,0 +1,7 @@
+# OmniDocBench v1.6 evaluation config for the NON-conformant fixture repo.
+dataset_version: v16
+platform: linux-rocm
+dataset_manifest: OmniDocBench/omnidocbench_v1_6/metadata.jsonl
+limit_pages: null
+metrics:
+  text_block: [Edit_dist]

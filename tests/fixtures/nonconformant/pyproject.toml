@@ -1,0 +1,12 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fixture-model-nonconformant"
+version = "0.0.1"
+description = "Deliberately non-conformant fixture repo for the conformance checker."
+requires-python = ">=3.10"
+dependencies = [
+  "omnidocbench-amd>=0.1.0",
+]
