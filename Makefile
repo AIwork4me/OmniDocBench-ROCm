@@ -1,4 +1,7 @@
-.PHONY: provision-cdm repro-score test
+.PHONY: provision-cdm repro-score test setup-linux
+
+setup-linux:
+	bash engine/omnidocbench_rocm/evalenv/setup-linux.sh
 
 provision-cdm:
 	omnidocbench-rocm cdm setup --platform linux-rocm
