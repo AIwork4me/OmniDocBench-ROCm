@@ -24,3 +24,15 @@ def eval_venv(platform: str) -> Path:
 
 def predictions_dir(model_id: str, platform: str) -> Path:
     return data_root() / "predictions" / model_id / platform
+
+
+def checkout() -> Path:
+    """The OmniDocBench scorer checkout (the repo ``pdf_validation.py`` runs from).
+
+    Override via the ``OMNIDOCBENCH_CHECKOUT`` env var — the same var the
+    eval-venv provisioning (``evalenv/setup-linux.sh``) uses, so the scorer
+    checkout and the venv that installs it stay in sync. Default
+    ``/workspace/OmniDocBench``. Lets ``get_backend('linux-rocm')`` (which builds
+    ``LinuxRocmBackend(checkout=None)``) score without an explicit checkout path.
+    """
+    return Path(os.environ.get("OMNIDOCBENCH_CHECKOUT", "/workspace/OmniDocBench"))

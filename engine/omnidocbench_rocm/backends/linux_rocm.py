@@ -2,7 +2,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 from .base import Backend
-from .._paths import eval_venv, data_root
+from .._paths import eval_venv, data_root, checkout as checkout_path
 from .._refs import OMNIDOCBENCH_V16_REF
 from ..config_render import render_config
 
@@ -22,13 +22,17 @@ class LinuxRocmBackend(Backend):
         self.checkout = checkout
 
     def ensure_checkout(self, revision: str = OMNIDOCBENCH_V16_REF) -> Path:
-        if self.checkout and (self.checkout / PDF_VALIDATION).exists():
-            return self.checkout
+        # Fall back to the OMNIDOCBENCH_CHECKOUT default when no explicit path
+        # is given (get_backend() builds the backend with checkout=None).
+        co = self.checkout or checkout_path()
+        if (co / PDF_VALIDATION).exists():
+            return co
         raise SystemExit(
-            f"OmniDocBench checkout not found at {self.checkout}. "
+            f"OmniDocBench checkout not found at {co} (pdf_validation.py missing). "
             f"Clone + pin {revision}:\n"
-            f"  git clone https://github.com/opendatalab/OmniDocBench.git {self.checkout}\n"
-            f"  cd {self.checkout} && git checkout {revision} && pip install -e ."
+            f"  git clone https://github.com/opendatalab/OmniDocBench.git {co}\n"
+            f"  cd {co} && git checkout {revision} && pip install -e .\n"
+            f"  (or set OMNIDOCBENCH_CHECKOUT to an existing checkout)"
         )
 
     def provision_cdm(self) -> None:
