@@ -7,10 +7,15 @@ add a model).
 
 > **Reality note.** Only the **Linux-ROCm** backend is implemented today. The
 > **Windows-HIP** backend is planned/onboarding (`get_backend("windows-hip")`
-> raises an explicit not-implemented error). CDM provisioning is a partial
-> Linux scaffold, not wired end-to-end. Earlier drafts of this document
-> described a Windows CDM toolchain and a `cdm/` directory that do not exist in
-> the codebase; they have been removed.
+> raises an explicit not-implemented error). CDM on Linux/ROCm is provisioned
+> end-to-end on the host by
+> [`engine/omnidocbench_rocm/cdm/setup-linux.sh`](../engine/omnidocbench_rocm/cdm/setup-linux.sh)
+> + [`smoke_cdm.sh`](../engine/omnidocbench_rocm/cdm/smoke_cdm.sh) (the fast
+> `community` path) and is reproducible via
+> [`engine/omnidocbench_rocm/docker/Dockerfile.repro`](../engine/omnidocbench_rocm/docker/Dockerfile.repro)
+> (the `verified` path). Windows-native CDM remains planned. See the
+> "CDM ownership" section below and [`pitfalls.md`](pitfalls.md) for the known
+> failure modes.
 
 ---
 
@@ -95,12 +100,11 @@ The engine dispatches platform-specific work to a backend
 
 | Backend | Status | Notes |
 |---|---|---|
-| `linux-rocm` (`LinuxRocmBackend`) | **Implemented** | `score()` runs `pdf_validation.py` in the eval-venv (Python 3.11). `provision_cdm()` is a partial stub (prints "not yet implemented"). The OmniDocBench checkout revision is currently hardcoded to `master`. |
-| `windows-hip` | **Planned / onboarding** | `get_backend("windows-hip")` raises `NotImplementedError`. No `windows_hip.py` exists. See `contracts/backend-policy.md`. |
+| `linux-rocm` (`LinuxRocmBackend`) | **Implemented** | `score()` renders the scoring config and runs `pdf_validation.py` in the eval-venv (Python 3.11). `provision_cdm()` runs [`cdm/setup-linux.sh`](../engine/omnidocbench_rocm/cdm/setup-linux.sh) (host CDM toolchain). The OmniDocBench checkout revision is pinned to `OMNIDOCBENCH_V16_REF` (`2b161d0`). |
+| `windows-hip` | **Planned / onboarding** | `get_backend("windows-hip")` raises `NotImplementedError`. No `windows_hip.py` exists. Windows-native CDM is planned (see [`pitfalls.md`](pitfalls.md) status note). See `contracts/backend-policy.md`. |
 
-There is no fabricated Windows CDM toolchain, no `score.ps1`, no `engine/.../cdm/`
-directory. When the Windows-HIP backend lands, this section will describe it for
-real.
+There is no fabricated Windows CDM toolchain and no `score.ps1`. When the
+Windows-HIP backend lands, this section will describe it for real.
 
 ---
 
@@ -130,26 +134,51 @@ the model's deps go in its own venv.
 
 ---
 
-## CDM ownership (the highest-value part — partially implemented)
+## CDM ownership (the highest-value part — provisioned + smoke-checked)
 
 CDM (Consistent Distance Metric) matches formulas by: compile each formula to a
 color-coded PDF -> rasterize to PNG -> match colored bounding boxes between
 ground truth and prediction. It is the hardest, highest-value metric.
 
 **The engine owns CDM provisioning** (so contributors don't each fight the 20+
-debug sessions documented in `pitfalls.md`), but today this is a **partial
-scaffold**: `LinuxRocmBackend.provision_cdm()` prints a not-implemented notice
-and there is no `engine/omnidocbench_rocm/cdm/` toolchain directory yet.
-End-to-end CDM (Linux first, Windows later) is on the roadmap. Invalid CDM is
-shown as `pending`/null — never a faked number.
+debug sessions documented in `pitfalls.md`). On Linux/ROCm, CDM is now
+**end-to-end-usable on the host** via two pieces:
 
-### Docker reproducible path (planned for `verified`)
+- [`engine/omnidocbench_rocm/cdm/setup-linux.sh`](../engine/omnidocbench_rocm/cdm/setup-linux.sh)
+  — idempotent host provisioning: `texlive-full` + **ImageMagick 7** (not the
+  IM6 default that silently flattens color formulas to grayscale — see
+  [`#grayscale`](pitfalls.md#grayscale)) + `ghostscript` + `node` + CJK fonts,
+  and enables PDF write in the IM7 policy. `make provision-cdm` runs it.
+- [`engine/omnidocbench_rocm/cdm/smoke_cdm.sh`](../engine/omnidocbench_rocm/cdm/smoke_cdm.sh)
+  — a smoke probe that compiles one color-coded formula, rasterizes it, and
+  asserts the PNG is **not grayscale**. This catches the
+  [`#grayscale`](pitfalls.md#grayscale) and [`#posix`](pitfalls.md#posix)
+  branches directly and exercises the `pdflatex → magick` path end-to-end; the
+  remaining [`#cdm-zero`](pitfalls.md#cdm-zero) branches
+  ([`#mathcolor`](pitfalls.md#mathcolor), [`#gkaiu-map`](pitfalls.md#gkaiu-map),
+  [`#texlive-cjk`](pitfalls.md#texlive-cjk)) still require walking the decision
+  tree in [`pitfalls.md`](pitfalls.md). Exit 0 = toolchain is CDM-capable.
 
-For maximum reproducibility, the recommended path for `verified`-badge
-reproductions is to run `score` inside a pinned Docker image
-(`ghcr.io/zeng-weijun/omnidocbench-eval:repro-ubuntu2204`) that pins the exact
-TeX Live / ImageMagick 7 / Ghostscript versions. Maintainer reproductions use
-the Docker path.
+This host path is the **fast `community` path** — good enough to produce a real
+CDM score for a conformant, provenance-complete entry.
+
+**Honesty caveats — what CDM is *not*.** CDM is provisioned + smoke-checked, not
+"fully automated" or "always works". The [`#cdm-zero`](pitfalls.md#cdm-zero)
+failure modes are real and documented; if the smoke probe fails, walk the tree.
+On an all-exception result the CDM metric is recorded as **`pending`/null —
+never a faked number.** Do not claim CDM is "done/automatic".
+
+### Docker reproducible path (the `verified` path)
+
+For maximum reproducibility, the `verified`-badge path runs `score` inside a
+pinned Docker image built from
+[`engine/omnidocbench_rocm/docker/Dockerfile.repro`](../engine/omnidocbench_rocm/docker/Dockerfile.repro),
+which pins the exact TeX Live / ImageMagick 7 / Ghostscript versions and the
+OmniDocBench scorer at `OMNIDOCBENCH_REF=OMNIDOCBENCH_V16_REF`. It reproduces
+**scoring** (Edit_dist + TEDS + CDM) from committed predictions. Maintainer
+reproductions + a `VERIFIED.yaml` tolerance-checked by
+[`scripts/check_verified.py`](../scripts/check_verified.py) are the gate for the
+`verified` badge. See the [onboarding runbook](onboarding-runbook.md) Step 7.
 
 ---
 
@@ -183,6 +212,7 @@ provisioned, and resumes cleanly after a partial run.
 
 ## Where to look next
 
+- Onboarding a model to a `verified` flagship entry -> [`onboarding-runbook.md`](onboarding-runbook.md)
 - Adding a model -> [`contribute-a-model.md`](contribute-a-model.md)
 - The contract you implement -> [`contracts/adapter.md`](../contracts/adapter.md)
 - Backend policy -> [`contracts/backend-policy.md`](../contracts/backend-policy.md)

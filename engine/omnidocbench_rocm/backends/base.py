@@ -14,5 +14,6 @@ class Backend(ABC):
 
     @abstractmethod
     def score(self, *, predictions_dir: Path, version: str, cdm: bool,
-              run_stats_path: Path) -> Path:
+              run_stats_path: Path, scoring_config: Path | None = None,
+              dataset_dir: Path | None = None) -> Path:
         """Run pdf_validation.py in the eval-venv (3.11). Return metric_result path."""

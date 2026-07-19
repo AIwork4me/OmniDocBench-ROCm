@@ -56,10 +56,12 @@ def _assert_full_set(run_stats_path: Path) -> None:
 
 
 def stage_score(*, backend, predictions_dir: Path, version: str, cdm: bool,
-                run_stats_path: Path) -> Path:
+                run_stats_path: Path, scoring_config: Path | None = None,
+                dataset_dir: Path | None = None) -> Path:
     """Run pdf_validation.py inside the backend's eval-venv (3.11)."""
     return backend.score(predictions_dir=predictions_dir, version=version, cdm=cdm,
-                         run_stats_path=run_stats_path)
+                         run_stats_path=run_stats_path, scoring_config=scoring_config,
+                         dataset_dir=dataset_dir)
 
 
 def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,

@@ -26,4 +26,8 @@ omnidocbench-rocm = "omnidocbench_rocm.cli:main"
 packages = ["engine/omnidocbench_rocm"]
 
 [tool.hatch.build.targets.wheel.force-include]
+# Only artifact-schema.json needs force-include — it lives in contracts/ (outside
+# the package). cdm/, evalenv/, and data/*.tmpl are INSIDE engine/omnidocbench_rocm/
+# and are already shipped by packages = ["engine/omnidocbench_rocm"]; force-including
+# them again makes hatchling add them twice (ValueError: second file at same path).
 "contracts/artifact-schema.json" = "omnidocbench_rocm/data/artifact-schema.json"

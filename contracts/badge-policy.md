@@ -32,6 +32,11 @@ demoted: `verified` -> `community` (conformance gate fails, VERIFIED.yaml
 becomes stale) until re-verified; `community` -> `community-wanted` if results
 are removed.
 
+Tolerance is machine-checked by `scripts/check_verified.py`
+(`|reproduced − committed| ≤ 0.5`). The reproduction runs in
+`engine/omnidocbench_rocm/docker/Dockerfile.repro` (pinned toolchain; reproduces
+**scoring** from committed predictions).
+
 ## `VERIFIED.yaml` shape
 
 ```yaml

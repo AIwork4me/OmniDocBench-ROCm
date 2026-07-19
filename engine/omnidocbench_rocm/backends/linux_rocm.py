@@ -2,25 +2,26 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 from .base import Backend
-from .._paths import eval_venv
+from .._paths import eval_venv, data_root
+from .._refs import OMNIDOCBENCH_V16_REF
+from ..config_render import render_config
 
 PDF_VALIDATION = "pdf_validation.py"
 RESULT_DIR = Path("result")
+DEFAULT_TEMPLATE = Path(__file__).resolve().parent.parent / "data" / "omnidocbench_v16.yaml.tmpl"
 
 
 class LinuxRocmBackend(Backend):
-    """Runs OmniDocBench ``pdf_validation.py`` (Edit_dist + TEDS) in the
-    eval-venv on a Linux/ROCm host.
-
-    The metric_result filename follows OmniDocBench's ``build_save_name``
-    convention: ``<predictions_dir.name>_quick_match_metric_result.json``
-    (``build_save_name`` = basename(prediction_path) + "_" + match_method).
+    """Runs OmniDocBench ``pdf_validation.py`` (Edit_dist + TEDS [+ CDM]) in the
+    3.11 eval-venv on a Linux/ROCm host. Scoring is config-driven: predictions
+    and ground truth live inside the rendered config, and pdf_validation takes a
+    single ``--config <yaml>`` argument.
     """
 
     def __init__(self, checkout: Path | None = None):
         self.checkout = checkout
 
-    def ensure_checkout(self, revision: str) -> Path:
+    def ensure_checkout(self, revision: str = OMNIDOCBENCH_V16_REF) -> Path:
         if self.checkout and (self.checkout / PDF_VALIDATION).exists():
             return self.checkout
         raise SystemExit(
@@ -31,21 +32,23 @@ class LinuxRocmBackend(Backend):
         )
 
     def provision_cdm(self) -> None:
-        # CDM provisioning is partially scaffolded (Linux) and not wired
-        # end-to-end; Windows CDM is planned. Do not reference a toolchain
-        # path that does not exist. See contracts/backend-policy.md.
-        print("[cdm] linux-rocm: CDM provisioning not yet implemented (planned)")
+        # Wired in Commit 2 (host CDM toolchain). Kept honest here.
+        from ..cdm_runner import provision_cdm_linux
+        provision_cdm_linux()
 
     def score(self, *, predictions_dir: Path, version: str, cdm: bool,
-              run_stats_path: Path) -> Path:
-        # TODO Task 16: accept + plumb a pinned revision instead of hardcoding master
-        checkout = self.ensure_checkout(revision="master")  # v1.6 = master; pinned by caller
-        # TODO Task 16: pass cdm flag + run_stats to pdf_validation / publish
+              run_stats_path: Path, scoring_config: Path | None = None,
+              dataset_dir: Path | None = None) -> Path:
+        checkout = self.ensure_checkout()
+        template = Path(scoring_config) if scoring_config else DEFAULT_TEMPLATE
+        ds_dir = Path(dataset_dir) if dataset_dir else data_root() / "datasets" / version
+        gt_path = ds_dir / "OmniDocBench.json"
+        if not gt_path.exists():
+            raise SystemExit(f"ground truth not found: {gt_path} (run the download stage)")
+        rendered = render_config(template, prediction_path=Path(predictions_dir),
+                                 gt_path=gt_path, cdm=cdm)
         venv_python = str(eval_venv("linux-rocm") / "bin" / "python")
-        # OmniDocBench build_save_name = basename(prediction_path) + "_" + match_method
-        save = f"{predictions_dir.name}_quick_match"
-        # TODO Task 16: wire version into the scoring config
-        cmd = [venv_python, str(checkout / PDF_VALIDATION),
-               "--config", str(version), "--predictions", str(predictions_dir)]
+        save = f"{Path(predictions_dir).name}_quick_match"
+        cmd = [venv_python, str(checkout / PDF_VALIDATION), "--config", str(rendered)]
         subprocess.run(cmd, cwd=checkout, check=True)
         return checkout / RESULT_DIR / f"{save}_metric_result.json"
