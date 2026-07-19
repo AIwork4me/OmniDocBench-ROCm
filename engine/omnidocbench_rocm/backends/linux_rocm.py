@@ -33,7 +33,7 @@ class LinuxRocmBackend(Backend):
 
     def provision_cdm(self) -> None:
         # Wired in Commit 2 (host CDM toolchain). Kept honest here.
-        from .cdm_runner import provision_cdm_linux
+        from ..cdm_runner import provision_cdm_linux
         provision_cdm_linux()
 
     def score(self, *, predictions_dir: Path, version: str, cdm: bool,

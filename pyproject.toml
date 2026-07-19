@@ -27,3 +27,5 @@ packages = ["engine/omnidocbench_rocm"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "contracts/artifact-schema.json" = "omnidocbench_rocm/data/artifact-schema.json"
+"engine/omnidocbench_rocm/data/omnidocbench_v16.yaml.tmpl" = "omnidocbench_rocm/data/omnidocbench_v16.yaml.tmpl"
+"engine/omnidocbench_rocm/cdm" = "omnidocbench_rocm/cdm"
