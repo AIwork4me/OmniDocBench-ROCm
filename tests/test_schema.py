@@ -36,3 +36,26 @@ def test_runsummary_roundtrip(tmp_path):
     rs.write(p)
     back = RunSummary.from_run_stats(p)
     assert back.count == 3 and back.ok == 2 and back.fail == 1
+
+
+def test_model_card_accepts_optional_backend_fields():
+    card = {
+        "schema_version": 1, "model_id": "x", "model_version": "0.1",
+        "platforms": ["linux-rocm"], "badge": {"linux-rocm": "community"},
+        "eval_date": "2026-07-19", "omnidocbench_version": "v1.6",
+        "overall": None, "hardware": {}, "artifacts": {},
+        "backend": "vllm-rocm", "execution_provider": "ROCMExecutionProvider",
+        "backend_family": "rocm", "compatibility_status": "first-class",
+        "target_backend": "migraphx",
+    }
+    validate_artifact("model_card", card)  # must not raise
+
+
+def test_minimal_model_card_still_validates():
+    minimal = {
+        "schema_version": 1, "model_id": "x", "model_version": "0.1",
+        "platforms": ["linux-rocm"], "badge": {"linux-rocm": "community"},
+        "eval_date": "2026-07-19", "omnidocbench_version": "v1.6",
+        "overall": None, "hardware": {}, "artifacts": {},
+    }
+    validate_artifact("model_card", minimal)  # optional fields absent -> still valid

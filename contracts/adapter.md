@@ -4,7 +4,7 @@ This is the canonical, human-readable contract every per-model adapter must
 satisfy. It is the single interface that makes scores **comparable across
 models and across platforms**. The machine-checkable companion is
 `scripts/check_conformance.py` (existence + signature + output convention); the
-runtime types live in `engine/omnidocbench_amd/types.py`.
+runtime types live in `engine/omnidocbench_rocm/types.py`.
 
 ---
 
@@ -172,14 +172,17 @@ is **platform-specific**:
 | Platform | ONNX package | Execution provider |
 |---|---|---|
 | `linux-rocm` | `onnxruntime-rocm` | ROCm EP (`ROCMExecutionProvider`) |
-| `windows-hip` | `onnxruntime-directml` | DirectML EP (`DmlExecutionProvider`), via Microsoft Olive for conversion/optimization |
+| `windows-hip` | `onnxruntime-directml` *(compatibility fallback)* | DirectML EP (`DmlExecutionProvider`), via Microsoft Olive; target backend is MIGraphX / ONNX Runtime MIGraphX EP when available |
 
 Reference for the Windows DirectML path:
 <https://ryzenai.docs.amd.com/en/latest/gpu/ryzenai_gpu.html>.
 
 VLM serving is similarly platform-split: Linux → vLLM/ROCm; Windows →
-llama.cpp/GGUF (HIP or Vulkan). See the per-model `docs/backends.md` for the
-recommended backend per model type.
+llama.cpp/GGUF (HIP). DirectML (`onnxruntime-directml`) is a **temporary
+Windows compatibility fallback** only, used where an equivalent ROCm/MIGraphX
+path is not yet available; it is not a first-class backend, and Vulkan is out
+of scope. See the platform repo's `contracts/backend-policy.md` and the
+per-model `docs/backends.md` for the recommended backend per model type.
 
 ---
 
@@ -195,7 +198,7 @@ recommended backend per model type.
   as a bare subprocess; use absolute paths from `img_dir`/`out_dir` and the
   `_load_adapter_config()` pattern for sibling imports.
 - **Must not run CDM.** CDM is exclusively engine-owned
-  (`engine/omnidocbench_amd/cdm/`), so contributors don't each fight the 20+
+  (`engine/omnidocbench_rocm/cdm/`), so contributors don't each fight the 20+
   debug sessions documented in `pitfalls.md`.
 - **Must not fake `_run_stats.json`.** If inference didn't run, don't emit ok
   statuses. The engine's full-set enforcement and conformance checks rely on

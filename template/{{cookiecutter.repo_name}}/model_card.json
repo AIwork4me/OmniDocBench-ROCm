@@ -9,5 +9,10 @@
   "overall": null,
   "submetrics": {},
   "hardware": {"gpu": "", "vram": "", "rocm_driver": ""},
-  "artifacts": {}
+  "artifacts": {},
+  "backend": "",
+  "execution_provider": "",
+  "backend_family": "rocm",
+  "compatibility_status": "first-class",
+  "target_backend": ""
 }

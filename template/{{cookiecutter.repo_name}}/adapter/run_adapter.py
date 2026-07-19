@@ -1,4 +1,4 @@
-"""{{cookiecutter.repo_name}} adapter — implements the omnidocbench-amd contract.
+"""{{cookiecutter.repo_name}} adapter — implements the omnidocbench-rocm contract.
 
 Replace the `smoke` branch with your model's inference. Keep the signature and the
 out_dir/<image_stem>.md output convention. Per-page failures must be caught and

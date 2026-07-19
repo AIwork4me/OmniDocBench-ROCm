@@ -14,7 +14,7 @@ A score is only meaningful if someone else can reproduce it from the committed r
 Every published run produces a `provenance.json` (schema-validated) capturing:
 
 - `git_commit` — the exact repo state the run used.
-- `engine_version` — the `omnidocbench-amd` version.
+- `engine_version` — the `omnidocbench-rocm` version.
 - `dataset_revision` — the pinned OmniDocBench revision.
 - `adapter_command` — the literal subprocess command.
 - `platform`, `model_id`, `vlm_server_url`, `api_model_name`, page counts, and metric/run artifact paths.

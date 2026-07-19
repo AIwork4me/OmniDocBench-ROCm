@@ -1,6 +1,6 @@
 # {{cookiecutter.repo_name}}
 
-[omnidocbench-amd](https://github.com/omnidocbench/omnidocbench-amd) 文档解析评测平台的单模型适配仓库。由官方 cookiecutter 模板生成；自带无需 GPU 的 `smoke` 后端，开箱即用。
+[omnidocbench-rocm](https://github.com/omnidocbench/omnidocbench-rocm) 文档解析评测平台的单模型适配仓库。由官方 cookiecutter 模板生成；自带无需 GPU 的 `smoke` 后端，开箱即用。
 
 - 模型：`{{cookiecutter.model_id}}`（v{{cookiecutter.model_version}}）
 - 平台：linux-rocm、windows-hip
@@ -12,7 +12,7 @@
 
 ```bash
 pip install -e ".[dev]"
-pip install omnidocbench-amd        # 引擎（提供 `omnidocbench-amd` CLI 与类型）
+pip install omnidocbench-rocm        # 引擎（提供 `omnidocbench-rocm` CLI 与类型）
 ```
 
 平台环境准备（权重、ROCm/DirectML 运行时）：
