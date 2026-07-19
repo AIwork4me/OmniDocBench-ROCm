@@ -17,20 +17,31 @@ else
 fi
 
 # ImageMagick 7 (NOT the IM6 default on Ubuntu 22.04 — IM6 flattens color).
-if ! command -v magick >/dev/null 2>&1; then
+# NOTE: `magick` may exist as an IM6 legacy wrapper, so check the VERSION, not
+# just the binary's presence.
+if ! magick -version 2>/dev/null | grep -q 'ImageMagick 7'; then
   echo "[cdm] installing ImageMagick 7"
   sudo apt-get install -y -qq build-essential pkg-config libjpeg-dev libpng-dev libtiff-dev zlib1g-dev
-  IM=7.1.1-38
-  curl -fsSL "https://imagemagick.org/archive/releases/ImageMagick-${IM}.tar.xz" -o /tmp/im7.tar.xz
-  tar -xf /tmp/im7.tar.xz -C /tmp && cd /tmp/ImageMagick-${IM}
+  IM=7.1.2-8
+  # imagemagick.org archive paths 404; the GitHub tag archive is the working source.
+  curl -fsSL "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/${IM}.tar.gz" -o /tmp/im7.tar.gz
+  tar -xzf /tmp/im7.tar.gz -C /tmp && cd /tmp/ImageMagick-${IM}
   ./configure --disable-docs && make -j"$(nproc)" && sudo make install && sudo ldconfig
   cd - >/dev/null
 else
-  echo "[cdm] magick (IM7): already present"
+  echo "[cdm] magick (IM7): already present ($(magick -version | head -1))"
 fi
 
-# CJK fonts for texlive (formulas can contain CJK).
-sudo apt-get install -y -qq fonts-noto-cjk fonts-noto-cjk-extra 2>/dev/null || true
+# CJK fonts for texlive. OmniDocBench CDM uses the Arphic `gkai` font with the
+# CJK LaTeX package (\begin{CJK}{UTF8}{gkai}); it does NOT use Noto. The Arphic
+# Type1 TFM (gkai00mp.tfm) is the #gkaiu-map requirement.
+sudo apt-get install -y -qq fonts-arphic-ukai fonts-arphic-uming texlive-lang-chinese 2>/dev/null || true
+if ! kpsewhich gkai00mp.tfm >/dev/null 2>&1; then
+  echo "[cdm] WARNING: gkai00mp.tfm not found — CJK formulas will render BLANK (#gkaiu-map)." >&2
+  echo "[cdm]   The CJK.sty .fd shims load but produce no glyphs without the Arphic Type1 TFM." >&2
+  echo "[cdm]   CDM scoring needs a TeX install that ships it (e.g. a fuller texlive-full host," >&2
+  echo "[cdm]   or the repro Docker image). Edit_dist + TEDS work WITHOUT it." >&2
+fi
 
 # Enable PDF write in IM7 policy.xml (default denies PDF).
 POLICY="$(magick -configure | awk '/CONFIGURE PATH/{print $2; exit}')policy.xml" 2>/dev/null || true
