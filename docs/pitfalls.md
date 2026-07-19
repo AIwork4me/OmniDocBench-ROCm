@@ -10,9 +10,15 @@ debugging hours; the fixes are distilled from 20+ throwaway scripts. If you
 change a setup step anywhere in `engine/` or an `adapter/setup/`, re-read the
 relevant entry first.
 
-> This knowledge base was absorbed from `omnidocbench-amd-windows/docs/pitfalls.md`
-> and extended for the dual-platform engine. Cross-references like `#grayscale`
-> are stable anchors — cite them from code comments and commit messages.
+> This knowledge base was absorbed from the historical Windows-side eval harness
+> (superseded) and extended for the central engine. Cross-references like
+> `#grayscale` are stable anchors — cite them from code comments and commit messages.
+>
+> **Status note:** only the Linux/ROCm (and WSL) paths here are current. The
+> Windows-native CDM toolchain paths referenced in some entries are **planned,
+> not yet implemented** in the central engine — see
+> [`contracts/backend-policy.md`](../contracts/backend-policy.md). The failure-mode
+> analysis (`#posix`, `#grayscale`, `#cdm-zero`) is platform-agnostic and stays valuable.
 
 ---
 
@@ -93,7 +99,7 @@ downloads the Ubuntu 22.04 rootfs tarball directly from the USTC mirror
 `wsl --import Ubuntu2204 C:\WSL\Ubuntu2204 <tarball> --version 2`.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File engine\omnidocbench_amd\cdm\wsl-ensure.ps1
+powershell -ExecutionPolicy Bypass -File engine\omnidocbench_rocm\cdm\wsl-ensure.ps1
 ```
 
 **Verify.** `wsl -d Ubuntu2204 -- echo OK` prints `OK`. If it errors about a
@@ -422,7 +428,7 @@ paths, `shlex` quoting, and coreutils-style command behavior. On Windows these
 either aren't on `PATH`, behave differently, or get mis-quoted.
 
 **Fix.** First run the Windows CDM verifier
-(`engine/omnidocbench_amd/cdm/verify-windows.ps1`). If it fails, follow the
+(`engine/omnidocbench_rocm/cdm/verify-windows.ps1`). If it fails, follow the
 reported missing tool or use the WSL CDM path. The native verifier confirms
 the tracked `windows-cdm.patch` is applied and that TeX Live, ImageMagick, and
 Ghostscript can complete a real CDM smoke test. For the

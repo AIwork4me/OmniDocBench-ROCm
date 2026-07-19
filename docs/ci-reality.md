@@ -28,8 +28,8 @@ The platform repo's CI and each per-model repo's CI run on `ubuntu-latest`
 |---|---|---|
 | **Contract tests** | A fake adapter writes known `.md` → the engine scores it → the artifact schema validates + scores match expectations. Schema fixture positive/negative cases. `model_card.json` generate→validate round-trip. | platform repo `tests/` |
 | **Template smoke** | `cookiecutter` renders a conformant repo; `make demo --backend smoke` produces a `.md`; `check-conformance` passes on structure (no GPU needed — the `smoke` backend is a no-GPU placeholder). | platform repo + per-model repo CI |
-| **Conformance check** | `check_conformance.py` exits 0 on the per-model repo (required sections present, `pyproject.toml` depends on `omnidocbench-amd`, results dirs non-empty, `model_card.json` schema-valid). | per-model repo CI |
-| **Engine self-import** | `python -c "from omnidocbench_amd.types import RunSummary"` — the engine is importable in a clean 3.11 env. | per-model repo CI |
+| **Conformance check** | `check_conformance.py` exits 0 on the per-model repo (required sections present, `pyproject.toml` depends on `omnidocbench-rocm`, results dirs non-empty, `model_card.json` schema-valid). | per-model repo CI |
+| **Engine self-import** | `python -c "from omnidocbench_rocm.types import RunSummary"` — the engine is importable in a clean 3.11 env. | per-model repo CI |
 
 These are the CPU-feasible parts of the test pyramid (spec §10). They catch
 contract regressions, schema drift, and structural non-conformance. They do
@@ -45,7 +45,7 @@ on CI runners:
 
 | GPU test | What it asserts | Who runs it | When |
 |---|---|---|---|
-| **Engine self-test** | A 10-page subset end-to-end on `linux-rocm` (gfx1100) + `windows-hip` (Strix Halo): non-zero scores + valid artifacts. | maintainer | pre-release |
+| **Engine self-test** | A 10-page subset end-to-end on `linux-rocm` (gfx1100): non-zero scores + valid artifacts. (`windows-hip` is planned/onboarding — not yet run.) | maintainer | pre-release |
 | **Reference-model regression** | The 3 reference models (PaddleOCR-VL-1.6, Unlimited-OCR, MinerU2.5) each pin a `results/` baseline; `Overall` drift > 0.1 points triggers review. | maintainer | pre-release + on model-repo changes |
 | **CDM validity test** | A small formula subset on both platforms must produce non-null valid CDM (catches the `#cdm-zero` failure mode). | maintainer | pre-release + on CDM toolchain changes |
 
