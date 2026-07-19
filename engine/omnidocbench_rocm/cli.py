@@ -51,7 +51,9 @@ def _orchestrate_run(a) -> int:
         backend = get_backend(a.platform)
         stage_score(backend=backend, predictions_dir=out_dir,
                     version=a.version, cdm=a.cdm,
-                    run_stats_path=run_stats_path)
+                    run_stats_path=run_stats_path,
+                    scoring_config=(Path(a.scoring_config) if a.scoring_config else None),
+                    dataset_dir=(Path(a.dataset_dir) if a.dataset_dir else None))
         return 0
 
     if stage == "publish":
@@ -75,7 +77,9 @@ def _orchestrate_run(a) -> int:
     backend = get_backend(a.platform)
     metric_result_path = stage_score(
         backend=backend, predictions_dir=out_dir, version=a.version,
-        cdm=a.cdm, run_stats_path=run_stats_path)
+        cdm=a.cdm, run_stats_path=run_stats_path,
+        scoring_config=(Path(a.scoring_config) if a.scoring_config else None),
+        dataset_dir=(Path(a.dataset_dir) if a.dataset_dir else None))
     stage_publish(
         model_id=a.model_id, platform=a.platform, version=a.version,
         cdm=a.cdm, run_stats_path=run_stats_path,
@@ -112,6 +116,8 @@ def main(argv: list[str] | None = None) -> int:
     sc.add_argument("--version", default="v16")
     sc.add_argument("--cdm", action="store_true")
     sc.add_argument("--run-stats", required=True)
+    sc.add_argument("--scoring-config", default="")
+    sc.add_argument("--dataset-dir", default="")
 
     pu = sub.add_parser("publish")
     pu.add_argument("--model-id", required=True)
@@ -149,6 +155,7 @@ def main(argv: list[str] | None = None) -> int:
     rn.add_argument("--api-model-name", default="")
     rn.add_argument("--scoring-config", default="")
     rn.add_argument("--dataset-manifest", default="")
+    rn.add_argument("--dataset-dir", default="")
 
     cf = sub.add_parser("conformance")
     cf.add_argument("repo_path")
@@ -169,7 +176,9 @@ def main(argv: list[str] | None = None) -> int:
         b = get_backend(a.platform)
         stage_score(backend=b, predictions_dir=Path(a.predictions_dir),
                     version=a.version, cdm=a.cdm,
-                    run_stats_path=Path(a.run_stats))
+                    run_stats_path=Path(a.run_stats),
+                    scoring_config=(Path(a.scoring_config) if a.scoring_config else None),
+                    dataset_dir=(Path(a.dataset_dir) if a.dataset_dir else None))
         return 0
     if a.cmd == "publish":
         stage_publish(

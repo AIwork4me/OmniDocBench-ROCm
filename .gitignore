@@ -1,6 +1,7 @@
-# heavy data — lives under $OMNIDOCBENCH_ROCM_DATA (big disk), never in the repo
-data/
-predictions/
+# heavy data — lives under $OMNIDOCBENCH_ROCM_DATA (big disk), never in the repo.
+# Anchored to repo root so engine package data (engine/.../data/*.tmpl) tracks.
+/data/
+/predictions/
 */.venv/
 .venv/
 *.gguf
