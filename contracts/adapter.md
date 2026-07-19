@@ -6,9 +6,6 @@ models and across platforms**. The machine-checkable companion is
 `scripts/check_conformance.py` (existence + signature + output convention); the
 runtime types live in `engine/omnidocbench_amd/types.py`.
 
-> Spec reference: §5.1 of
-> `docs/superpowers/specs/2026-07-12-amd-doc-parsing-platform-foundation-design.md`.
-
 ---
 
 ## 1. The signature
