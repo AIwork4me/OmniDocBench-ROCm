@@ -1,7 +1,7 @@
 """Hub model registry loader + comparison-table renderer.
 
 ``hub/registry.yaml`` is the source of truth for the per-model comparison
-table on the hub site (mkdocs, sub-project 1). This module loads it into
+table (a hosted hub site is planned, not yet implemented). This module loads it into
 structured rows and renders a Markdown table.
 
 Public API:

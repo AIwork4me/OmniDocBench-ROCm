@@ -1,7 +1,7 @@
 # Hub model registry — source of truth for the comparison table.
 #
 # One entry per model repo. Consumed by scripts/generate_registry.py and
-# rendered into the hub site (mkdocs, sub-project 1) comparison table.
+# rendered into a Markdown comparison table (a hosted MkDocs hub site is planned, not yet implemented).
 #
 # Schema:
 #   - model_id:   short identifier used in URLs/table rows
@@ -14,7 +14,7 @@
 # overall: OmniDocBench v1.6 overall score (number) or null when not yet measured.
 #
 # Status: the 3 v1 models ship as `community-wanted` on both platforms until
-# sub-project 4 onboards + verifies them. Scores are null until measured on AMD.
+# they are onboarded + verified. Scores are null until measured on AMD.
 
 - model_id: paddleocr-vl-1.6
   repo: AIwork4me/PaddleOCR-VL-ROCm

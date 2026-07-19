@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://omnidocbench-amd/schemas/artifact-schema.json",
+  "$id": "https://omnidocbench-rocm/schemas/artifact-schema.json",
   "schema_version": 1,
   "$defs": {
     "run_stats": {
@@ -50,7 +50,12 @@
         "fallback_pages": {"type": "integer"},
         "metric_result_paths": {"type": "array", "items": {"type": "string"}},
         "run_summary_paths": {"type": "array", "items": {"type": "string"}},
-        "run_stats_path": {"type": "string"}
+        "run_stats_path": {"type": "string"},
+        "backend": {"type": "string"},
+        "execution_provider": {"type": "string"},
+        "backend_family": {"type": "string"},
+        "compatibility_status": {"type": "string"},
+        "target_backend": {"type": "string"}
       }
     },
     "run_summary": {
@@ -104,7 +109,12 @@
         "submetrics": {"type": "object"},
         "hardware": {"type": "object",
           "properties": {"gpu": {"type": "string"}, "vram": {"type": "string"}, "rocm_driver": {"type": "string"}}},
-        "artifacts": {"type": "object"}
+        "artifacts": {"type": "object"},
+        "backend": {"type": "string"},
+        "execution_provider": {"type": "string"},
+        "backend_family": {"type": "string"},
+        "compatibility_status": {"type": "string"},
+        "target_backend": {"type": "string"}
       }
     }
   }

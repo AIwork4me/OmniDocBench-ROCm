@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "omnidocbench-amd"
-version = "0.1.0"
-description = "Shared dual-platform (Radeon/Linux + Ryzen AI MAX+ 395/Windows) OmniDocBench v1.6 eval engine + per-model repo template."
+name = "omnidocbench-rocm"
+version = "0.2.0"
+description = "OmniDocBench-ROCm: open adaptation, evaluation, reproduction, and collaboration platform for document-parsing models on the AMD ROCm software stack."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
@@ -16,14 +16,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-cov", "cookiecutter>=2"]
+dev = ["pytest>=8", "pytest-cov", "cookiecutter>=2", "build"]
 download = ["huggingface_hub>=0.24"]
 
 [project.scripts]
-omnidocbench-amd = "omnidocbench_amd.cli:main"
+omnidocbench-rocm = "omnidocbench_rocm.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["engine/omnidocbench_amd"]
+packages = ["engine/omnidocbench_rocm"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"contracts/artifact-schema.json" = "omnidocbench_amd/data/artifact-schema.json"
+"contracts/artifact-schema.json" = "omnidocbench_rocm/data/artifact-schema.json"

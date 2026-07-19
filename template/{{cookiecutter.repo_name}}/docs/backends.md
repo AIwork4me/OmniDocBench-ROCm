@@ -4,13 +4,13 @@ Pick the backend that best fits your model type and target platform. This is gui
 
 | Model type | linux-rocm | windows-hip |
 |---|---|---|
-| pure VLM | vLLM/ROCm | llama.cpp/GGUF (HIP or Vulkan) |
+| pure VLM | vLLM/ROCm | llama.cpp/GGUF (HIP) |
 | layout+VLM | ONNX `onnxruntime-rocm` (ROCm EP) + VLM server | ONNX `onnxruntime-directml` (DirectML EP, via Microsoft Olive) + VLM server |
 | pipeline (MinerU2.5) | MinerU on ROCm | MinerU on DirectML/ONNX |
 
-## Windows DirectML path
+## Windows DirectML path (temporary compatibility fallback)
 
-For the Windows `onnxruntime-directml` path (layout models, ONNX-based pipelines), follow the AMD Ryzen AI GPU documentation, which covers DirectML EP setup and model optimization via Microsoft Olive:
+DirectML is a **temporary Windows compatibility fallback**, used only where an equivalent ROCm/MIGraphX path is not yet available — it is not a first-class backend (see the platform repo's `contracts/backend-policy.md`). For the Windows `onnxruntime-directml` path (layout models, ONNX-based pipelines), follow the AMD Ryzen AI GPU documentation, which covers DirectML EP setup and model optimization via Microsoft Olive:
 
 https://ryzenai.docs.amd.com/en/latest/gpu/ryzenai_gpu.html
 

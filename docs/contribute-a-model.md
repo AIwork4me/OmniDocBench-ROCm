@@ -1,6 +1,6 @@
 # Contribute a Model
 
-How to add an open-source document-parsing model to the **AMD Doc Parsing**
+How to add an open-source document-parsing model to the **OmniDocBench-ROCm**
 zone and get it scored on OmniDocBench v1.6 on AMD hardware. This guide is the
 9-step path from proposal to a verified badge. The contract you implement is
 [`contracts/adapter.md`](../contracts/adapter.md); the checklist that gates
@@ -63,7 +63,7 @@ Each step has a rough time budget assuming the hardware + weights are ready.
 
 ### Step 1 — Propose (minutes)
 
-Open an issue in `AIwork4me/OmniDocBench-AMD` titled "I want to add model X".
+Open an issue in `AIwork4me/OmniDocBench-ROCm` titled "I want to add model X".
 The maintainer confirms:
 
 - It's **open-source** (open weights + open code). Closed-source models
@@ -81,8 +81,8 @@ Generate a conformant repo from the cookiecutter template:
 
 ```bash
 pip install cookiecutter
-cookiecutter gh:AIwork4me/OmniDocBench-AMD --directory template
-# prompts: repo_name (Model-AMD), model_slug, model_id, model_version, license
+cookiecutter gh:AIwork4me/OmniDocBench-ROCm --directory template
+# prompts: repo_name (Model-ROCm), model_slug, model_id, model_version, license
 ```
 
 This gives you the full structure: `adapter/run_adapter.py` (with a `smoke`
@@ -108,7 +108,7 @@ bash adapter/setup/00-install-deps.sh        # Linux
 powershell -ExecutionPolicy Bypass -File adapter\setup\00-install-deps.ps1   # Windows
 
 # CDM toolchain (optional for a first pass — see Step 6)
-omnidocbench-amd cdm setup --platform linux-rocm
+omnidocbench-rocm cdm setup --platform linux-rocm
 ```
 
 Everything is **idempotent** — re-running is a no-op once provisioned, and
@@ -117,7 +117,7 @@ resumes cleanly after an interrupt. Weights go to a gitignored `models/` dir;
 
 **Time:** 30 min if mirrors are fast and weights are cached; up to 2 h if
 downloading a large model over a slow link or building the CDM toolchain.
-**Exit:** `omnidocbench-amd dataset download --version v16 --revision v1.6`
+**Exit:** `omnidocbench-rocm dataset download --version v16 --revision v1.6`
 succeeds; `make demo` runs.
 
 ### Step 4 — Implement (hours – a day)
@@ -143,7 +143,7 @@ multi-stage pipeline (layout + formula + OCR) or a custom ONNX path.
 
 ```bash
 make demo
-# runs: omnidocbench-amd infer --adapter adapter/run_adapter.py --img-dir examples --out-dir <tmp>
+# runs: omnidocbench-rocm infer --adapter adapter/run_adapter.py --img-dir examples --out-dir <tmp>
 ```
 
 Verify the one-page output looks like a real document parse (headings, text,
@@ -158,7 +158,7 @@ Run the full OmniDocBench v1.6 eval (1651 pages):
 
 ```bash
 make eval-linux          # or: make eval-windows
-# = omnidocbench-amd run --stage all --platform linux-rocm --version v16 --revision v1.6
+# = omnidocbench-rocm run --stage all --platform linux-rocm --version v16 --revision v1.6
 ```
 
 This runs the four stages: `download → infer → score → publish`, producing the
@@ -168,7 +168,7 @@ artifact bundle in `results/omnidocbench/v16/<platform>/`:
 **CDM, the high-value metric:** CDM (formula matching via LaTeX→PDF→PNG color
 matching) is opt-in via `--cdm`. For a **first pass**, run without `--cdm`
 (Edit_dist + TEDS only) to validate the pipeline. Then provision CDM
-(`omnidocbench-amd cdm setup --platform ...`) and re-run with `--cdm`. CDM is
+(`omnidocbench-rocm cdm setup --platform ...`) and re-run with `--cdm`. CDM is
 engine-owned and notoriously fiddly — if it fails, see
 [`pitfalls.md`](pitfalls.md) (the `#cdm-zero` decision tree covers the six ways
 CDM silently scores zero).
@@ -181,11 +181,11 @@ artifact bundle exists and `run_summary.json` has non-zero `readme_metrics`.
 
 ```bash
 make publish
-# = omnidocbench-amd conformance .   (runs check_conformance.py)
+# = omnidocbench-rocm conformance .   (runs check_conformance.py)
 ```
 
 Fix any conformance failures (missing README section, empty results dir,
-`pyproject.toml` not depending on `omnidocbench-amd`, invalid `model_card.json`).
+`pyproject.toml` not depending on `omnidocbench-rocm`, invalid `model_card.json`).
 The conformance checklist is in [`contracts/conformance.md`](../contracts/conformance.md).
 
 Then commit the `results/` bundle + `model_card.json`. This is your
@@ -196,7 +196,7 @@ Then commit the `results/` bundle + `model_card.json`. This is your
 
 ### Step 8 — Submit (minutes)
 
-Open a PR to `AIwork4me/OmniDocBench-AMD` adding your model to
+Open a PR to `AIwork4me/OmniDocBench-ROCm` adding your model to
 `hub/registry.yaml` with `badge: community` (or `community-wanted` for the
 platform you don't have) and a link to your repo. CI runs
 `check-conformance` on your repo.
@@ -241,7 +241,7 @@ with one.
   highest-value pages in the repo.
 - **Architecture / "how does it fit?":** [`architecture.md`](architecture.md).
 - **The contract you're implementing:** [`contracts/adapter.md`](../contracts/adapter.md).
-- **Questions / proposals:** open an issue in `AIwork4me/OmniDocBench-AMD`.
+- **Questions / proposals:** open an issue in `AIwork4me/OmniDocBench-ROCm`.
   The maintainer responds on issue threads.
 
 A "good first model" list (models that are open-source, well-documented, and
@@ -253,7 +253,7 @@ you want a recommendation matched to your hardware.
 ## TL;DR
 
 ```bash
-cookiecutter gh:AIwork4me/OmniDocBench-AMD --directory template   # 2 Scaffold
+cookiecutter gh:AIwork4me/OmniDocBench-ROCm --directory template   # 2 Scaffold
 make setup-linux                                                   # 3 Provision
 $EDITOR adapter/run_adapter.py adapter/adapter_config.py           # 4 Implement
 make demo                                                          # 5 Demo

@@ -9,7 +9,7 @@
 pip install -e .
 ```
 
-依赖 `omnidocbench-amd` 引擎包。
+依赖 `omnidocbench-rocm` 引擎包。
 
 ## 演示 (Demo)
 
@@ -18,7 +18,7 @@ pip install -e .
 ## 评测 (Evaluation)
 
 ```bash
-omnidocbench-amd infer --adapter adapter/run_adapter.py --platform linux-rocm
+omnidocbench-rocm infer --adapter adapter/run_adapter.py --platform linux-rocm
 ```
 
 评测配置位于 `eval/configs/omnidocbench_v16.yaml`。

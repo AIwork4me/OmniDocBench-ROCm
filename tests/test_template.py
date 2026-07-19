@@ -22,7 +22,7 @@ TEMPLATE = Path(__file__).parent.parent / "template"
 
 def test_rendered_template_passes_conformance(tmp_path):
     out = cookiecutter(str(TEMPLATE), no_input=True,
-                       extra_context={"repo_name": "SmokeModel-AMD", "model_slug": "smokemodel"},
+                       extra_context={"repo_name": "SmokeModel-ROCm", "model_slug": "smokemodel"},
                        output_dir=str(tmp_path))
     report = check_repo(Path(out))
     assert report.ok, report.failures
@@ -30,7 +30,7 @@ def test_rendered_template_passes_conformance(tmp_path):
 
 def test_rendered_template_smoke_backend_runs(tmp_path):
     out = cookiecutter(str(TEMPLATE), no_input=True,
-                       extra_context={"repo_name": "SmokeModel-AMD", "model_slug": "smokemodel"},
+                       extra_context={"repo_name": "SmokeModel-ROCm", "model_slug": "smokemodel"},
                        output_dir=str(tmp_path))
     adapter = Path(out) / "adapter" / "run_adapter.py"
     imgs = tmp_path / "imgs"; imgs.mkdir(); (imgs / "a.png").write_bytes(b"x")

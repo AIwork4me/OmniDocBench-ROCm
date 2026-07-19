@@ -1,17 +1,17 @@
 """Per-model repo conformance checker.
 
-Validates that a model repository satisfies the omnidocbench-amd contracts:
+Validates that a model repository satisfies the omnidocbench-rocm contracts:
 required layout, README sections, examples, engine dependency, and a schema-valid
 ``model_card.json``. Used in CI and before awarding a ``verified`` badge.
 
 Usage (CLI, via the installed engine)::
 
-    omnidocbench-amd conformance <repo-path>
+    omnidocbench-rocm conformance <repo-path>
     # exits 0 (CONFORMANT) or 1 (NON-CONFORMANT + failure list)
 
 Library::
 
-    from omnidocbench_amd.conformance import check_repo
+    from omnidocbench_rocm.conformance import check_repo
     report = check_repo(Path("path/to/model-repo"))
     if report.ok: ...
 
@@ -61,8 +61,8 @@ def check_repo(repo: Path) -> ConformanceReport:
     if not (repo / "examples").is_dir() or not any((repo / "examples").iterdir()):
         r.add("missing examples/ demo")
     pp = repo / "pyproject.toml"
-    if not pp.exists() or "omnidocbench-amd" not in pp.read_text():
-        r.add("pyproject.toml does not depend on omnidocbench-amd")
+    if not pp.exists() or "omnidocbench-rocm" not in pp.read_text():
+        r.add("pyproject.toml does not depend on omnidocbench-rocm")
     mc = repo / "model_card.json"
     if mc.exists():
         try:

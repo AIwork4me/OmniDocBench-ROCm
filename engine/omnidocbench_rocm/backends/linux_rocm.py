@@ -31,8 +31,10 @@ class LinuxRocmBackend(Backend):
         )
 
     def provision_cdm(self) -> None:
-        # Task 14 implements real CDM; for now this is the no-CDM path.
-        print("[cdm] linux-rocm: provision via engine/omnidocbench_amd/cdm/setup-linux.sh (Task 14)")
+        # CDM provisioning is partially scaffolded (Linux) and not wired
+        # end-to-end; Windows CDM is planned. Do not reference a toolchain
+        # path that does not exist. See contracts/backend-policy.md.
+        print("[cdm] linux-rocm: CDM provisioning not yet implemented (planned)")
 
     def score(self, *, predictions_dir: Path, version: str, cdm: bool,
               run_stats_path: Path) -> Path:

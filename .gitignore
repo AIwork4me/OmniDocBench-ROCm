@@ -1,4 +1,4 @@
-# heavy data — lives under $OMNIDOCBENCH_AMD_DATA (big disk), never in the repo
+# heavy data — lives under $OMNIDOCBENCH_ROCM_DATA (big disk), never in the repo
 data/
 predictions/
 */.venv/
@@ -11,5 +11,10 @@ __pycache__/
 .env.local
 # CDM toolchain outputs
 cdb-build/
+# build / test artifacts
+dist/
+build/
+*.egg-info/
+.pytest_cache/
 # superpowers SDD scratch space (task briefs/reports/ledger — not committed)
 .superpowers/sdd/

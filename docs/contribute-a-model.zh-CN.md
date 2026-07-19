@@ -29,7 +29,7 @@
 
 ### 国内镜像配置（先做这一步）
 
-国内环境最大的坑是网络。专区沿用了 `omnidocbench-amd-windows` 的镜像探测方案——**一次性配好，后续脚本自动读取**：
+国内环境最大的坑是网络。专区沿用了 `the historical Windows-side eval harness (superseded)` 的镜像探测方案——**一次性配好，后续脚本自动读取**：
 
 | 来源 | 可用镜像 / 替代源 |
 |---|---|
@@ -66,7 +66,7 @@ OmniDocBench 的评测代码在 Python 3.12 下会坏（用了 `inspect.getargsp
 
 ### 第 1 步 — 提案（几分钟）
 
-在 `AIwork4me/OmniDocBench-AMD` 开一个 issue，标题「我想加入模型 X」。维护者确认：
+在 `AIwork4me/OmniDocBench-ROCm` 开一个 issue，标题「我想加入模型 X」。维护者确认：
 
 - **开源**（权重 + 代码都开放）。闭源模型（Gemini、GPT、Mistral-OCR、mathpix、混元 OCR、优图 Parsing、Nanonets、GLM-OCR 等）永不支持。
 - **在范围内**——是文档解析模型（纯通用 VLM 除非有文档解析路径，否则不算）。
@@ -80,8 +80,8 @@ OmniDocBench 的评测代码在 Python 3.12 下会坏（用了 `inspect.getargsp
 
 ```bash
 pip install cookiecutter
-cookiecutter gh:AIwork4me/OmniDocBench-AMD --directory template
-# 提示：repo_name (Model-AMD)、model_slug、model_id、model_version、license
+cookiecutter gh:AIwork4me/OmniDocBench-ROCm --directory template
+# 提示：repo_name (Model-ROCm)、model_slug、model_id、model_version、license
 ```
 
 > 国内若 `gh:` 协议慢，可先 `git clone` 专区仓库再 `cookiecutter <本地路径>/template`。
@@ -105,14 +105,14 @@ bash adapter/setup/00-install-deps.sh        # Linux
 powershell -ExecutionPolicy Bypass -File adapter\setup\00-install-deps.ps1   # Windows
 
 # CDM 工具链（首次可跳过，见第 6 步）
-omnidocbench-amd cdm setup --platform linux-rocm
+omnidocbench-rocm cdm setup --platform linux-rocm
 ```
 
 所有步骤都是**幂等**的——装过再跑是空操作，中断后能续跑。权重放进 gitignore 的 `models/` 目录；`.env.local` 记录绝对路径。
 
 **国内提示：** 权重走 ModelScope；TeX Live 走 USTC/清华 CTAN 镜像；PyPI 走清华源。`mirrors.env` 配好后这些自动生效。
 
-**耗时：** 镜像快 + 权重有缓存则 30 分钟；大模型 + 慢链路 + 建 CDM 工具链可能要 2 小时。**完成标志：** `omnidocbench-amd dataset download --version v16 --revision v1.6` 成功；`make demo` 能跑。
+**耗时：** 镜像快 + 权重有缓存则 30 分钟；大模型 + 慢链路 + 建 CDM 工具链可能要 2 小时。**完成标志：** `omnidocbench-rocm dataset download --version v16 --revision v1.6` 成功；`make demo` 能跑。
 
 ### 第 4 步 — 实现（几小时 – 一天）
 
@@ -129,7 +129,7 @@ omnidocbench-amd cdm setup --platform linux-rocm
 
 ```bash
 make demo
-# 等价于：omnidocbench-amd infer --adapter adapter/run_adapter.py --img-dir examples --out-dir <临时目录>
+# 等价于：omnidocbench-rocm infer --adapter adapter/run_adapter.py --img-dir examples --out-dir <临时目录>
 ```
 
 检查单页输出像不像真实的文档解析（标题、正文、公式为 `$...$`、表格）。如果一团糟，先修 `_infer`，别急着跑全量。
@@ -142,12 +142,12 @@ make demo
 
 ```bash
 make eval-linux          # 或：make eval-windows
-# = omnidocbench-amd run --stage all --platform linux-rocm --version v16 --revision v1.6
+# = omnidocbench-rocm run --stage all --platform linux-rocm --version v16 --revision v1.6
 ```
 
 这会跑四个阶段：`download → infer → score → publish`，在 `results/omnidocbench/v16/<platform>/` 产出产物包：`metric_result.json`、`run_summary.json`、`provenance.json`、`_run_stats.json`。
 
-**CDM（高价值指标）：** CDM（公式匹配，通过 LaTeX→PDF→PNG 颜色匹配）用 `--cdm` 开启。**第一遍先不开 `--cdm`**（只跑 Edit_dist + TEDS）验证流水线；然后建好 CDM 工具链（`omnidocbench-amd cdm setup --platform ...`）再带 `--cdm` 重跑。CDM 由引擎统一管理，但出了名的折腾——如果失败，看 [`pitfalls.md`](pitfalls.md)（`#cdm-zero` 决策树覆盖了 CDM 静默得 0 的六种原因）。
+**CDM（高价值指标）：** CDM（公式匹配，通过 LaTeX→PDF→PNG 颜色匹配）用 `--cdm` 开启。**第一遍先不开 `--cdm`**（只跑 Edit_dist + TEDS）验证流水线；然后建好 CDM 工具链（`omnidocbench-rocm cdm setup --platform ...`）再带 `--cdm` 重跑。CDM 由引擎统一管理，但出了名的折腾——如果失败，看 [`pitfalls.md`](pitfalls.md)（`#cdm-zero` 决策树覆盖了 CDM 静默得 0 的六种原因）。
 
 **耗时：** 推理 20–40 分钟（VLM，gfx1100 上约 1 秒/页）；评分再加 10–30 分钟（带 CDM 更久，每个公式要编译 LaTeX）。**完成标志：** 产物包存在，`run_summary.json` 的 `readme_metrics` 非零。
 
@@ -155,10 +155,10 @@ make eval-linux          # 或：make eval-windows
 
 ```bash
 make publish
-# = omnidocbench-amd conformance .   （跑 check_conformance.py）
+# = omnidocbench-rocm conformance .   （跑 check_conformance.py）
 ```
 
-修复所有不合规项（README 缺章节、results 目录空、`pyproject.toml` 没依赖 `omnidocbench-amd`、`model_card.json` 不合法）。检查清单见 [`contracts/conformance.md`](../contracts/conformance.md)。
+修复所有不合规项（README 缺章节、results 目录空、`pyproject.toml` 没依赖 `omnidocbench-rocm`、`model_card.json` 不合法）。检查清单见 [`contracts/conformance.md`](../contracts/conformance.md)。
 
 然后提交 `results/` 产物包 + `model_card.json`。这就是你的**来源完整**证据。
 
@@ -166,7 +166,7 @@ make publish
 
 ### 第 8 步 — 提交（几分钟）
 
-向 `AIwork4me/OmniDocBench-AMD` 开 PR，把你的模型加进 `hub/registry.yaml`，`badge` 填 `community`（没有的平台填 `community-wanted`），附上你仓库的链接。CI 会对你的仓库跑 `check-conformance`。
+向 `AIwork4me/OmniDocBench-ROCm` 开 PR，把你的模型加进 `hub/registry.yaml`，`badge` 填 `community`（没有的平台填 `community-wanted`），附上你仓库的链接。CI 会对你的仓库跑 `check-conformance`。
 
 **耗时：** 来回一轮。**完成标志：** 你的模型出现在对比表里，所贡献的平台带 `community` 徽章。
 
@@ -195,7 +195,7 @@ make publish
 - **报错 / 失败：** 先按症状搜 [`pitfalls.md`](pitfalls.md)——按你看到的现象组织，每条都有 根因 → 修复 → 验证。CDM 相关条目（`#cdm-zero`、`#grayscale`、`#mathcolor` 等）是仓库里最有价值的几页。
 - **架构 / 「怎么拼到一起的」：** [`architecture.md`](architecture.md)。
 - **你在实现的契约：** [`contracts/adapter.md`](../contracts/adapter.md)。
-- **问题 / 提案：** 在 `AIwork4me/OmniDocBench-AMD` 开 issue。维护者在 issue 里回复。
+- **问题 / 提案：** 在 `AIwork4me/OmniDocBench-ROCm` 开 issue。维护者在 issue 里回复。
 
 仓库里维护着一份「适合新手的模型」清单（开源、文档全、接起来简单的模型）。想根据你的硬件要推荐，开 issue 问一声。
 
@@ -204,7 +204,7 @@ make publish
 ## 太长不看
 
 ```bash
-cookiecutter gh:AIwork4me/OmniDocBench-AMD --directory template   # 2 脚手架
+cookiecutter gh:AIwork4me/OmniDocBench-ROCm --directory template   # 2 脚手架
 make setup-linux                                                   # 3 环境准备
 $EDITOR adapter/run_adapter.py adapter/adapter_config.py           # 4 实现
 make demo                                                          # 5 Demo

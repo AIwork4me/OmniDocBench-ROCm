@@ -1,7 +1,26 @@
 name: ci
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: python -m pytest -q
+      - run: python -c "import omnidocbench_rocm; print(omnidocbench_rocm.__version__)"
+      - run: omnidocbench-rocm --help
+      - run: python scripts/check_conformance.py tests/fixtures/conformant
+      - run: python -c "from cookiecutter.main import cookiecutter; cookiecutter('template', no_input=True, output_dir='/tmp/t')"
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -9,6 +28,19 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -e ".[dev]"
-      - run: python -m pytest -q
-      - run: python scripts/check_conformance.py tests/fixtures/conformant
-      - run: python -c "from cookiecutter.main import cookiecutter; cookiecutter('template', no_input=True, output_dir='/tmp/t')"
+      - run: python scripts/validate_registry.py hub/registry.yaml
+      - run: python scripts/check_brand.py
+      - run: python -m build
+      - name: Install the built wheel and re-check the surface
+        run: |
+          set -e
+          whl=(dist/*.whl); test -e "$whl"
+          python -m pip install --force-reinstall "$whl"
+          omnidocbench-rocm --help
+          python -c "import omnidocbench_rocm; from omnidocbench_rocm.types import RunSummary"
+      - name: Rendered template conformance + smoke
+        run: |
+          set -e
+          python -c "from cookiecutter.main import cookiecutter; cookiecutter('template', no_input=True, output_dir='/tmp/r')"
+          python scripts/check_conformance.py /tmp/r/Model-ROCm
+          python /tmp/r/Model-ROCm/adapter/run_adapter.py --img-dir /tmp/r/Model-ROCm/examples --out-dir /tmp/smoke --platform linux-rocm --backend smoke

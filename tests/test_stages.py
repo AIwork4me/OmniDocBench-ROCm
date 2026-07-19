@@ -1,6 +1,6 @@
 import json, subprocess, sys
 from pathlib import Path
-from omnidocbench_amd import stages
+from omnidocbench_rocm import stages
 
 
 # Fake adapter: defines run_adapter per the canonical contract
@@ -10,7 +10,7 @@ from omnidocbench_amd import stages
 FAKE_ADAPTER = '''
 import argparse
 from pathlib import Path
-from omnidocbench_amd.types import RunSummary, PageStatus
+from omnidocbench_rocm.types import RunSummary, PageStatus
 IMG_EXT = {".png", ".jpg"}
 def run_adapter(img_dir, out_dir, *, platform, config):
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)

@@ -2,6 +2,6 @@
 name = "{{cookiecutter.repo_name | lower}}"
 version = "{{cookiecutter.model_version}}"
 license = { text = "{{cookiecutter.license}}" }
-dependencies = ["omnidocbench-amd>=0.1.0"]
+dependencies = ["omnidocbench-rocm>=0.2.0"]
 [project.optional-dependencies]
 dev = ["pytest"]

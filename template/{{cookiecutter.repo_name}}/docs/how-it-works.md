@@ -1,6 +1,6 @@
 # How it works
 
-`{{cookiecutter.repo_name}}` is a per-model adapter repo for the **omnidocbench-amd** engine. The engine drives the OmniDocBench v1.6 pipeline; this repo only supplies the model-specific inference step.
+`{{cookiecutter.repo_name}}` is a per-model adapter repo for the **omnidocbench-rocm** engine. The engine drives the OmniDocBench v1.6 pipeline; this repo only supplies the model-specific inference step.
 
 ## The contract
 
@@ -31,7 +31,7 @@ See [`backends.md`](backends.md) for the recommended backend per model type × p
 
 ## Stages (engine-side)
 
-The `omnidocbench-amd` CLI (`make eval-linux`) runs:
+The `omnidocbench-rocm` CLI (`make eval-linux`) runs:
 
 1. **download** — fetch the pinned OmniDocBench v1.6 dataset revision.
 2. **infer** — invoke `adapter/run_adapter.py` as a subprocess over the dataset images.

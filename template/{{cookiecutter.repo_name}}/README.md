@@ -1,6 +1,6 @@
 # {{cookiecutter.repo_name}}
 
-A per-model adapter repo for the [omnidocbench-amd](https://github.com/omnidocbench/omnidocbench-amd) document-parsing evaluation platform. Rendered from the official cookiecutter template; ships with a no-GPU `smoke` backend so it runs out of the box.
+A per-model adapter repo for the [omnidocbench-rocm](https://github.com/omnidocbench/omnidocbench-rocm) document-parsing evaluation platform. Rendered from the official cookiecutter template; ships with a no-GPU `smoke` backend so it runs out of the box.
 
 - Model: `{{cookiecutter.model_id}}` (v{{cookiecutter.model_version}})
 - Platforms: linux-rocm, windows-hip
@@ -10,7 +10,7 @@ A per-model adapter repo for the [omnidocbench-amd](https://github.com/omnidocbe
 
 ```bash
 pip install -e ".[dev]"
-pip install omnidocbench-amd        # the engine (provides the `omnidocbench-amd` CLI + types)
+pip install omnidocbench-rocm        # the engine (provides the `omnidocbench-rocm` CLI + types)
 ```
 
 For platform provisioning (weights, ROCm/DirectML runtime), run:

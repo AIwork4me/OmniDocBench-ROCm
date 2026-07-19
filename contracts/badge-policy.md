@@ -44,7 +44,7 @@ reproduced_overall: <number>
 committed_overall: <number>
 delta: <number>               # reproduced - committed (|delta| within tolerance)
 tolerance: 0.5                # max acceptable |delta|
-engine_version: <omnidocbench-amd version>
+engine_version: <omnidocbench-rocm version>
 git_commit: <repo commit verified>
 ```
 

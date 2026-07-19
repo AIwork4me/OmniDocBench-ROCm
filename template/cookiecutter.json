@@ -1,5 +1,5 @@
 {
-  "repo_name": "Model-AMD",
+  "repo_name": "Model-ROCm",
   "model_slug": "model",
   "model_id": "model",
   "model_version": "0.1.0",
