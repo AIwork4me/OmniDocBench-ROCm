@@ -141,42 +141,47 @@ color-coded PDF -> rasterize to PNG -> match colored bounding boxes between
 ground truth and prediction. It is the hardest, highest-value metric.
 
 **The engine owns CDM provisioning** (so contributors don't each fight the 20+
-debug sessions documented in `pitfalls.md`). On Linux/ROCm, CDM is now
-**end-to-end-usable on the host** via two pieces:
+debug sessions documented in `pitfalls.md`). The host provisions the
+**non-CJK** parts and runs a smoke probe, but **CDM scoring itself is NOT viable
+on the dev host** — it requires OmniDocBench's official CDM Docker image.
+
+What the host does (the [`#grayscale`](pitfalls.md#grayscale) fix + a smoke
+probe):
 
 - [`engine/omnidocbench_rocm/cdm/setup-linux.sh`](../engine/omnidocbench_rocm/cdm/setup-linux.sh)
-  — idempotent host provisioning: `texlive-full` + **ImageMagick 7** (not the
-  IM6 default that silently flattens color formulas to grayscale — see
-  [`#grayscale`](pitfalls.md#grayscale)) + `ghostscript` + `node` + CJK fonts,
-  and enables PDF write in the IM7 policy. `make provision-cdm` runs it.
+  — installs **ImageMagick 7** (not the IM6 default that flattens color formulas
+  to grayscale) + `ghostscript` + attempts CJK fonts. `make provision-cdm` runs it.
 - [`engine/omnidocbench_rocm/cdm/smoke_cdm.sh`](../engine/omnidocbench_rocm/cdm/smoke_cdm.sh)
-  — a smoke probe that compiles one color-coded formula, rasterizes it, and
-  asserts the PNG is **not grayscale**. This catches the
-  [`#grayscale`](pitfalls.md#grayscale) and [`#posix`](pitfalls.md#posix)
-  branches directly and exercises the `pdflatex → magick` path end-to-end; the
-  remaining [`#cdm-zero`](pitfalls.md#cdm-zero) branches
-  ([`#mathcolor`](pitfalls.md#mathcolor), [`#gkaiu-map`](pitfalls.md#gkaiu-map),
-  [`#texlive-cjk`](pitfalls.md#texlive-cjk)) still require walking the decision
-  tree in [`pitfalls.md`](pitfalls.md). Exit 0 = toolchain is CDM-capable.
+  — compiles one `\color{red}` formula, rasterizes it, asserts non-grayscale.
+  This catches [`#grayscale`](pitfalls.md#grayscale) and
+  [`#posix`](pitfalls.md#posix) but uses **no CJK**, so passing it does **not**
+  mean CDM scoring will work.
 
-This host path is the **fast `community` path** — good enough to produce a real
-CDM score for a conformant, provenance-complete entry.
+**Why CDM scoring needs Docker (proven).** OmniDocBench's CDM wraps every
+formula in `\begin{CJK}{UTF8}{gkai}` (the Arphic `gkai` font) under `pdflatex`.
+The dev host — even with official TeX Live 2026 + the `arphic` (`gkaiu`) package
++ IM7 + `updmap-sys` — renders CJK **blank** (the
+[`#gkaiu-map`](pitfalls.md#gkaiu-map) /
+[`#texlive-cjk`](pitfalls.md#texlive-cjk) failure): `gkaiu` is mapped but the
+glyphs do not embed, so OmniDocBench's own CDM returns `display_formula.CDM =
+None` (while Edit_dist on the same formulas is sane). Confirmed by 4 systematic
+attempts. **Do not expect host CDM.**
 
-**Honesty caveats — what CDM is *not*.** CDM is provisioned + smoke-checked, not
-"fully automated" or "always works". The [`#cdm-zero`](pitfalls.md#cdm-zero)
-failure modes are real and documented; if the smoke probe fails, walk the tree.
-On an all-exception result the CDM metric is recorded as **`pending`/null —
-never a faked number.** Do not claim CDM is "done/automatic".
+**What this means for the flow.** The host produces Edit_dist + TEDS (no CJK
+needed) → `community` (CDM honestly `pending`/null). Valid CDM is produced only
+in the Docker reproduction below. On an all-exception/null CDM, the result is
+recorded as **`pending`/null — never a faked number.**
 
-### Docker reproducible path (the `verified` path)
+### Docker reproducible path (where CDM actually works)
 
-For maximum reproducibility, the `verified`-badge path runs `score` inside a
-pinned Docker image built from
-[`engine/omnidocbench_rocm/docker/Dockerfile.repro`](../engine/omnidocbench_rocm/docker/Dockerfile.repro),
-which pins the exact TeX Live / ImageMagick 7 / Ghostscript versions and the
-OmniDocBench scorer at `OMNIDOCBENCH_REF=OMNIDOCBENCH_V16_REF`. It reproduces
-**scoring** (Edit_dist + TEDS + CDM) from committed predictions. Maintainer
-reproductions + a `VERIFIED.yaml` tolerance-checked by
+[`engine/omnidocbench_rocm/docker/Dockerfile.repro`](../engine/omnidocbench_rocm/docker/Dockerfile.repro)
+is `FROM` OmniDocBench's official verified image
+(`ghcr.io/zeng-weijun/omnidocbench-eval:repro-ubuntu2204` — TeX Live 2025 +
+working CJK/Arphic `gkai` + IM7 + Ghostscript), so it is the only path here that
+produces valid CDM. It reproduces **scoring** (Edit_dist + TEDS + CDM) from
+committed predictions, with the OmniDocBench scorer pinned at
+`OMNIDOCBENCH_REF=OMNIDOCBENCH_V16_REF`. Maintainer reproductions + a
+`VERIFIED.yaml` tolerance-checked by
 [`scripts/check_verified.py`](../scripts/check_verified.py) are the gate for the
 `verified` badge. See the [onboarding runbook](onboarding-runbook.md) Step 7.
 

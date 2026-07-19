@@ -1,41 +1,53 @@
-# Reproducible OmniDocBench-ROCm scoring image (Linux-ROCm verified path).
-# Pins the CDM-sensitive toolchain: texlive-full + ImageMagick 7 + ghostscript.
-# Reproduces SCORING (Edit_dist + TEDS + CDM) from committed predictions —
-# NOT inference. Build on a Docker-capable box (Docker is absent in the dev env).
-FROM ubuntu:22.04
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
-      texlive-full ghostscript nodejs fonts-noto-cjk fonts-noto-cjk-extra \
-      git python3.11 python3.11-venv python3-pip curl ca-certificates \
-      build-essential pkg-config libjpeg-dev libpng-dev libtiff-dev zlib1g-dev \
-      libxml2 libxml2-utils \
- && rm -rf /var/lib/apt/lists/*
+# Reproducible OmniDocBench-ROCm scoring image (verified path).
+#
+# Bases on OmniDocBench's OFFICIAL verified eval image, which bundles the exact
+# working CDM runtime: Python 3.10 conda env + TeX Live 2025 + ImageMagick 7.1.1-47
+# + Ghostscript 9.55.0 + working CJK (Arphic `gkai`) fonts. The previous
+# FROM ubuntu:22.04 + Debian texlive-full base LACKED the Arphic `gkai` font, so
+# CDM rendered BLANK (the #gkaiu-map failure) — confirmed by running OmniDocBench's
+# own CDM on the host (display_formula.CDM = None). Basing on the verified image
+# fixes CDM correctness.
+#
+# Reproduces SCORING (Edit_dist + TEDS + CDM) from committed predictions — NOT
+# inference (inference is deterministic given the committed model+weights; the
+# CDM-toolchain versions are the reproducibility risk, which this image pins).
+#
+# !!! BUILD VERIFICATION: this Dockerfile was NOT build-tested (Docker is absent in
+# the dev env). Build on a Docker-capable box. The engine-wheel install assumes the
+# base image's default `pip` is its conda env; if not, adjust to
+# `conda run -n <env> pip install ...` on first build. See docker/README.md.
+FROM ghcr.io/zeng-weijun/omnidocbench-eval:repro-ubuntu2204
 
-# ImageMagick 7 (NOT IM6 — IM6 flattens color formulas to grayscale).
-ARG IM_VERSION=7.1.1-38
-RUN curl -fsSL "https://imagemagick.org/archive/releases/ImageMagick-${IM_VERSION}.tar.xz" -o /tmp/im7.tar.xz \
- && tar -xf /tmp/im7.tar.xz -C /tmp && cd /tmp/ImageMagick-${IM_VERSION} \
- && ./configure --disable-docs && make -j"$(nproc)" && make install && ldconfig \
- && rm -rf /tmp/im7.tar.xz /tmp/ImageMagick-${IM_VERSION}
-# Enable PDF write in IM7 policy.
-RUN pol="$(magick -configure 2>/dev/null | awk '/CONFIGURE PATH/{print $2; exit}')policy.xml" || true \
- && [ -n "$pol" ] && [ -f "$pol" ] && sed -i 's|PDF" write="none"|PDF" write="allowed"|g' "$pol" || true
-
-# OmniDocBench scorer pinned to the engine's v1.6 ref; the engine itself.
 ARG OMNIDOCBENCH_REF=2b161d0
 ARG ENGINE_WHEEL=dist/omnidocbench_rocm-0.2.0-py3-none-any.whl
 WORKDIR /opt
-RUN python3.11 -m venv /opt/eval-venv \
- && /opt/eval-venv/bin/pip install -U pip
-RUN if [ -n "$OMNIDOCBENCH_REF" ]; then \
-      git clone https://github.com/opendatalab/OmniDocBench.git /opt/OmniDocBench \
-      && cd /opt/OmniDocBench && git checkout "$OMNIDOCBENCH_REF" \
-      && /opt/eval-venv/bin/pip install -e . ; fi
-COPY ${ENGINE_WHEEL} /tmp/engine.whl
-RUN /opt/eval-venv/bin/pip install /tmp/engine.whl Pillow
 
-# Entrypoint: score a mounted predictions dir with a rendered config.
-# docker run -v <preds>:/preds -v <OmniDocBench.json>:/gt/OmniDocBench.json \
-#   <image> /opt/eval-venv/bin/omnidocbench-rocm score --platform linux-rocm \
-#   --predictions-dir /preds --version v16 --run-stats /preds/_run_stats.json --dataset-dir /gt
-ENTRYPOINT ["/opt/eval-venv/bin/omnidocbench-rocm"]
+# Pin the OmniDocBench checkout to the engine's v1.6 ref (clone if the base lacks it).
+RUN if [ -d /opt/OmniDocBench ]; then \
+      cd /opt/OmniDocBench && git fetch --tags -q && git checkout -q "$OMNIDOCBENCH_REF"; \
+    else \
+      git clone https://github.com/opendatalab/OmniDocBench.git /opt/OmniDocBench \
+      && cd /opt/OmniDocBench && git checkout -q "$OMNIDOCBENCH_REF"; \
+    fi
+
+# Install the OmniDocBench-ROCm engine into the base image's Python env (which also
+# holds pdf_validation). Pillow is already in the base; --no-deps keeps the engine's
+# deps from clobbering the verified env.
+COPY ${ENGINE_WHEEL} /tmp/engine.whl
+RUN pip install --force-reinstall --no-deps /tmp/engine.whl \
+ && pip install --force-reinstall huggingface_hub jsonschema pyyaml Pillow
+
+# Engine resolves the scorer checkout + TeX Live via these.
+ENV OMNIDOCBENCH_CHECKOUT=/opt/OmniDocBench
+ENV PATH=/usr/local/texlive/2025/bin/x86_64-linux:${PATH}
+
+# Entrypoint: reproduce SCORING from committed predictions.
+#   docker build -t omnidocbench-rocm-repro:0.2.0 \
+#     --build-arg OMNIDOCBENCH_REF=2b161d0 \
+#     -f engine/omnidocbench_rocm/docker/Dockerfile.repro .
+#   docker run --rm -v "$PREDICTIONS":/preds -v "$GT_DIR":/gt \
+#     omnidocbench-rocm-repro:0.2.0 \
+#     score --platform linux-rocm --predictions-dir /preds --version v16 \
+#           --run-stats /preds/_run_stats.json --dataset-dir /gt
+#   Then: python scripts/check_verified.py VERIFIED.yaml   (|delta| <= 0.5)
+ENTRYPOINT ["omnidocbench-rocm"]
