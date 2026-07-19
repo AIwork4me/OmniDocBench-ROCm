@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use OmniDocBench-ROCm, please cite this project and the upstream OmniDocBench benchmark."
+title: "OmniDocBench-ROCm: open adaptation, evaluation, reproduction, and collaboration platform for document-parsing models on the AMD ROCm software stack"
+type: software
+version: "0.2.0"
+date-released: "2026-07-19"
+license: Apache-2.0
+repository-code: "https://github.com/AIwork4me/OmniDocBench-ROCm"
+keywords:
+  - OCR
+  - document-parsing
+  - AMD
+  - ROCm
+  - evaluation
+  - OmniDocBench
