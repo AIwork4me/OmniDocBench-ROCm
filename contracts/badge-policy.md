@@ -34,8 +34,12 @@ are removed.
 
 Tolerance is machine-checked by `scripts/check_verified.py`
 (`|reproduced − committed| ≤ 0.5`). The reproduction runs in
-`engine/omnidocbench_rocm/docker/Dockerfile.repro` (pinned toolchain; reproduces
-**scoring** from committed predictions).
+`engine/omnidocbench_rocm/docker/Dockerfile.repro`, which is `FROM` OmniDocBench's
+official verified image (`ghcr.io/zeng-weijun/omnidocbench-eval:repro-ubuntu2204` —
+TeX Live 2025 + working CJK/Arphic `gkai` + IM7 + Ghostscript). It reproduces
+**scoring** (Edit_dist + TEDS + CDM) from committed predictions; the dev host
+cannot produce valid CDM (CJK renders blank — see `docs/onboarding-runbook.md`
+Step 4), so CDM is reproduced in this Docker run.
 
 ## `VERIFIED.yaml` shape
 
