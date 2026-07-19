@@ -7,7 +7,7 @@ recorded (a missing page scores zero) — never raise.
 from __future__ import annotations
 import argparse, sys
 from pathlib import Path
-from omnidocbench_amd.types import RunSummary, PageStatus
+from omnidocbench_rocm.types import RunSummary, PageStatus
 
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
 PLATFORMS = ("linux-rocm", "windows-hip")

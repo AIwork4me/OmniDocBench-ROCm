@@ -10,8 +10,8 @@ the engine integrates correctly.
 import json
 from pathlib import Path
 
-from omnidocbench_amd import stages
-from omnidocbench_amd.schema import validate_artifact
+from omnidocbench_rocm import stages
+from omnidocbench_rocm.schema import validate_artifact
 
 FIXTURE_ADAPTER = Path(__file__).parent / "fixtures" / "fake_adapter.py"
 

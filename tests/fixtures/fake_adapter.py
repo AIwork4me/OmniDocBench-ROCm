@@ -5,7 +5,7 @@ Implements the canonical contract::
     run_adapter(img_dir, out_dir, *, platform, config) -> dict
 
 and is self-executing as a subprocess (``--backend smoke``), because
-:func:`omnidocbench_amd.stages.stage_infer` invokes it via
+:func:`omnidocbench_rocm.stages.stage_infer` invokes it via
 ``subprocess.run([sys.executable, adapter, --img-dir, ...])`` and never
 imports it. The ``__main__`` block writes ``out_dir/<stem>.md`` per image and
 the ``_run_stats.json`` the engine consumes.
@@ -15,7 +15,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from omnidocbench_amd.types import RunSummary, PageStatus
+from omnidocbench_rocm.types import RunSummary, PageStatus
 
 IMG_EXT = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"}
 

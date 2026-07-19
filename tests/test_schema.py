@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
-from omnidocbench_amd.schema import validate_artifact, SCHEMA_PATH
-from omnidocbench_amd.types import RunSummary, PageStatus, AdapterConfig
+from omnidocbench_rocm.schema import validate_artifact, SCHEMA_PATH
+from omnidocbench_rocm.types import RunSummary, PageStatus, AdapterConfig
 
 
 def _run_stats_obj():

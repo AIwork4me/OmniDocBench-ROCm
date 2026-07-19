@@ -1,6 +1,6 @@
 from pathlib import Path
 from unittest.mock import patch
-from omnidocbench_amd.backends.linux_rocm import LinuxRocmBackend
+from omnidocbench_rocm.backends.linux_rocm import LinuxRocmBackend
 
 
 def test_score_invokes_pdf_validation_in_eval_venv(tmp_path):
@@ -10,7 +10,7 @@ def test_score_invokes_pdf_validation_in_eval_venv(tmp_path):
     metric_path = tmp_path / "result" / "preds_quick_match_metric_result.json"
     metric_path.parent.mkdir(parents=True)
     metric_path.write_text("{}")
-    with patch("omnidocbench_amd.backends.linux_rocm.subprocess.run") as run:
+    with patch("omnidocbench_rocm.backends.linux_rocm.subprocess.run") as run:
         run.return_value.returncode = 0
         out = backend.score(predictions_dir=tmp_path / "preds", version="v16",
                             cdm=False, run_stats_path=tmp_path / "rs.json")

@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from omnidocbench_amd import artifact_utils as au
+from omnidocbench_rocm import artifact_utils as au
 
 
 def _metric(all_cdm_except=False):
@@ -37,12 +37,12 @@ def test_write_run_summary_validates(tmp_path):
     out = tmp_path / "run_summary.json"
     au.write_run_summary(save_name="m_v16_quick_match", run_stats_path=rs_path,
                          metric_result_path=metric_path, destination=out, cdm=False)
-    from omnidocbench_amd.schema import validate_artifact
+    from omnidocbench_rocm.schema import validate_artifact
     validate_artifact("run_summary", json.loads(out.read_text()))  # no exception
 
 
 def test_write_provenance_validates(tmp_path):
-    from omnidocbench_amd.schema import validate_artifact
+    from omnidocbench_rocm.schema import validate_artifact
     rs = tmp_path / "_run_stats.json"
     rs.write_text(json.dumps({"schema_version": 1, "count": 3, "ok": 3, "fail": 0, "fallback": 0, "limit_pages": None, "engine": "official", "stats": []}))
     out = tmp_path / "provenance.json"

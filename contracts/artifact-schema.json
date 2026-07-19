@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://omnidocbench-amd/schemas/artifact-schema.json",
+  "$id": "https://omnidocbench-rocm/schemas/artifact-schema.json",
   "schema_version": 1,
   "$defs": {
     "run_stats": {

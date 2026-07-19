@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from omnidocbench_amd.types import RunSummary, PageStatus
+from omnidocbench_rocm.types import RunSummary, PageStatus
 
 IMG_EXT = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"}
 

@@ -1,8 +1,8 @@
 """Argparse CLI wiring ``cdm``/``dataset``/``infer``/``score``/``publish``/``run``
-subcommands to :mod:`omnidocbench_amd.stages` + :mod:`backends`.
+subcommands to :mod:`omnidocbench_rocm.stages` + :mod:`backends`.
 
-Registered as the ``omnidocbench-amd`` console script
-(``omnidocbench-amd = "omnidocbench_amd.cli:main"`` in ``pyproject.toml``).
+Registered as the ``omnidocbench-rocm`` console script
+(``omnidocbench-rocm = "omnidocbench_rocm.cli:main"`` in ``pyproject.toml``).
 
 The ``run`` subcommand orchestrates the full four-stage pipeline
 (``download -> infer -> score -> publish``) when invoked with
@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-import omnidocbench_amd
+import omnidocbench_rocm
 from .stages import stage_download, stage_infer, stage_publish, stage_score
 from .backends import get_backend
 from .conformance import check_repo
@@ -60,7 +60,7 @@ def _orchestrate_run(a) -> int:
             model_id=a.model_id, platform=a.platform, version=a.version,
             cdm=a.cdm, run_stats_path=run_stats_path,
             metric_result_path=metric_path, results_dir=Path(a.results_dir),
-            git_commit=a.git_commit, engine_version=omnidocbench_amd.__version__,
+            git_commit=a.git_commit, engine_version=omnidocbench_rocm.__version__,
             adapter_command=a.adapter_command, server_url=a.server_url,
             api_model_name=a.api_model_name, scoring_config_path=a.scoring_config,
             dataset_manifest_path=a.dataset_manifest, dataset_revision=a.revision)
@@ -80,7 +80,7 @@ def _orchestrate_run(a) -> int:
         model_id=a.model_id, platform=a.platform, version=a.version,
         cdm=a.cdm, run_stats_path=run_stats_path,
         metric_result_path=metric_result_path, results_dir=Path(a.results_dir),
-        git_commit=a.git_commit, engine_version=omnidocbench_amd.__version__,
+        git_commit=a.git_commit, engine_version=omnidocbench_rocm.__version__,
         adapter_command=a.adapter_command, server_url=a.server_url,
         api_model_name=a.api_model_name, scoring_config_path=a.scoring_config,
         dataset_manifest_path=a.dataset_manifest, dataset_revision=a.revision)
@@ -88,7 +88,7 @@ def _orchestrate_run(a) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="omnidocbench-amd")
+    p = argparse.ArgumentParser(prog="omnidocbench-rocm")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sp = sub.add_parser("cdm")
@@ -176,7 +176,7 @@ def main(argv: list[str] | None = None) -> int:
             model_id=a.model_id, platform=a.platform, version=a.version, cdm=a.cdm,
             run_stats_path=Path(a.run_stats), metric_result_path=Path(a.metric_result),
             results_dir=Path(a.results_dir), git_commit=a.git_commit,
-            engine_version=omnidocbench_amd.__version__,
+            engine_version=omnidocbench_rocm.__version__,
             adapter_command=a.adapter_command, server_url=a.server_url,
             api_model_name=a.api_model_name, scoring_config_path=a.scoring_config,
             dataset_manifest_path=a.dataset_manifest, dataset_revision=a.dataset_revision)

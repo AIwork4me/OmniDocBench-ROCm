@@ -1,7 +1,7 @@
 """Legacy entrypoint — re-exports the engine's conformance checker.
 
 The canonical implementation now lives in
-:mod:`omnidocbench_amd.conformance` (installed with the engine). This shim
+:mod:`omnidocbench_rocm.conformance` (installed with the engine). This shim
 keeps existing callers working:
 
 - Library: ``from scripts.check_conformance import check_repo`` (Task 9 tests)
@@ -9,9 +9,9 @@ keeps existing callers working:
 
 For new callers prefer the installed engine directly::
 
-    omnidocbench-amd conformance <repo-path>
+    omnidocbench-rocm conformance <repo-path>
 """
-from omnidocbench_amd.conformance import check_repo, ConformanceReport, main, REQUIRED_README_SECTIONS
+from omnidocbench_rocm.conformance import check_repo, ConformanceReport, main, REQUIRED_README_SECTIONS
 
 __all__ = ["check_repo", "ConformanceReport", "main", "REQUIRED_README_SECTIONS"]
 
