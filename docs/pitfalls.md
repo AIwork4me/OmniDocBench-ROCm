@@ -14,11 +14,19 @@ relevant entry first.
 > (superseded) and extended for the central engine. Cross-references like
 > `#grayscale` are stable anchors — cite them from code comments and commit messages.
 >
-> **Status note:** only the Linux/ROCm (and WSL) paths here are current. The
-> Windows-native CDM toolchain paths referenced in some entries are **planned,
-> not yet implemented** in the central engine — see
-> [`contracts/backend-policy.md`](../contracts/backend-policy.md). The failure-mode
-> analysis (`#posix`, `#grayscale`, `#cdm-zero`) is platform-agnostic and stays valuable.
+> **Status note:** the Linux/ROCm CDM toolchain is now **provisioned on the host**
+> by [`engine/omnidocbench_rocm/cdm/setup-linux.sh`](../engine/omnidocbench_rocm/cdm/setup-linux.sh)
+> (texlive-full + ImageMagick 7 + ghostscript + node + CJK fonts), with
+> [`smoke_cdm.sh`](../engine/omnidocbench_rocm/cdm/smoke_cdm.sh) as the
+> CDM-capable canary (`make provision-cdm` runs the setup). It is reproducible
+> via [`engine/omnidocbench_rocm/docker/Dockerfile.repro`](../engine/omnidocbench_rocm/docker/Dockerfile.repro).
+> The **Windows-native CDM toolchain** paths referenced in some entries below
+> (`#wsl`, `#distro-name`, `#pythonutf8`, the WSL half of `#posix`) remain
+> **planned, not yet implemented** in the central engine — see
+> [`contracts/backend-policy.md`](../contracts/backend-policy.md). The
+> failure-mode analysis (`#posix`, `#grayscale`, `#cdm-zero`) is
+> platform-agnostic and stays valuable on both platforms. See the
+> [onboarding runbook](onboarding-runbook.md) Step 4 for the host CDM flow.
 
 ---
 
