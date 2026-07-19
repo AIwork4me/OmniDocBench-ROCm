@@ -9,7 +9,7 @@ It satisfies every item of the conformance checklist.
 pip install -e .
 ```
 
-Requires the `omnidocbench-amd` engine package.
+Requires the `omnidocbench-rocm` engine package.
 
 ## Demo
 
@@ -18,7 +18,7 @@ See `examples/run_demo.sh` for a one-command smoke run.
 ## Evaluation
 
 ```bash
-omnidocbench-amd infer --adapter adapter/run_adapter.py --platform linux-rocm
+omnidocbench-rocm infer --adapter adapter/run_adapter.py --platform linux-rocm
 ```
 
 Eval config lives at `eval/configs/omnidocbench_v16.yaml`.

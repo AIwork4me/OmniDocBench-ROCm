@@ -61,8 +61,8 @@ def check_repo(repo: Path) -> ConformanceReport:
     if not (repo / "examples").is_dir() or not any((repo / "examples").iterdir()):
         r.add("missing examples/ demo")
     pp = repo / "pyproject.toml"
-    if not pp.exists() or "omnidocbench-amd" not in pp.read_text():
-        r.add("pyproject.toml does not depend on omnidocbench-amd")
+    if not pp.exists() or "omnidocbench-rocm" not in pp.read_text():
+        r.add("pyproject.toml does not depend on omnidocbench-rocm")
     mc = repo / "model_card.json"
     if mc.exists():
         try:

@@ -8,5 +8,5 @@ version = "0.0.1"
 description = "Deliberately non-conformant fixture repo for the conformance checker."
 requires-python = ">=3.10"
 dependencies = [
-  "omnidocbench-amd>=0.1.0",
+  "omnidocbench-rocm>=0.2.0",
 ]
