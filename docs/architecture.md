@@ -141,38 +141,32 @@ color-coded PDF -> rasterize to PNG -> match colored bounding boxes between
 ground truth and prediction. It is the hardest, highest-value metric.
 
 **The engine owns CDM provisioning** (so contributors don't each fight the 20+
-debug sessions documented in `pitfalls.md`). The host provisions the
-**non-CJK** parts and runs a smoke probe, but **CDM scoring itself is NOT viable
-on the dev host** — it requires OmniDocBench's official CDM Docker image.
+debug sessions documented in `pitfalls.md`). **CDM works on the host** — verified:
+`omnidocbench-rocm score --cdm` via the OmniDocBench checkout's `.venv` produces
+real CDM scores (e.g., CDM 0.3012 on 10 formula pages, 0 exceptions).
 
-What the host does (the [`#grayscale`](pitfalls.md#grayscale) fix + a smoke
-probe):
+**Key requirement: use the OmniDocBench checkout's `.venv`.** CDM uses
+`multiprocessing.Pool(200)` for parallel formula rendering. A separately-created
+venv may have subtle multiprocessing differences that break Pool workers
+("AssertionError: can only join a started process"). The checkout's `.venv`
+(created by OmniDocBench's own setup) is the known-working scorer venv.
+[`evalenv/setup-linux.sh`](../engine/omnidocbench_rocm/evalenv/setup-linux.sh)
+detects + symlinks it automatically.
 
 - [`engine/omnidocbench_rocm/cdm/setup-linux.sh`](../engine/omnidocbench_rocm/cdm/setup-linux.sh)
-  — installs **ImageMagick 7** (not the IM6 default that flattens color formulas
-  to grayscale) + `ghostscript` + attempts CJK fonts. `make provision-cdm` runs it.
+  — installs **ImageMagick 7** (not IM6 — `#grayscale`) + `ghostscript` + CJK fonts.
 - [`engine/omnidocbench_rocm/cdm/smoke_cdm.sh`](../engine/omnidocbench_rocm/cdm/smoke_cdm.sh)
-  — compiles one `\color{red}` formula, rasterizes it, asserts non-grayscale.
-  This catches [`#grayscale`](pitfalls.md#grayscale) and
-  [`#posix`](pitfalls.md#posix) but uses **no CJK**, so passing it does **not**
-  mean CDM scoring will work.
+  — a `#grayscale`/`#posix` smoke probe (simple formula, no CJK).
 
-**Why CDM scoring needs Docker (proven).** OmniDocBench's CDM wraps every
-formula in `\begin{CJK}{UTF8}{gkai}` (the Arphic `gkai` font) under `pdflatex`.
-The dev host — even with official TeX Live 2026 + the `arphic` (`gkaiu`) package
-+ IM7 + `updmap-sys` — renders CJK **blank** (the
-[`#gkaiu-map`](pitfalls.md#gkaiu-map) /
-[`#texlive-cjk`](pitfalls.md#texlive-cjk) failure): `gkaiu` is mapped but the
-glyphs do not embed, so OmniDocBench's own CDM returns `display_formula.CDM =
-None` (while Edit_dist on the same formulas is sane). Confirmed by 4 systematic
-attempts. **Do not expect host CDM.**
+**CDM result keys.** In `metric_result.json`, CDM is at `display_formula.page.CDM.ALL`
+(page-level average) and `display_formula.all.CDM.all` (sample-level), NOT
+`ALL_page_avg` (that key is Edit_dist-specific). `metric_debug.CDM.exception_case_count`
+should be 0 for a valid run.
 
-**What this means for the flow.** The host produces Edit_dist + TEDS (no CJK
-needed) → `community` (CDM honestly `pending`/null). Valid CDM is produced only
-in the Docker reproduction below. On an all-exception/null CDM, the result is
-recorded as **`pending`/null — never a faked number.**
+On an all-exception/null CDM (rare with `.venv`), the result is recorded as
+**`pending`/null — never a faked number.**
 
-### Docker reproducible path (where CDM actually works)
+### Docker reproducible path (verified-repro pinning)
 
 [`engine/omnidocbench_rocm/docker/Dockerfile.repro`](../engine/omnidocbench_rocm/docker/Dockerfile.repro)
 is `FROM` OmniDocBench's official verified image
