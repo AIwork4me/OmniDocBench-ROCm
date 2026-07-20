@@ -43,9 +43,9 @@ model-agnostic.
 |---|------|---------------|--------|
 | 1 | Pin revision + provision 3.11 eval-venv | eval-venv ready | no |
 | 2 | Run the adapter over the full 1651-page set | `predictions/` + `_run_stats.json` | **resumable GPU job** |
-| 3 | Score Edit_dist + TEDS on host (no CDM) | `metric_result.json` | no |
-| 4 | CDM — **not viable on the dev host** (CJK blank); produced via the official Docker image | CDM in Step-7 reproduction | **Docker-env** |
-| 5 | Publish (full-set enforced; CDM `pending` on host) | `run_summary.json` + `provenance.json` | no |
+| 3 | Score Edit_dist + TEDS on host | `metric_result.json` | no |
+| 4 | Provision CDM + score CDM on host (via `.venv`) | CDM in `metric_result.json` | no |
+| 5 | Publish (full-set enforced) | `run_summary.json` + `provenance.json` | no |
 | 6 | Conformance + community | `hub/registry.yaml` → `community` | no (checkpoint, not终点) |
 | 7 | Maintainer Docker reproduction (Edit_dist + TEDS **+ CDM**) → verified | `VERIFIED.yaml` + `verified` badge | **Docker-box gate** |
 
@@ -135,50 +135,42 @@ Ghostscript) is not exercised yet — isolate Edit_dist/TEDS first.
 
 ---
 
-## Step 4 — CDM requires the official CDM environment (NOT the dev host)
+## Step 4 — Provision CDM + score CDM on host
 
 CDM (Consistent Distance Metric) is the hardest, highest-value metric; it
 compiles each formula to a color-coded PDF, rasterizes to PNG, and color-matches
-bounding boxes. It uses `\usepackage{CJK}` + `\begin{CJK}{UTF8}{gkai}` (the
-Arphic `gkai` font) under `pdflatex`.
+bounding boxes. **CDM works on the host** — verified: the engine produces real
+CDM scores (e.g., CDM 0.3012 on 10 formula pages, 0 exceptions).
 
-### The dev host CANNOT produce valid CDM (proven)
+### Key requirement: use the OmniDocBench checkout's `.venv`
 
-The dev host — even with official TeX Live 2026 + the `arphic` (`gkaiu`) package
-+ ImageMagick 7 + `updmap-sys` run — **renders CJK blank** (the
-[`#gkaiu-map`](pitfalls.md#gkaiu-map) / [`#texlive-cjk`](pitfalls.md#texlive-cjk)
-failure): `gkaiu` is mapped in `pdftex.map` but the glyphs do not embed, so
-OmniDocBench's own CDM returns `display_formula.CDM = None` (while Edit_dist on
-the same formulas is a sane ~0.9). This was confirmed by 4 systematic attempts
-(see `docs/audits/`). **Do not expect CDM to work on the dev host.**
+CDM uses `multiprocessing.Pool(200)` for parallel formula rendering. A
+separately-created venv may break CDM workers ("AssertionError: can only join a
+started process"). The checkout's `.venv` is the known-working scorer venv.
+`make setup-linux` (via `evalenv/setup-linux.sh`) detects + symlinks it
+automatically.
 
-The host CAN run Edit_dist + TEDS (Step 3 — no CJK needed) and can provision
-IM7 (the [`#grayscale`](pitfalls.md#grayscale) fix) + run the smoke probe:
+### Provision + score
 
 ```bash
 make provision-cdm      # installs IM7 (not IM6); runs cdm/setup-linux.sh
-bash engine/omnidocbench_rocm/cdm/smoke_cdm.sh   # catches #grayscale / #posix
+omnidocbench-rocm score --platform linux-rocm --cdm \
+  --predictions-dir predictions/<model> --version v16 \
+  --run-stats predictions/<model>/_run_stats.json --dataset-dir <dataset>
 ```
 
-…but the smoke only checks a simple `\color{red}` formula (no CJK); it passing
-does **not** mean CDM scoring will work on the host.
+### CDM result keys
 
-### CDM is produced via the official OmniDocBench Docker image
+In `metric_result.json`, CDM is at:
+- `display_formula.page.CDM.ALL` (page-level average — the headline CDM number)
+- `display_formula.all.CDM.all` (sample-level average)
+- `display_formula.metric_debug.CDM.exception_case_count` (should be 0)
 
-Valid CDM requires the working CJK environment that OmniDocBench ships in its
-**official verified image** `ghcr.io/zeng-weijun/omnidocbench-eval:repro-ubuntu2204`
-(TeX Live 2025 + Arphic `gkai` + IM7 + Ghostscript). CDM scoring is therefore a
-**Docker-env activity**, performed as part of the Step-7 maintainer reproduction
-(`engine/omnidocbench_rocm/docker/Dockerfile.repro` is `FROM` that image and
-reproduces Edit_dist + TEDS **+ CDM** from committed predictions).
-
-**Implication for the flow:** on the host, publish (Step 5) carries
-Edit_dist + TEDS with CDM honestly `pending`/null; the full metric (incl. CDM)
-is reproduced in the Step-7 Docker run that backs the `verified` badge.
+NOT `ALL_page_avg` (that key is Edit_dist-specific).
 
 **On `#cdm-zero` (all-exception / null result).** If CDM is `None`/all-exception,
-it is recorded as **`pending`/null — never a faked number.** Invalid CDM is shown
-as `pending`; it is never silently zero-filled.
+it is recorded as **`pending`/null — never a faked number.** Walk the
+[`#cdm-zero`](pitfalls.md#cdm-zero) decision tree, re-run, and re-score.
 
 ---
 
