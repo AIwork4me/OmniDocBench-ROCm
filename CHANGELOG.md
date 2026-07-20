@@ -1,5 +1,37 @@
 # Changelog
 
+## Unreleased (post-0.2.0 fixes)
+
+- **CDM works on the host** (PR #7): `omnidocbench-rocm score --cdm` via the
+  OmniDocBench checkout's `.venv` produces real CDM scores (verified: CDM 0.3012,
+  0 exceptions). Previous claims that "CDM needs Docker / is not viable on host"
+  (PRs #5–#6) were a **misdiagnosis** caused by two bugs in the debugging
+  tooling, not a host limitation:
+  1. The provisioned eval-venv broke CDM's `multiprocessing.Pool(200)` workers
+     ("AssertionError: can only join a started process"). The OmniDocBench
+     checkout's `.venv` (Python 3.11) works correctly.
+     `evalenv/setup-linux.sh` now detects + symlinks the checkout's `.venv`
+     instead of creating a separate one.
+  2. Ad-hoc test scripts read the wrong JSON key (`ALL_page_avg` — that's
+     Edit_dist's key). CDM is at `display_formula.page.CDM.ALL`. The engine's
+     own `artifact_utils.py` always read the correct key.
+  The host TeX (Debian texlive 2023) + Arphic `gkaiu` font + ImageMagick 7 all
+  work correctly for CDM. HunyuanOCR-ROCm's CDM 0.8964 was produced in this same
+  environment and is trustworthy.
+- **CLI checkout default** (PR #4): `_paths.checkout()` (`OMNIDOCBENCH_CHECKOUT`
+  env, default `/workspace/OmniDocBench`); `ensure_checkout` falls back to it
+  when the backend is built with `checkout=None`. Fixes `omnidocbench-rocm
+  score/run` raising SystemExit.
+- **CDM toolchain fixes** (PR #5): `cdm/setup-linux.sh` IM7 source URL switched
+  from the 404 `imagemagick.org` path to the GitHub tag archive (7.1.2-8); IM7
+  presence check now verifies the version (not just the `magick` binary, which
+  may be the IM6 legacy wrapper); CJK-font section warns when `gkai00mp.tfm` is
+  absent.
+- **PR #6 (superseded by #7):** briefly based `Dockerfile.repro` on the
+  official OmniDocBench image + claimed "CDM not viable on host." The Dockerfile
+  base change is retained (valid for verified-repro pinning); the "not viable"
+  docs were reverted by PR #7.
+
 ## 0.2.0 — OmniDocBench-ROCm transition (2026-07-19)
 
 - **Brand:** renamed the platform from OmniDocBench-AMD to **OmniDocBench-ROCm**;
