@@ -19,8 +19,8 @@
 - model_id: paddleocr-vl-1.6
   repo: AIwork4me/PaddleOCR-VL-ROCm
   platforms:
-    linux-rocm: {badge: community-wanted, overall: null}
-    windows-hip: {badge: community-wanted, overall: null}
+    linux-rocm: {badge: community, overall: 95.77}
+    windows-hip: {badge: community, overall: 95.77}
 
 - model_id: unlimited-ocr
   repo: AIwork4me/Unlimited-OCR-ROCm
