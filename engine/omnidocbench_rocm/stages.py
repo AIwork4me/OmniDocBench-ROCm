@@ -20,6 +20,28 @@ from ._paths import dataset_dir, eval_venv, predictions_dir
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".gif"}
 
 
+def _build_adapter_command(*, adapter_path: Path, img_dir: Path, out_dir: Path,
+                           platform: str, config: dict) -> list[str]:
+    """Build the adapter subprocess argv. Forwards only truthy config keys.
+
+    No shell=True, no string concatenation: every value is a separate argv
+    element, so paths/URLs/model names with spaces are safe by construction.
+    Unknown config keys are ignored.
+    """
+    cmd = [sys.executable, str(adapter_path),
+           "--img-dir", str(img_dir), "--out-dir", str(out_dir),
+           "--platform", platform]
+    if config.get("backend"):
+        cmd += ["--backend", str(config["backend"])]
+    if config.get("server_url"):
+        cmd += ["--server-url", str(config["server_url"])]
+    if config.get("api_model_name"):
+        cmd += ["--api-model-name", str(config["api_model_name"])]
+    if config.get("skip_existing"):
+        cmd += ["--skip-existing"]
+    return cmd
+
+
 def stage_download(version: str, revision: str | None = None) -> Path:
     """Pin revision; fetch OmniDocBench manifest + images to dataset_dir(version)."""
     from .download_omnidocbench import download_dataset
@@ -35,9 +57,8 @@ def stage_infer(*, adapter_path: Path, img_dir: Path, out_dir: Path,
                 platform: str, config: dict) -> dict:
     """Invoke the adapter as a SUBPROCESS (filesystem-decoupled). Never import it."""
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
-    cmd = [sys.executable, str(adapter_path),
-           "--img-dir", str(img_dir), "--out-dir", str(out_dir),
-           "--platform", platform]
+    cmd = _build_adapter_command(adapter_path=adapter_path, img_dir=img_dir,
+                                 out_dir=out_dir, platform=platform, config=config)
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
         raise SystemExit(f"adapter failed ({proc.returncode}):\n{proc.stderr}")
