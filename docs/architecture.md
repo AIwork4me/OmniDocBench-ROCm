@@ -32,7 +32,7 @@ OmniDocBench-ROCm/                    <- this repo (platform)
   contracts/      adapter contract, artifact schema, conformance, badges, backend policy
   engine/         omnidocbench_rocm/  (pip package: stages, backends, schema, conformance)
   template/       cookiecutter -> <Model>-ROCm/
-  hub/            registry.yaml (source of truth for the comparison table; initial placeholder)
+  hub/            registry.yaml (source of truth for the comparison table)
   docs/           contribute-a-model, architecture, pitfalls, ci-reality, governance, roadmap
   scripts/        check_conformance.py, generate_registry.py, validate_registry.py, check_brand.py
 
