@@ -20,6 +20,7 @@ import omnidocbench_rocm
 from .stages import stage_download, stage_infer, stage_publish, stage_score
 from .backends import get_backend
 from .conformance import check_repo
+from .bundle_validator import validate_bundle
 from ._paths import dataset_dir, predictions_dir
 
 
@@ -228,6 +229,13 @@ def main(argv: list[str] | None = None) -> int:
     cf = sub.add_parser("conformance")
     cf.add_argument("repo_path")
 
+    vb = sub.add_parser("validate-bundle")
+    vb.add_argument("results_dir", help="results/omnidocbench/<version>/<platform>/ bundle dir")
+    vb.add_argument("--model-card", default="",
+                    help="optional model_card.json to cross-check Overall + model_id")
+    vb.add_argument("--registry", default="",
+                    help="optional hub/registry.yaml to cross-check Overall + badge")
+
     a = p.parse_args(argv)
 
     if a.cmd == "cdm":
@@ -269,6 +277,16 @@ def main(argv: list[str] | None = None) -> int:
         return _orchestrate_run(a)
     if a.cmd == "conformance":
         report = check_repo(Path(a.repo_path))
+        if report.ok:
+            print("CONFORMANT"); return 0
+        print("NON-CONFORMANT:")
+        for f in report.failures:
+            print(" -", f)
+        return 1
+    if a.cmd == "validate-bundle":
+        report = validate_bundle(Path(a.results_dir),
+                                 model_card=(a.model_card or None),
+                                 registry=(a.registry or None))
         if report.ok:
             print("CONFORMANT"); return 0
         print("NON-CONFORMANT:")

@@ -39,6 +39,30 @@ def test_cli_conformance_nonconformant_repo_exits_one(capsys):
     assert "NON-CONFORMANT" in out
 
 
+def test_cli_validate_bundle_dispatches(tmp_path, capsys):
+    """validate-bundle CLI prints CONFORMANT + exits 0 on a valid bundle."""
+    import json as _json
+    from omnidocbench_rocm import stages
+    rs = tmp_path / "_run_stats.json"
+    rs.write_text(_json.dumps({"schema_version": 1, "count": 1, "ok": 1, "fail": 0,
+                               "fallback": 0, "limit_pages": None, "engine": "vlm-vllm", "stats": []}))
+    metric = tmp_path / "metric.json"
+    metric.write_text(_json.dumps({
+        "text_block": {"page": {"Edit_dist": {"ALL": 0.034}}},
+        "table": {"page": {"TEDS": {"ALL": 0.9424}}},
+        "display_formula": {"page": {"CDM": {"ALL": 0.965}},
+                            "metric_debug": {"CDM": {"sample_count": 1, "exception_case_count": 0}}}}))
+    preds = tmp_path / "preds"; preds.mkdir(); (preds / "a.md").write_text("x")
+    results = tmp_path / "linux-rocm"
+    stages.stage_publish(model_id="m", platform="linux-rocm", version="v16", cdm=True,
+        run_stats_path=rs, metric_result_path=metric, results_dir=results, git_commit="c",
+        engine_version="0.3.1", adapter_command="python a.py", predictions_dir=preds,
+        dataset_revision="2b161d0")
+    rc = main(["validate-bundle", str(results)])
+    out = capsys.readouterr().out
+    assert rc == 0 and "CONFORMANT" in out
+
+
 def test_cli_run_all_orchestrates_four_stages_in_order(tmp_path):
     """`run --stage all` calls download -> infer -> score -> publish in order."""
     call_order: list[str] = []
