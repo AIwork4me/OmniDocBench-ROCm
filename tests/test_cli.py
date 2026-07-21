@@ -177,3 +177,27 @@ def test_run_all_adapter_command_override_note(tmp_path, capsys):
         assert rc == 0
         err = capsys.readouterr().err.lower()
         assert "overriding" in err or "user-supplied" in err
+
+
+def test_run_all_predictions_dir_override_propagates(tmp_path):
+    """D6: a user-supplied --predictions-dir drives out_dir, score/publish
+    predictions_dir, AND run_stats_path — never diverging between roots."""
+    custom = tmp_path / "custom_preds"
+    with patch("omnidocbench_rocm.cli.stage_download"), \
+         patch("omnidocbench_rocm.cli.stage_infer") as inf, \
+         patch("omnidocbench_rocm.cli.stage_score") as sc, \
+         patch("omnidocbench_rocm.cli.stage_publish") as pub, \
+         patch("omnidocbench_rocm.cli.get_backend"):
+        inf.return_value = InferResult(run_stats={"count": 0, "ok": 0},
+                                       adapter_argv=[sys.executable, "fake.py"])
+        sc.return_value = tmp_path / "metric.json"
+        rc = main(["run", "--stage", "all", "--platform", "linux-rocm",
+                   "--version", "v16", "--revision", "2b161d0", "--adapter", "fake.py",
+                   "--model-id", "m", "--git-commit", "c", "--results-dir", str(tmp_path),
+                   "--predictions-dir", str(custom)])
+        assert rc == 0
+        assert inf.call_args.kwargs["out_dir"] == custom
+        assert sc.call_args.kwargs["predictions_dir"] == custom
+        assert sc.call_args.kwargs["run_stats_path"] == custom / "_run_stats.json"
+        assert pub.call_args.kwargs["predictions_dir"] == custom
+        assert pub.call_args.kwargs["run_stats_path"] == custom / "_run_stats.json"
