@@ -27,6 +27,7 @@
   platforms:
     linux-rocm: {badge: community-wanted, overall: null}
     windows-hip: {badge: community-wanted, overall: null}
+  note: CONFORMANT (code-complete). Platform-standard score/publish pending.
 
 - model_id: mineru2.5
   repo: AIwork4me/MinerU-ROCm
