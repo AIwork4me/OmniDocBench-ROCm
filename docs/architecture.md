@@ -198,6 +198,36 @@ ends up with:
 _run_stats.json                     # adapter-produced, engine-consumed
 ```
 
+### What `provenance.json` records (and where each field comes from)
+
+Provenance records three fields about *what actually ran*, not what was
+requested:
+
+- **`prediction_dir`** — the **real** predictions directory the adapter wrote
+  into (resolved absolute path), recorded exactly as the engine passed it to
+  the subprocess. Standalone `publish` requires this via `--predictions-dir`;
+  `run --stage all` derives it from the single inference config and threads the
+  same value into both the `infer` and `publish` stages.
+- **`backend`** — the **adapter-reported** engine, read from
+  `_run_stats.json["engine"]` (schema-required, non-empty). This is the trust
+  model: the adapter is the only component that knows which inference path
+  actually executed, so the engine trusts its self-report over the operator's
+  `--backend` flag.
+- **`adapter_command`** — the **actual** argv that launched the adapter, as a
+  single POSIX-shlex-joined string (`shlex.join(argv)`). Note `argv[0]` is the
+  engine's `sys.executable` for this environment, so the string is
+  environment-specific and POSIX-shell-quoted — it is **not** pasteable into
+  `cmd.exe` verbatim. It is an audit record of what ran, not a reproduction
+  recipe.
+
+**`run --stage all`** threads one inference config (adapter, model id,
+backend/server/api-model flags, dataset revision) into both `infer` and
+`publish`, so the published `prediction_dir` and `adapter_command` are the
+real ones from the run that produced the scores. **`stage_publish` refuses to
+publish** when a requested `--backend` does not match the adapter-reported
+`_run_stats.json["engine"]` (backend mismatch gate) — provenance never
+misrepresents which engine ran.
+
 ---
 
 ## Idempotency

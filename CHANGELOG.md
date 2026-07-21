@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.3.0 — platform provenance (2026-07-21)
+
+- **Breaking:** standalone `publish` now **requires `--predictions-dir`** (the
+  real predictions directory). The engine records it in `provenance.json` and
+  reads `_run_stats.json` from it. Migration: add
+  `--predictions-dir <dir>` to any standalone `publish` invocation. (`run
+  --stage all` derives and threads this for you.)
+- **`stage_infer` now honors the inference contract:** `--backend`,
+  `--server-url`, `--api-model-name`, and `--skip-existing` are forwarded to
+  the adapter. The contract always promised this; the engine now honors it.
+- **`run --stage all` threads one inference config** into both `infer` and
+  `publish`: a single `--backend` / `--server-url` / `--api-model-name` drives
+  the adapter during inference and is recorded into provenance at publish.
+- **`provenance.json` gains `backend`** (schema-required), sourced from the
+  adapter-reported `_run_stats.json["engine"]`. `stage_publish` refuses to
+  publish when a requested `--backend` does not match the adapter-reported
+  backend (mismatch gate).
+- **`provenance.prediction_dir` is now the real predictions dir** (was wrongly
+  `results_dir.parent`).
+- **`provenance.adapter_command` is now the actual executed argv**
+  (`shlex.join` of the launched command), overridable via `--adapter-command`
+  (with a stderr note when an override is used).
+- **Template adapter accepts `--skip-existing`** (real skip; skipped pages are
+  counted, not reprocessed).
+
 ## Unreleased (post-0.2.0 fixes)
 
 - **CDM works on the host** (PR #7): `omnidocbench-rocm score --cdm` via the

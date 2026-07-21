@@ -201,6 +201,7 @@ def write_provenance(
         "metric_result_paths": [str(path) for path in metric_result_paths],
         "run_summary_paths": [str(path) for path in run_summary_paths],
         "run_stats_path": str(run_stats_path),
+        "backend": run_stats.get("engine", ""),   # adapter-reported (_run_stats.json)
     }
     validate_artifact("provenance", provenance)
     destination.parent.mkdir(parents=True, exist_ok=True)

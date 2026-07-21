@@ -37,7 +37,10 @@ The engine invokes the adapter as a **subprocess**
 (`python adapter/run_adapter.py --img-dir ... --out-dir ... --platform ...`),
 so `run_adapter.py` must also be runnable as a script with an `argparse`
 `__main__` block (the template ships one). The `--platform` flag is required;
-`--backend`, `--server-url`, `--api-model-name` populate the `config` dict.
+`--backend`, `--server-url`, `--api-model-name` populate the `config` dict, and
+`--skip-existing` (optional) tells the adapter to skip pages whose `.md` already
+exists (skipped pages are recorded as `ok` and still counted — never reduce the
+full set).
 
 ---
 
@@ -113,6 +116,15 @@ The engine reads `_run_stats.json` to: (a) gate `publish` — `limit_pages`
 must be `null` to publish official evidence (full-set enforcement); (b) drive
 the `run_summary.json` ok/fail/fallback counts; (c) detect a totally-dead run
 (zero predictions).
+
+**Backend source of truth (adapter-reported).** `provenance.backend` is set
+from `_run_stats.json["engine"]` — the backend the adapter itself ran, not the
+one requested on the command line. This is the trust model: the adapter is the
+only component that knows which inference path actually executed, so the engine
+trusts its self-report over the operator's `--backend` flag. When a requested
+`--backend` disagrees with `_run_stats.json["engine"]`, `stage_publish`
+**refuses to publish** (backend mismatch gate) rather than emit provenance that
+would misrepresent what ran.
 
 ---
 

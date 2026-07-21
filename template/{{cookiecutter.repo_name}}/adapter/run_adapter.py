@@ -39,13 +39,20 @@ def run_adapter(img_dir: Path, out_dir: Path, *, platform: str, config: dict) ->
     imgs = sorted(p for p in Path(img_dir).iterdir() if p.suffix.lower() in IMG_EXT)
     stats: list[PageStatus] = []
     backend = cfg.get("backend", "smoke")
+    skip_existing = bool(cfg.get("skip_existing"))
     for i in imgs:
         try:
+            target = out_dir / f"{i.stem}.md"
+            if skip_existing and target.exists():
+                # Skipped pages are recorded as exactly "ok" (the ok-count is an
+                # exact match on "ok") and still counted — never reduce the full set.
+                stats.append(PageStatus(i.name, "ok", seconds=0.0, attempts=0))
+                continue
             if backend == "smoke":
                 md = f"# {i.stem}\n\n(smoke output — wire your model here)\n"
             else:
                 md = _infer(i, platform, cfg)  # TODO-replace: your model's inference
-            (out_dir / f"{i.stem}.md").write_text(md, encoding="utf-8")
+            target.write_text(md, encoding="utf-8")
             stats.append(PageStatus(i.name, "ok", seconds=0.0, attempts=1))
         except Exception as e:  # per-page failure → record, continue, never raise
             stats.append(PageStatus(i.name, f"failed: {e}", error=str(e)))
@@ -69,6 +76,8 @@ if __name__ == "__main__":
     p.add_argument("--backend", default="smoke")
     p.add_argument("--server-url", default="")
     p.add_argument("--api-model-name", default="")
+    p.add_argument("--skip-existing", action="store_true")
     a = p.parse_args()
     run_adapter(Path(a.img_dir), Path(a.out_dir), platform=a.platform,
-                config={"backend": a.backend, "server_url": a.server_url, "api_model_name": a.api_model_name})
+                config={"backend": a.backend, "server_url": a.server_url,
+                        "api_model_name": a.api_model_name, "skip_existing": a.skip_existing})

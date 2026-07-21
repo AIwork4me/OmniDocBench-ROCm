@@ -57,3 +57,15 @@ class RunSummary:
             stats=[PageStatus(**s) for s in d.get("stats", [])],
             engine=d.get("engine", ""),
         )
+
+
+@dataclass
+class InferResult:
+    """What stage_infer returns: the loaded run_stats + the actual adapter argv.
+
+    adapter_argv is the real subprocess command (argv[0] = sys.executable); the
+    engine serializes it (shlex.join) into provenance.adapter_command so the
+    recorded command is the one that actually ran, not a hand-typed guess.
+    """
+    run_stats: dict
+    adapter_argv: list[str]

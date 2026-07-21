@@ -135,6 +135,21 @@ This is the only model-specific code. Edit `adapter/run_adapter.py`:
 4. Keep the `run_adapter` signature, the `out_dir/<image_stem>.md` convention,
    the per-page `try/except` (never raise), and the `_run_stats.json` write.
 
+**The engine forwards these flags to the adapter** (they populate the `config`
+dict, overriding `adapter_config.py` defaults):
+
+- `--backend` — which inference path to take (`vllm`, `llama-cpp-server`, …).
+- `--server-url` — the vLLM / OpenAI-compatible server URL.
+- `--api-model-name` — the model name as registered on the server.
+- `--skip-existing` — skip pages whose `.md` already exists (resumable runs;
+  skipped pages are recorded as `ok` and still counted — never reduce the full
+  set). The template adapter honors this; if you replace the CLI parsing, keep
+  it.
+
+`_run_stats.json["engine"]` is what the adapter reports as having actually run,
+and that self-report — not the requested `--backend` — is what lands in
+`provenance.backend`. If they disagree, `publish` refuses to run.
+
 **Time:** a few hours for a vLLM-served VLM (mostly wiring); up to a day for a
 multi-stage pipeline (layout + formula + OCR) or a custom ONNX path.
 **Exit:** `make demo` produces sane Markdown from `examples/demo.png`.
@@ -160,6 +175,19 @@ Run the full OmniDocBench v1.6 eval (1651 pages):
 make eval-linux          # or: make eval-windows
 # = omnidocbench-rocm run --stage all --platform linux-rocm --version v16 --revision v1.6
 ```
+
+For a server-served model, forward the backend/server flags (the Makefile
+exposes `BACKEND`, `SERVER_URL`, `API_MODEL_NAME` for this):
+
+```bash
+make eval-linux BACKEND=vlm-vllm \
+                 SERVER_URL=http://127.0.0.1:8000/v1 \
+                 API_MODEL_NAME=<model-name>
+```
+
+`run --stage all` threads one inference config into both `infer` and
+`publish`, so the published `prediction_dir`, `adapter_command`, and
+`backend` fields reflect the run that actually produced the scores.
 
 This runs the four stages: `download → infer → score → publish`, producing the
 artifact bundle in `results/omnidocbench/v16/<platform>/`:

@@ -102,6 +102,19 @@ omnidocbench-rocm conformance <repo-path>             # CONFORMANT | NON-CONFORM
   (`limit_pages` must be `null` — full-set enforcement).
 - Every published run carries `run_summary.json` + `provenance.json`
   (git commit, platform, engine version, adapter command, dataset revision).
+  `provenance.backend` is the **adapter-reported** engine
+  (`_run_stats.json["engine"]`), and `publish` refuses to run if it disagrees
+  with the requested `--backend`.
+
+Run inference + scoring + publish in one shot, forwarding backend/server flags
+to the adapter (e.g. a MinerU2.5-class VLM on vLLM/ROCm — illustrative):
+
+```bash
+omnidocbench-rocm run --stage all --platform linux-rocm --version v16 --revision <git-rev> \
+  --adapter adapter/run_adapter.py --model-id <model-id> \
+  --backend vlm-vllm --server-url http://127.0.0.1:8000/v1 --api-model-name <model-name> \
+  --git-commit $(git rev-parse HEAD) --results-dir results/omnidocbench/v16/linux-rocm
+```
 
 ## Trust and Badge Model
 

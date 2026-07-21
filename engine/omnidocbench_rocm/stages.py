@@ -14,10 +14,32 @@ import importlib.util
 from pathlib import Path
 
 from . import artifact_utils as au
-from .types import RunSummary
+from .types import RunSummary, InferResult
 from ._paths import dataset_dir, eval_venv, predictions_dir
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".gif"}
+
+
+def _build_adapter_command(*, adapter_path: Path, img_dir: Path, out_dir: Path,
+                           platform: str, config: dict) -> list[str]:
+    """Build the adapter subprocess argv. Forwards only truthy config keys.
+
+    No shell=True, no string concatenation: every value is a separate argv
+    element, so paths/URLs/model names with spaces are safe by construction.
+    Unknown config keys are ignored.
+    """
+    cmd = [sys.executable, str(adapter_path),
+           "--img-dir", str(img_dir), "--out-dir", str(out_dir),
+           "--platform", platform]
+    if config.get("backend"):
+        cmd += ["--backend", str(config["backend"])]
+    if config.get("server_url"):
+        cmd += ["--server-url", str(config["server_url"])]
+    if config.get("api_model_name"):
+        cmd += ["--api-model-name", str(config["api_model_name"])]
+    if config.get("skip_existing"):
+        cmd += ["--skip-existing"]
+    return cmd
 
 
 def stage_download(version: str, revision: str | None = None) -> Path:
@@ -32,27 +54,32 @@ def stage_download(version: str, revision: str | None = None) -> Path:
 
 
 def stage_infer(*, adapter_path: Path, img_dir: Path, out_dir: Path,
-                platform: str, config: dict) -> dict:
-    """Invoke the adapter as a SUBPROCESS (filesystem-decoupled). Never import it."""
+                platform: str, config: dict) -> InferResult:
+    """Invoke the adapter as a SUBPROCESS (filesystem-decoupled). Never import it.
+
+    Returns the loaded _run_stats.json plus the actual argv that ran (so the
+    engine can record the real command in provenance).
+    """
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
-    cmd = [sys.executable, str(adapter_path),
-           "--img-dir", str(img_dir), "--out-dir", str(out_dir),
-           "--platform", platform]
+    cmd = _build_adapter_command(adapter_path=adapter_path, img_dir=img_dir,
+                                 out_dir=out_dir, platform=platform, config=config)
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
-        raise SystemExit(f"adapter failed ({proc.returncode}):\n{proc.stderr}")
+        raise SystemExit(f"adapter failed (exit {proc.returncode}):\n{proc.stderr}")
     rs_path = out_dir / "_run_stats.json"
     if not rs_path.exists():
         raise SystemExit(f"adapter wrote no _run_stats.json: {rs_path}")
-    return json.loads(rs_path.read_text(encoding="utf-8"))
+    run_stats = json.loads(rs_path.read_text(encoding="utf-8"))
+    return InferResult(run_stats=run_stats, adapter_argv=cmd)
 
 
-def _assert_full_set(run_stats_path: Path) -> None:
+def _assert_full_set(run_stats_path: Path) -> dict:
     rs = json.loads(Path(run_stats_path).read_text(encoding="utf-8"))
     if rs.get("limit_pages") is not None:
         raise SystemExit(
             f"Refusing to publish official evidence from limited predictions "
             f"(limit_pages={rs['limit_pages']}). Run full unbounded inference first.")
+    return rs
 
 
 def stage_score(*, backend, predictions_dir: Path, version: str, cdm: bool,
@@ -67,10 +94,16 @@ def stage_score(*, backend, predictions_dir: Path, version: str, cdm: bool,
 def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,
                   run_stats_path: Path, metric_result_path: Path, results_dir: Path,
                   git_commit: str, engine_version: str, adapter_command: str,
+                  predictions_dir: Path, requested_backend: str = "",
                   server_url: str = "", api_model_name: str = "",
                   scoring_config_path: str = "", dataset_manifest_path: str = "",
                   dataset_revision: str = "") -> dict:
-    _assert_full_set(run_stats_path)
+    run_stats = _assert_full_set(run_stats_path)
+    actual_backend = run_stats.get("engine", "")
+    if requested_backend and requested_backend != actual_backend:
+        raise SystemExit(
+            f"Refusing to publish: requested backend {requested_backend!r} "
+            f"does not match adapter-reported engine {actual_backend!r}.")
     save_name = f"{model_id}_{version}_quick_match{'_cdm' if cdm else ''}"
     summary_path = results_dir / f"{save_name}_run_summary.json"
     provenance_path = results_dir / f"{save_name}_provenance.json"
@@ -82,7 +115,7 @@ def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,
         api_model_name=api_model_name, adapter_command=adapter_command,
         scoring_config_path=Path(scoring_config_path),
         dataset_manifest_path=Path(dataset_manifest_path),
-        dataset_revision=dataset_revision, predictions_dir=results_dir.parent,
+        dataset_revision=dataset_revision, predictions_dir=predictions_dir,
         metric_result_paths=[metric_result_path], run_summary_paths=[summary_path],
         run_stats_path=run_stats_path)
     return {"run_summary": str(summary_path), "provenance": str(provenance_path)}
