@@ -138,3 +138,90 @@ def test_dataset_identity_records_revision_and_gt_sha(tmp_path):
     assert ident["revision"] == "2b161d0"
     assert ident["ground_truth_sha256"] == "abc123"
     assert ident["ground_truth_file"] == "OmniDocBench.json"
+
+
+# ── run_summary / provenance: committed-copy refs + migration fields ─────────
+
+def _rs_metric(tmp_path, engine="vllm"):
+    rs = tmp_path / "_run_stats.json"
+    rs.write_text(json.dumps({"schema_version": 1, "count": 3, "ok": 3, "fail": 0,
+                              "fallback": 0, "limit_pages": None, "engine": engine, "stats": []}))
+    metric = tmp_path / "metric.json"
+    metric.write_text(json.dumps(_metric()))
+    return rs, metric
+
+
+def test_run_summary_prefers_committed_copy_paths(tmp_path):
+    rs, metric = _rs_metric(tmp_path)
+    out = tmp_path / "summary.json"
+    committed_metric = tmp_path / "bundle" / "m_metric_result.json"
+    committed_stats = tmp_path / "bundle" / "m_run_stats.json"
+    au.write_run_summary(save_name="m_v16_quick_match", run_stats_path=rs,
+                         metric_result_path=metric, destination=out, cdm=False,
+                         committed_metric_result_path=committed_metric,
+                         committed_run_stats_path=committed_stats)
+    summ = json.loads(out.read_text())
+    assert summ["metric_result_path"] == str(committed_metric)
+    assert summ["run_stats_path"] == str(committed_stats)
+
+
+def test_run_summary_falls_back_to_runtime_paths(tmp_path):
+    """Backward-compat: without committed_* the recorded paths are the runtime sources."""
+    rs, metric = _rs_metric(tmp_path)
+    out = tmp_path / "summary.json"
+    au.write_run_summary(save_name="m_v16_quick_match", run_stats_path=rs,
+                         metric_result_path=metric, destination=out, cdm=False)
+    summ = json.loads(out.read_text())
+    assert summ["metric_result_path"] == str(metric)
+    assert summ["run_stats_path"] == str(rs)
+
+
+def test_provenance_records_migration_and_source_fields(tmp_path):
+    from omnidocbench_rocm.schema import validate_artifact
+    rs, _ = _rs_metric(tmp_path)
+    manifest = tmp_path / "pred_manifest.json"
+    ident = tmp_path / "dataset_identity.json"
+    out = tmp_path / "prov.json"
+    au.write_provenance(destination=out, git_commit="pack1", engine_version="0.3.1",
+                        model_id="mineru2.5", platform="linux-rocm", server_url="",
+                        api_model_name="mineru-pro", adapter_command="python a.py",
+                        scoring_config_path=tmp_path / "c.yaml",
+                        dataset_manifest_path=tmp_path / "m.json",
+                        dataset_identity_path=ident, dataset_revision="2b161d0",
+                        predictions_dir=tmp_path / "preds",
+                        prediction_manifest_path=manifest, prediction_manifest_sha256="deadbeef",
+                        metric_result_paths=[tmp_path / "metric.json"],
+                        run_summary_paths=[tmp_path / "rs.json"], run_stats_path=rs,
+                        source_metric_result_path=str(tmp_path / "metric.json"),
+                        source_run_stats_path=str(rs), source_prediction_dir=str(tmp_path / "preds"),
+                        prediction_source_commit="b75f788",
+                        prediction_source_command="mineru-rocm predict vlm-vllm",
+                        prediction_source_run_manifest="results/.../run_manifest.json",
+                        migration_type="legacy_predictions_to_platform_artifacts")
+    prov = json.loads(out.read_text())
+    validate_artifact("provenance", prov)
+    assert prov["packaging_commit"] == "pack1"
+    assert prov["prediction_source_commit"] == "b75f788"
+    assert prov["migration_type"] == "legacy_predictions_to_platform_artifacts"
+    assert prov["prediction_manifest_sha256"] == "deadbeef"
+    assert prov["dataset_identity_path"] == str(ident)
+    assert prov["source_prediction_dir"] == str(tmp_path / "preds")
+
+
+def test_provenance_migration_fields_optional_and_defaulted(tmp_path):
+    """Backward-compat: old callers (no migration kwargs) still validate."""
+    from omnidocbench_rocm.schema import validate_artifact
+    rs, _ = _rs_metric(tmp_path)
+    out = tmp_path / "prov.json"
+    au.write_provenance(destination=out, git_commit="c", engine_version="0.3.0",
+                        model_id="m", platform="linux-rocm", server_url="",
+                        api_model_name="", adapter_command="python a.py",
+                        scoring_config_path=tmp_path / "c.yaml",
+                        dataset_manifest_path=tmp_path / "m.json",
+                        dataset_revision="v1.6", predictions_dir=tmp_path / "preds",
+                        metric_result_paths=[tmp_path / "metric.json"],
+                        run_summary_paths=[tmp_path / "rs.json"], run_stats_path=rs)
+    prov = json.loads(out.read_text())
+    validate_artifact("provenance", prov)  # no exception
+    assert prov["packaging_commit"] == "c"
+    assert prov["migration_type"] == ""

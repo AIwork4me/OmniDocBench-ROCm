@@ -55,7 +55,18 @@
         "execution_provider": {"type": "string"},
         "backend_family": {"type": "string"},
         "compatibility_status": {"type": "string"},
-        "target_backend": {"type": "string"}
+        "target_backend": {"type": "string"},
+        "packaging_commit": {"type": "string"},
+        "prediction_source_commit": {"type": "string"},
+        "prediction_source_command": {"type": "string"},
+        "prediction_source_run_manifest": {"type": "string"},
+        "prediction_manifest_path": {"type": "string"},
+        "prediction_manifest_sha256": {"type": "string"},
+        "dataset_identity_path": {"type": "string"},
+        "source_metric_result_path": {"type": "string"},
+        "source_run_stats_path": {"type": "string"},
+        "source_prediction_dir": {"type": "string"},
+        "migration_type": {"type": "string"}
       }
     },
     "run_summary": {

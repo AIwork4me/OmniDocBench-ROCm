@@ -202,6 +202,8 @@ def write_run_summary(
     metric_result_path: Path,
     destination: Path,
     cdm: bool,
+    committed_metric_result_path: Path | None = None,
+    committed_run_stats_path: Path | None = None,
 ) -> Path:
     run_stats = load_json(run_stats_path)
     metric_result = load_json(metric_result_path)
@@ -222,6 +224,10 @@ def write_run_summary(
         "limit_pages": run_stats.get("limit_pages"),
         "failure_samples": failures,
     }
+    # Self-contained bundles record the committed (repo-relative) copy path;
+    # fall back to the runtime source for callers that did not stage copies.
+    recorded_metric = committed_metric_result_path or metric_result_path
+    recorded_stats = committed_run_stats_path or run_stats_path
     summary = {
         "schema_version": 1,
         "save_name": save_name,
@@ -232,8 +238,8 @@ def write_run_summary(
         "ok_pages": run_stats.get("ok"),
         "failed_pages": run_stats.get("fail"),
         "fallback_pages": run_stats.get("fallback"),
-        "metric_result_path": str(metric_result_path),
-        "run_stats_path": str(run_stats_path),
+        "metric_result_path": str(recorded_metric),
+        "run_stats_path": str(recorded_stats),
         "readme_metrics": extract_readme_metrics(metric_result),
         "metric_quality": analyze_metric_quality(metric_result),
         "run_stats_summary": run_stats_summary,
@@ -261,6 +267,17 @@ def write_provenance(
     metric_result_paths: list[Path],
     run_summary_paths: list[Path],
     run_stats_path: Path,
+    dataset_identity_path: Path | None = None,
+    prediction_manifest_path: Path | None = None,
+    prediction_manifest_sha256: str = "",
+    source_metric_result_path: str = "",
+    source_run_stats_path: str = "",
+    source_prediction_dir: str = "",
+    packaging_commit: str = "",
+    prediction_source_commit: str = "",
+    prediction_source_command: str = "",
+    prediction_source_run_manifest: str = "",
+    migration_type: str = "",
 ) -> Path:
     run_stats = load_json(run_stats_path)
     provenance = {
@@ -285,6 +302,18 @@ def write_provenance(
         "run_summary_paths": [str(path) for path in run_summary_paths],
         "run_stats_path": str(run_stats_path),
         "backend": run_stats.get("engine", ""),   # adapter-reported (_run_stats.json)
+        # Self-contained-bundle + migration provenance (all optional).
+        "packaging_commit": packaging_commit or git_commit,
+        "prediction_source_commit": prediction_source_commit,
+        "prediction_source_command": prediction_source_command,
+        "prediction_source_run_manifest": prediction_source_run_manifest,
+        "prediction_manifest_path": str(prediction_manifest_path) if prediction_manifest_path else "",
+        "prediction_manifest_sha256": prediction_manifest_sha256,
+        "dataset_identity_path": str(dataset_identity_path) if dataset_identity_path else "",
+        "source_metric_result_path": source_metric_result_path,
+        "source_run_stats_path": source_run_stats_path,
+        "source_prediction_dir": source_prediction_dir,
+        "migration_type": migration_type,
     }
     validate_artifact("provenance", provenance)
     destination.parent.mkdir(parents=True, exist_ok=True)
