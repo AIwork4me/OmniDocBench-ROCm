@@ -73,12 +73,13 @@ def stage_infer(*, adapter_path: Path, img_dir: Path, out_dir: Path,
     return InferResult(run_stats=run_stats, adapter_argv=cmd)
 
 
-def _assert_full_set(run_stats_path: Path) -> None:
+def _assert_full_set(run_stats_path: Path) -> dict:
     rs = json.loads(Path(run_stats_path).read_text(encoding="utf-8"))
     if rs.get("limit_pages") is not None:
         raise SystemExit(
             f"Refusing to publish official evidence from limited predictions "
             f"(limit_pages={rs['limit_pages']}). Run full unbounded inference first.")
+    return rs
 
 
 def stage_score(*, backend, predictions_dir: Path, version: str, cdm: bool,
@@ -93,11 +94,16 @@ def stage_score(*, backend, predictions_dir: Path, version: str, cdm: bool,
 def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,
                   run_stats_path: Path, metric_result_path: Path, results_dir: Path,
                   git_commit: str, engine_version: str, adapter_command: str,
-                  predictions_dir: Path,
+                  predictions_dir: Path, requested_backend: str = "",
                   server_url: str = "", api_model_name: str = "",
                   scoring_config_path: str = "", dataset_manifest_path: str = "",
                   dataset_revision: str = "") -> dict:
-    _assert_full_set(run_stats_path)
+    run_stats = _assert_full_set(run_stats_path)
+    actual_backend = run_stats.get("engine", "")
+    if requested_backend and requested_backend != actual_backend:
+        raise SystemExit(
+            f"Refusing to publish: requested backend {requested_backend!r} "
+            f"does not match adapter-reported engine {actual_backend!r}.")
     save_name = f"{model_id}_{version}_quick_match{'_cdm' if cdm else ''}"
     summary_path = results_dir / f"{save_name}_run_summary.json"
     provenance_path = results_dir / f"{save_name}_provenance.json"

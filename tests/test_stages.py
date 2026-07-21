@@ -243,3 +243,51 @@ def test_publish_does_not_use_results_dir_parent_as_prediction_dir(tmp_path):
     prov = json.loads(Path(out["provenance"]).read_text())
     assert prov["prediction_dir"] != str(results.parent)
     assert prov["prediction_dir"] == str(real_preds)
+
+
+def test_assert_full_set_returns_run_stats(tmp_path):
+    rs = tmp_path / "_run_stats.json"
+    rs.write_text(json.dumps({"schema_version": 1, "count": 3, "ok": 3, "fail": 0,
+                              "fallback": 0, "limit_pages": None, "engine": "x", "stats": []}))
+    loaded = stages._assert_full_set(rs)
+    assert loaded["engine"] == "x"
+
+
+def test_publish_uses_adapter_reported_backend(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path, engine="pipeline")
+    preds = tmp_path / "preds"; preds.mkdir()
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+                               cdm=False, run_stats_path=rs, metric_result_path=metric,
+                               results_dir=results, git_commit="c", engine_version="0.3.0",
+                               adapter_command="python a.py", predictions_dir=preds,
+                               requested_backend="", dataset_revision="v1.6")
+    prov = json.loads(Path(out["provenance"]).read_text())
+    assert prov["backend"] == "pipeline"
+
+
+def test_publish_rejects_requested_backend_mismatch(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path, engine="pipeline")
+    preds = tmp_path / "preds"; preds.mkdir()
+    try:
+        stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+                             cdm=False, run_stats_path=rs, metric_result_path=metric,
+                             results_dir=results, git_commit="c", engine_version="0.3.0",
+                             adapter_command="python a.py", predictions_dir=preds,
+                             requested_backend="vlm-vllm", dataset_revision="v1.6")
+        assert False, "should refuse mismatched backend"
+    except SystemExit as e:
+        msg = str(e)
+        assert "vlm-vllm" in msg and "pipeline" in msg
+        assert "Refusing to publish" in msg
+
+
+def test_publish_allows_empty_requested_backend(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path, engine="smoke")
+    preds = tmp_path / "preds"; preds.mkdir()
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+                               cdm=False, run_stats_path=rs, metric_result_path=metric,
+                               results_dir=results, git_commit="c", engine_version="0.3.0",
+                               adapter_command="python a.py", predictions_dir=preds,
+                               requested_backend="", dataset_revision="v1.6")
+    prov = json.loads(Path(out["provenance"]).read_text())
+    assert prov["backend"] == "smoke"   # recorded, no gate when nothing requested
