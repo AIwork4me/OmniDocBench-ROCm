@@ -49,6 +49,7 @@ def test_fake_adapter_infer_then_publish(tmp_path):
         run_stats_path=run_stats, metric_result_path=metric, results_dir=results,
         git_commit="abc123", engine_version="0.1.0",
         adapter_command="python fake_adapter.py", dataset_revision="v1.6",
+        predictions_dir=preds,
     )
 
     summary_obj = json.loads(Path(out["run_summary"]).read_text(encoding="utf-8"))
@@ -62,3 +63,4 @@ def test_fake_adapter_infer_then_publish(tmp_path):
     validate_artifact("provenance", prov_obj)
     assert prov_obj["platform"] == "linux-rocm"
     assert prov_obj["dataset_revision"] == "v1.6"
+    assert prov_obj["backend"] == "smoke"   # fake_adapter writes engine="smoke"

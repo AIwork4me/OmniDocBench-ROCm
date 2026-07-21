@@ -201,3 +201,45 @@ def test_stage_infer_reports_adapter_stderr_on_failure(tmp_path):
     except SystemExit as e:
         assert "boom: model exploded" in str(e)
         assert "3" in str(e)
+
+
+def _publish_inputs(tmp_path, engine="vllm"):
+    rs = tmp_path / "_run_stats.json"
+    rs.write_text(json.dumps({"schema_version": 1, "count": 3, "ok": 3, "fail": 0,
+                              "fallback": 0, "limit_pages": None, "engine": engine,
+                              "stats": []}))
+    metric = tmp_path / "metric.json"
+    metric.write_text(json.dumps({
+        "text_block": {"page": {"Edit_dist": {"ALL": 0.1}}},
+        "reading_order": {"page": {"Edit_dist": {"ALL": 0.1}}},
+        "table": {"page": {"TEDS": {"ALL": 0.9}}},
+        "display_formula": {"page": {"CDM": {"ALL": 0.9}},
+                            "metric_debug": {"CDM": {"sample_count": 1, "exception_case_count": 0}}},
+    }))
+    results = tmp_path / "results"; results.mkdir()
+    return rs, metric, results
+
+
+def test_publish_records_real_predictions_dir(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    real_preds = tmp_path / "the_real_predictions"; real_preds.mkdir()
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+                               cdm=False, run_stats_path=rs, metric_result_path=metric,
+                               results_dir=results, git_commit="c", engine_version="0.3.0",
+                               adapter_command="python a.py", predictions_dir=real_preds,
+                               dataset_revision="v1.6")
+    prov = json.loads(Path(out["provenance"]).read_text())
+    assert prov["prediction_dir"] == str(real_preds)
+
+
+def test_publish_does_not_use_results_dir_parent_as_prediction_dir(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    real_preds = tmp_path / "the_real_predictions"; real_preds.mkdir()
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+                               cdm=False, run_stats_path=rs, metric_result_path=metric,
+                               results_dir=results, git_commit="c", engine_version="0.3.0",
+                               adapter_command="python a.py", predictions_dir=real_preds,
+                               dataset_revision="v1.6")
+    prov = json.loads(Path(out["provenance"]).read_text())
+    assert prov["prediction_dir"] != str(results.parent)
+    assert prov["prediction_dir"] == str(real_preds)

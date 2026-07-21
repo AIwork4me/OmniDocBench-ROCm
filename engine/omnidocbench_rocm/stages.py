@@ -93,6 +93,7 @@ def stage_score(*, backend, predictions_dir: Path, version: str, cdm: bool,
 def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,
                   run_stats_path: Path, metric_result_path: Path, results_dir: Path,
                   git_commit: str, engine_version: str, adapter_command: str,
+                  predictions_dir: Path,
                   server_url: str = "", api_model_name: str = "",
                   scoring_config_path: str = "", dataset_manifest_path: str = "",
                   dataset_revision: str = "") -> dict:
@@ -108,7 +109,7 @@ def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,
         api_model_name=api_model_name, adapter_command=adapter_command,
         scoring_config_path=Path(scoring_config_path),
         dataset_manifest_path=Path(dataset_manifest_path),
-        dataset_revision=dataset_revision, predictions_dir=results_dir.parent,
+        dataset_revision=dataset_revision, predictions_dir=predictions_dir,
         metric_result_paths=[metric_result_path], run_summary_paths=[summary_path],
         run_stats_path=run_stats_path)
     return {"run_summary": str(summary_path), "provenance": str(provenance_path)}
