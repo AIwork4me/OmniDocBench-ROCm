@@ -201,3 +201,95 @@ def test_run_all_predictions_dir_override_propagates(tmp_path):
         assert sc.call_args.kwargs["run_stats_path"] == custom / "_run_stats.json"
         assert pub.call_args.kwargs["predictions_dir"] == custom
         assert pub.call_args.kwargs["run_stats_path"] == custom / "_run_stats.json"
+
+
+# ── P0.1: standalone publish --backend + run --metric-result + migration ─────
+
+def test_publish_cli_forwards_requested_backend(tmp_path):
+    with patch("omnidocbench_rocm.cli.stage_publish") as pub:
+        pub.return_value = {"run_summary": "x"}
+        main(["publish", "--model-id", "m", "--platform", "linux-rocm",
+              "--run-stats", str(tmp_path / "r.json"), "--metric-result", str(tmp_path / "m.json"),
+              "--results-dir", str(tmp_path), "--predictions-dir", str(tmp_path / "p"),
+              "--git-commit", "c", "--adapter-command", "x", "--dataset-revision", "2b161d0",
+              "--backend", "vlm-vllm"])
+        assert pub.call_args.kwargs["requested_backend"] == "vlm-vllm"
+
+
+def test_standalone_publish_allows_empty_backend(tmp_path):
+    with patch("omnidocbench_rocm.cli.stage_publish") as pub:
+        pub.return_value = {"run_summary": "x"}
+        rc = main(["publish", "--model-id", "m", "--platform", "linux-rocm",
+                   "--run-stats", str(tmp_path / "r.json"), "--metric-result", str(tmp_path / "m.json"),
+                   "--results-dir", str(tmp_path), "--predictions-dir", str(tmp_path / "p"),
+                   "--git-commit", "c", "--adapter-command", "x", "--dataset-revision", "2b161d0"])
+        assert rc == 0
+        assert pub.call_args.kwargs["requested_backend"] == ""
+
+
+def test_publish_cli_forwards_migration_flags(tmp_path):
+    with patch("omnidocbench_rocm.cli.stage_publish") as pub:
+        pub.return_value = {"run_summary": "x"}
+        main(["publish", "--model-id", "m", "--platform", "linux-rocm",
+              "--run-stats", str(tmp_path / "r.json"), "--metric-result", str(tmp_path / "m.json"),
+              "--results-dir", str(tmp_path), "--predictions-dir", str(tmp_path / "p"),
+              "--git-commit", "pack", "--adapter-command", "x", "--dataset-revision", "2b161d0",
+              "--prediction-source-commit", "b75f788",
+              "--prediction-source-command", "mineru-rocm predict",
+              "--prediction-source-run-manifest", "results/run_manifest.json",
+              "--migration-type", "legacy_predictions_to_platform_artifacts"])
+        kw = pub.call_args.kwargs
+        assert kw["prediction_source_commit"] == "b75f788"
+        assert kw["migration_type"] == "legacy_predictions_to_platform_artifacts"
+        assert kw["prediction_source_run_manifest"] == "results/run_manifest.json"
+
+
+def test_run_publish_requires_metric_result(tmp_path):
+    with pytest.raises(SystemExit) as exc:
+        main(["run", "--stage", "publish", "--platform", "linux-rocm", "--version", "v16",
+              "--revision", "2b161d0", "--adapter", "a.py", "--model-id", "m",
+              "--git-commit", "c", "--results-dir", str(tmp_path)])
+    assert "requires --metric-result" in str(exc.value)
+
+
+def test_run_publish_uses_explicit_metric_result(tmp_path):
+    with patch("omnidocbench_rocm.cli.stage_publish") as pub:
+        pub.return_value = {"run_summary": "x"}
+        main(["run", "--stage", "publish", "--platform", "linux-rocm", "--version", "v16",
+              "--revision", "2b161d0", "--adapter", "a.py", "--model-id", "m",
+              "--git-commit", "c", "--results-dir", str(tmp_path),
+              "--metric-result", str(tmp_path / "metric.json"),
+              "--predictions-dir", str(tmp_path / "p")])
+        assert pub.call_args.kwargs["metric_result_path"] == tmp_path / "metric.json"
+
+
+def test_run_publish_never_guesses_predictions_parent_metric_result(tmp_path):
+    """The guessed path `predictions.parent / 'metric_result.json'` must be gone."""
+    with patch("omnidocbench_rocm.cli.stage_publish") as pub:
+        pub.return_value = {"run_summary": "x"}
+        main(["run", "--stage", "publish", "--platform", "linux-rocm", "--version", "v16",
+              "--revision", "2b161d0", "--adapter", "a.py", "--model-id", "m",
+              "--git-commit", "c", "--results-dir", str(tmp_path),
+              "--metric-result", str(tmp_path / "my_metric.json"),
+              "--predictions-dir", str(tmp_path / "p")])
+        mp = pub.call_args.kwargs["metric_result_path"]
+        assert mp == tmp_path / "my_metric.json"
+        assert mp != (tmp_path / "p").parent / "metric_result.json"
+
+
+def test_run_all_defaults_prediction_source_to_current_run(tmp_path):
+    with patch("omnidocbench_rocm.cli.stage_download"), \
+         patch("omnidocbench_rocm.cli.stage_infer") as inf, \
+         patch("omnidocbench_rocm.cli.stage_score") as sc, \
+         patch("omnidocbench_rocm.cli.stage_publish") as pub, \
+         patch("omnidocbench_rocm.cli.get_backend"):
+        inf.return_value = InferResult(run_stats={"count": 0, "ok": 0},
+                                       adapter_argv=[sys.executable, "a.py", "--backend", "x"])
+        sc.return_value = tmp_path / "metric.json"
+        main(["run", "--stage", "all", "--platform", "linux-rocm", "--version", "v16",
+              "--revision", "2b161d0", "--adapter", "a.py", "--model-id", "m",
+              "--git-commit", "HEAD1", "--results-dir", str(tmp_path)])
+        kw = pub.call_args.kwargs
+        assert kw["prediction_source_commit"] == "HEAD1"
+        assert kw["migration_type"] == "native-platform-run"
+        assert kw["prediction_source_command"] and "--backend" in kw["prediction_source_command"]
