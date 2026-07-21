@@ -21,6 +21,17 @@ from .conformance import check_repo
 from ._paths import dataset_dir, predictions_dir
 
 
+def _infer_config_from_args(a) -> dict:
+    """One source of truth for the adapter config dict. Shared by `infer` and `run`.
+
+    Empty strings / False are omitted downstream by _build_adapter_command.
+    """
+    return {"backend": a.backend,
+            "server_url": a.server_url,
+            "api_model_name": a.api_model_name,
+            "skip_existing": bool(a.skip_existing)}
+
+
 def _orchestrate_run(a) -> int:
     """Run the four-stage pipeline (``download -> infer -> score -> publish``).
 
@@ -109,6 +120,10 @@ def main(argv: list[str] | None = None) -> int:
     ip.add_argument("--img-dir", required=True)
     ip.add_argument("--out-dir", required=True)
     ip.add_argument("--platform", required=True)
+    ip.add_argument("--backend", default="")
+    ip.add_argument("--server-url", default="")
+    ip.add_argument("--api-model-name", default="")
+    ip.add_argument("--skip-existing", action="store_true")
 
     sc = sub.add_parser("score")
     sc.add_argument("--platform", required=True)
@@ -127,6 +142,8 @@ def main(argv: list[str] | None = None) -> int:
     pu.add_argument("--run-stats", required=True)
     pu.add_argument("--metric-result", required=True)
     pu.add_argument("--results-dir", required=True)
+    pu.add_argument("--predictions-dir", required=True,
+                    help="real predictions dir (where the .md files live)")
     pu.add_argument("--git-commit", required=True)
     pu.add_argument("--adapter-command", required=True)
     pu.add_argument("--server-url", default="")
@@ -170,7 +187,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if a.cmd == "infer":
         stage_infer(adapter_path=Path(a.adapter), img_dir=Path(a.img_dir),
-                    out_dir=Path(a.out_dir), platform=a.platform, config={})
+                    out_dir=Path(a.out_dir), platform=a.platform,
+                    config=_infer_config_from_args(a))
         return 0
     if a.cmd == "score":
         b = get_backend(a.platform)
@@ -186,9 +204,10 @@ def main(argv: list[str] | None = None) -> int:
             run_stats_path=Path(a.run_stats), metric_result_path=Path(a.metric_result),
             results_dir=Path(a.results_dir), git_commit=a.git_commit,
             engine_version=omnidocbench_rocm.__version__,
-            adapter_command=a.adapter_command, server_url=a.server_url,
-            api_model_name=a.api_model_name, scoring_config_path=a.scoring_config,
-            dataset_manifest_path=a.dataset_manifest, dataset_revision=a.dataset_revision)
+            adapter_command=a.adapter_command, predictions_dir=Path(a.predictions_dir),
+            server_url=a.server_url, api_model_name=a.api_model_name,
+            scoring_config_path=a.scoring_config, dataset_manifest_path=a.dataset_manifest,
+            dataset_revision=a.dataset_revision)
         return 0
     if a.cmd == "run":
         return _orchestrate_run(a)

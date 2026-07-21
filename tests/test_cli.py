@@ -79,3 +79,25 @@ def test_cli_run_all_orchestrates_four_stages_in_order(tmp_path):
     assert pub.call_count == 1
     # download receives version + revision.
     dl.assert_called_once_with("v16", "v1.6")
+
+
+def test_cli_infer_forwards_config(tmp_path):
+    with patch("omnidocbench_rocm.cli.stage_infer") as inf:
+        rc = main(["infer", "--adapter", "a.py", "--img-dir", "i", "--out-dir", "o",
+                   "--platform", "linux-rocm", "--backend", "vlm-vllm",
+                   "--server-url", "http://x/v1", "--api-model-name", "m", "--skip-existing"])
+        assert rc == 0
+        cfg = inf.call_args.kwargs["config"]
+        assert cfg["backend"] == "vlm-vllm"
+        assert cfg["server_url"] == "http://x/v1"
+        assert cfg["api_model_name"] == "m"
+        assert cfg["skip_existing"] is True
+
+
+def test_cli_publish_requires_predictions_dir():
+    with pytest.raises(SystemExit) as exc:
+        main(["publish", "--model-id", "m", "--platform", "linux-rocm",
+              "--run-stats", "r.json", "--metric-result", "m.json",
+              "--results-dir", "r", "--git-commit", "c",
+              "--adapter-command", "x", "--dataset-revision", "v1.6"])
+    assert exc.value.code == 2   # argparse missing-required-arg
