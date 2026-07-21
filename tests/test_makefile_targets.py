@@ -29,10 +29,13 @@ def test_targets_are_separate_recipes():
 def test_eval_linux_uses_linux_rocm():
     r = _recipe("eval-linux")
     assert "--platform linux-rocm" in r
-    assert r.rstrip().endswith("linux-rocm")
+    assert "--results-dir results/omnidocbench/$(VERSION)/linux-rocm" in r
+    # CDM on / skip-existing off by default, surfaced as trailing flags.
+    assert r.rstrip().endswith("$(CDM_FLAG) $(RESUME_FLAG)")
 
 
 def test_eval_windows_uses_windows_hip():
     r = _recipe("eval-windows")
     assert "--platform windows-hip" in r
-    assert r.rstrip().endswith("windows-hip")
+    assert "--results-dir results/omnidocbench/$(VERSION)/windows-hip" in r
+    assert r.rstrip().endswith("$(CDM_FLAG) $(RESUME_FLAG)")
