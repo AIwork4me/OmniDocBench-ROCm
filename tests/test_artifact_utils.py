@@ -1,5 +1,9 @@
+import hashlib
 import json
 from pathlib import Path
+
+import pytest
+
 from omnidocbench_rocm import artifact_utils as au
 
 
@@ -73,3 +77,64 @@ def test_provenance_contains_backend(tmp_path):
                         run_summary_paths=[tmp_path / "rs.json"], run_stats_path=rs)
     prov = json.loads(out.read_text())
     assert prov["backend"] == "vllm"
+
+
+# ── copy_artifact / prediction manifest / dataset identity ────────────────────
+
+def test_copy_artifact_copies_and_creates_parent(tmp_path):
+    src = tmp_path / "s.json"; src.write_text("{}")
+    dst = tmp_path / "nested" / "deep" / "d.json"
+    out = au.copy_artifact(source=src, destination=dst)
+    assert out == dst and dst.read_text() == "{}"
+
+
+def test_copy_artifact_fails_when_source_missing(tmp_path):
+    with pytest.raises(FileNotFoundError):
+        au.copy_artifact(source=tmp_path / "nope", destination=tmp_path / "d.json")
+
+
+def test_prediction_manifest_hashes_nonempty_and_is_deterministic(tmp_path):
+    preds = tmp_path / "preds"; preds.mkdir()
+    (preds / "b.md").write_text("hello"); (preds / "a.md").write_text("world")
+    (preds / "empty.md").write_text("")  # excluded
+    rs = {"count": 3, "ok": 2, "fail": 1, "stats": [
+        {"image": "x.png", "status": "failed: empty prediction", "error": "empty prediction"}]}
+    dst = tmp_path / "m.json"
+    au.write_prediction_manifest(predictions_dir=preds, destination=dst, model_id="m",
+                                 platform="linux-rocm", backend="vlm-vllm", run_stats=rs)
+    m = json.loads(dst.read_text())
+    assert m["prediction_count"] == 2
+    assert [f["relative_path"] for f in m["files"]] == ["a.md", "b.md"]  # sorted
+    assert m["files"][0]["sha256"] == hashlib.sha256(b"world").hexdigest()
+    assert m["hash_algorithm"] == "sha256"
+    assert m["failed_pages"][0]["reason"] == "empty prediction"
+    # deterministic across runs
+    dst2 = tmp_path / "m2.json"
+    au.write_prediction_manifest(predictions_dir=preds, destination=dst2, model_id="m",
+                                 platform="linux-rocm", backend="vlm-vllm", run_stats=rs)
+    assert dst2.read_text() == dst.read_text()
+
+
+def test_prediction_manifest_counts_match_run_stats(tmp_path):
+    preds = tmp_path / "preds"; preds.mkdir()
+    for n in ("a.md", "b.md", "c.md"):
+        (preds / n).write_text("x")
+    rs = {"count": 4, "ok": 3, "fail": 1, "stats": [
+        {"image": "z.png", "status": "failed: empty prediction", "error": "empty"}]}
+    dst = tmp_path / "m.json"
+    au.write_prediction_manifest(predictions_dir=preds, destination=dst, model_id="m",
+                                 platform="linux-rocm", backend="vlm-vllm", run_stats=rs)
+    m = json.loads(dst.read_text())
+    assert m["prediction_count"] == rs["ok"] == 3
+    assert m["expected_page_count"] == 4 and m["failed_page_count"] == 1
+
+
+def test_dataset_identity_records_revision_and_gt_sha(tmp_path):
+    dst = tmp_path / "ident.json"
+    au.write_dataset_identity(destination=dst, dataset="OmniDocBench", version="v1.6",
+                              revision="2b161d0", ground_truth_file="OmniDocBench.json",
+                              ground_truth_sha256="abc123")
+    ident = json.loads(dst.read_text())
+    assert ident["revision"] == "2b161d0"
+    assert ident["ground_truth_sha256"] == "abc123"
+    assert ident["ground_truth_file"] == "OmniDocBench.json"

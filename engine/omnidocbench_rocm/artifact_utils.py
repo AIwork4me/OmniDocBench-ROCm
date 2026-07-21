@@ -7,6 +7,7 @@ being written to disk.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from dataclasses import dataclass
@@ -47,6 +48,88 @@ def copy_metric_report(source: Path, destination: Path) -> Path:
         raise FileNotFoundError(f"Metric report not found: {source}")
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, destination)
+    return destination
+
+
+def copy_artifact(*, source: Path, destination: Path) -> Path:
+    """Copy a required artifact into the results bundle.
+
+    Fails loudly when the source is absent (never silently skip a missing
+    metric/run_stats). Creates parent dirs; uses ``shutil.copyfile``.
+    """
+    source = Path(source)
+    if not source.is_file():
+        raise FileNotFoundError(f"Artifact source not found: {source}")
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, destination)
+    return destination
+
+
+def write_prediction_manifest(*, predictions_dir: Path, destination: Path,
+                              model_id: str, platform: str, backend: str,
+                              run_stats: dict) -> Path:
+    """Deterministic SHA256 manifest of non-empty ``.md`` predictions.
+
+    Only existing, non-empty Markdown files are recorded, sorted by
+    ``relative_path``. ``failed_pages`` is derived from ``run_stats`` entries
+    whose status starts with ``fail``/``fallback``. ``source_prediction_dir``
+    is the runtime path (redacted downstream); no other absolute host path is
+    baked in. Output is deterministic (sorted keys + sorted file list).
+    """
+    predictions_dir = Path(predictions_dir)
+    files = []
+    for path in sorted(predictions_dir.glob("*.md")):
+        size = path.stat().st_size
+        if size == 0:
+            continue
+        files.append({"relative_path": path.name,
+                      "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                      "size_bytes": size})
+    failed = []
+    for item in run_stats.get("stats", []) or []:
+        if not isinstance(item, dict):
+            continue
+        status = str(item.get("status", ""))
+        if status.startswith(("fail", "fallback")):
+            image = item.get("image", "")
+            failed.append({"relative_path": (Path(image).stem + ".md") if image else "",
+                           "reason": str(item.get("error", status))})
+    manifest = {
+        "schema_version": 1,
+        "model_id": model_id,
+        "platform": platform,
+        "backend": backend,
+        "prediction_count": len(files),
+        "expected_page_count": run_stats.get("count"),
+        "failed_page_count": run_stats.get("fail"),
+        "source_prediction_dir": str(predictions_dir),
+        "hash_algorithm": "sha256",
+        "files": files,
+        "failed_pages": failed,
+    }
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8")
+    return destination
+
+
+def write_dataset_identity(*, destination: Path, dataset: str, version: str,
+                           revision: str, ground_truth_file: str,
+                           ground_truth_sha256: str) -> Path:
+    """Minimal dataset identity artifact when no full manifest is available.
+
+    Records the dataset name/version, pinned revision, the GT JSON filename,
+    and its SHA256 (so the bundle is self-identifying without a private path).
+    """
+    ident = {"schema_version": 1, "dataset": dataset, "version": version,
+             "revision": revision, "ground_truth_file": ground_truth_file,
+             "ground_truth_sha256": ground_truth_sha256 or "not_recorded"}
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(
+        json.dumps(ident, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8")
     return destination
 
 
