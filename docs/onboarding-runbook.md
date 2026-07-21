@@ -286,10 +286,10 @@ On a Docker-capable box, build the engine wheel and the image, pinning the
 scorer to the same ref as the dataset:
 
 ```bash
-python -m build     # produces dist/omnidocbench_rocm-0.2.0-py3-none-any.whl
+python -m build     # produces dist/omnidocbench_rocm-0.3.0-py3-none-any.whl
 docker build \
   --build-arg OMNIDOCBENCH_REF=2b161d0 \
-  -t omnidocbench-rocm-repro:0.2.0 \
+  -t omnidocbench-rocm-repro:0.3.0 \
   -f engine/omnidocbench_rocm/docker/Dockerfile.repro .
 ```
 
@@ -306,7 +306,7 @@ copy). Mount the committed predictions and ground truth:
 docker run --rm \
   -v "$PREDICTIONS":/preds \
   -v "$GT/OmniDocBench.json":/gt/OmniDocBench.json \
-  omnidocbench-rocm-repro:0.2.0 \
+  omnidocbench-rocm-repro:0.3.0 \
   score --platform linux-rocm --predictions-dir /preds --version v16 \
         --run-stats /preds/_run_stats.json --dataset-dir /gt
 ```
