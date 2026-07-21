@@ -176,12 +176,15 @@ it is recorded as **`pending`/null — never a faked number.** Walk the
 
 ## Step 5 — Publish (full-set enforced)
 
-Assemble the `run_summary.json` + `provenance.json` artifacts:
+Assemble the `run_summary.json` + `provenance.json` artifacts. Standalone
+`publish` **requires `--predictions-dir`** — it needs the real predictions
+directory to record in provenance and to read `_run_stats.json` from:
 
 ```bash
 omnidocbench-rocm publish \
   --model-id <model-id> \
   --platform linux-rocm \
+  --predictions-dir predictions/<model> \
   --version v16 \
   --run-stats predictions/<model>/_run_stats.json \
   --metric-result <metric_result.json> \
@@ -190,6 +193,32 @@ omnidocbench-rocm publish \
   --adapter-command "<the command that launched the adapter>" \
   --dataset-revision 2b161d0
 ```
+
+> **Migration note.** Earlier versions of this runbook omitted
+> `--predictions-dir` from `publish`. It is now **required** when invoking
+> `publish` standalone: the engine records the real predictions directory in
+> `provenance.json` and reads `_run_stats.json` from it. (When you use
+> `run --stage all` instead — see below — the engine threads the inference
+> config's predictions dir through both stages for you.)
+
+### Or, in one shot
+
+If you would rather run inference + scoring + publish in a single command,
+`run --stage all` threads one inference config into both `infer` and `publish`.
+For a server-served VLM (e.g. a MinerU2.5-class VLM on vLLM/ROCm), forward the
+backend/server flags so the adapter knows where to call:
+
+```bash
+omnidocbench-rocm run --stage all --platform linux-rocm --version v16 --revision 2b161d0 \
+  --adapter adapter/run_adapter.py --model-id <model-id> \
+  --backend vlm-vllm --server-url http://127.0.0.1:8000/v1 --api-model-name <model-name> \
+  --git-commit $(git rev-parse HEAD) --results-dir results/omnidocbench/v16/linux-rocm
+```
+
+The same `--backend`/`--server-url`/`--api-model-name` flow into the adapter's
+`config` dict during `infer`; `publish` then records the **adapter-reported**
+backend (from `_run_stats.json["engine"]`) into provenance and refuses to
+publish if it disagrees with the `--backend` you requested.
 
 **Full-set enforcement:** `stage_publish` calls `_assert_full_set`, which reads
 `_run_stats.json` and refuses with a `SystemExit` if `limit_pages` is not
