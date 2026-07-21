@@ -1,5 +1,6 @@
 import json, subprocess, sys
 from pathlib import Path
+import pytest
 from omnidocbench_rocm import stages
 from omnidocbench_rocm.stages import _build_adapter_command
 
@@ -291,3 +292,122 @@ def test_publish_allows_empty_requested_backend(tmp_path):
                                requested_backend="", dataset_revision="v1.6")
     prov = json.loads(Path(out["provenance"]).read_text())
     assert prov["backend"] == "smoke"   # recorded, no gate when nothing requested
+
+
+# ── self-contained bundle ────────────────────────────────────────────────────
+
+def test_publish_copies_metric_result_and_run_stats(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+        cdm=True, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+        git_commit="c", engine_version="0.3.1", adapter_command="python a.py",
+        predictions_dir=preds, dataset_revision="2b161d0")
+    assert (results / "m_v16_quick_match_cdm_metric_result.json").exists()
+    assert (results / "m_v16_quick_match_cdm_run_stats.json").exists()
+    assert out["metric_result"].endswith("m_v16_quick_match_cdm_metric_result.json")
+    assert out["run_stats"].endswith("m_v16_quick_match_cdm_run_stats.json")
+
+
+def test_publish_cdm_and_non_cdm_do_not_clobber(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    for cdm in (True, False):
+        stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+            cdm=cdm, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+            git_commit="c", engine_version="0.3.1", adapter_command="python a.py",
+            predictions_dir=preds, dataset_revision="2b161d0")
+    names = {p.name for p in results.iterdir()}
+    assert "m_v16_quick_match_metric_result.json" in names
+    assert "m_v16_quick_match_cdm_metric_result.json" in names
+
+
+def test_run_summary_references_committed_copies(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+        cdm=False, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+        git_commit="c", engine_version="0.3.1", adapter_command="python a.py",
+        predictions_dir=preds, dataset_revision="2b161d0")
+    summ = json.loads(Path(out["run_summary"]).read_text())
+    assert summ["metric_result_path"].endswith("m_v16_quick_match_metric_result.json")
+    assert summ["run_stats_path"].endswith("m_v16_quick_match_run_stats.json")
+
+
+def test_publish_writes_prediction_manifest(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    (preds / "a.md").write_text("x")
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+        cdm=False, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+        git_commit="c", engine_version="0.3.1", adapter_command="python a.py",
+        predictions_dir=preds, dataset_revision="2b161d0")
+    prov = json.loads(Path(out["provenance"]).read_text())
+    assert prov["prediction_manifest_path"].endswith("_prediction_manifest.json")
+    assert len(prov["prediction_manifest_sha256"]) == 64
+    man = json.loads(Path(out["prediction_manifest"]).read_text())
+    assert man["prediction_count"] == 1
+
+
+def test_publish_records_prediction_source_and_packaging(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+        cdm=False, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+        git_commit="pack123", engine_version="0.3.1", adapter_command="python a.py",
+        predictions_dir=preds, dataset_revision="2b161d0",
+        prediction_source_commit="pred456", prediction_source_command="mineru-rocm predict",
+        prediction_source_run_manifest="results/.../run_manifest.json",
+        migration_type="legacy_predictions_to_platform_artifacts")
+    prov = json.loads(Path(out["provenance"]).read_text())
+    assert prov["packaging_commit"] == "pack123"
+    assert prov["prediction_source_commit"] == "pred456"
+    assert prov["migration_type"] == "legacy_predictions_to_platform_artifacts"
+    assert prov["prediction_source_run_manifest"] == "results/.../run_manifest.json"
+
+
+def test_publish_rejects_dot_scoring_config(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    with pytest.raises(SystemExit):
+        stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+            cdm=False, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+            git_commit="c", engine_version="0.3.1", adapter_command="python a.py",
+            predictions_dir=preds, dataset_revision="2b161d0", scoring_config_path=".")
+
+
+def test_publish_rejects_dot_dataset_manifest(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    with pytest.raises(SystemExit):
+        stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+            cdm=False, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+            git_commit="c", engine_version="0.3.1", adapter_command="python a.py",
+            predictions_dir=preds, dataset_revision="2b161d0", dataset_manifest_path=".")
+
+
+def test_publish_synthesizes_dataset_identity(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+        cdm=False, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+        git_commit="c", engine_version="0.3.1", adapter_command="python a.py",
+        predictions_dir=preds, dataset_revision="2b161d0",
+        ground_truth_sha256="deadbeef")
+    assert (results / "m_v16_quick_match_dataset_identity.json").exists()
+    ident = json.loads((results / "m_v16_quick_match_dataset_identity.json").read_text())
+    assert ident["revision"] == "2b161d0" and ident["ground_truth_sha256"] == "deadbeef"
+    prov = json.loads(Path(out["provenance"]).read_text())
+    assert prov["dataset_identity_path"].endswith("dataset_identity.json")
+
+
+def test_publish_copies_real_dataset_manifest_when_provided(tmp_path):
+    rs, metric, results = _publish_inputs(tmp_path)
+    preds = tmp_path / "preds"; preds.mkdir()
+    manifest_src = tmp_path / "OmniDocBench.json"; manifest_src.write_text("{}")
+    out = stages.stage_publish(model_id="m", platform="linux-rocm", version="v16",
+        cdm=False, run_stats_path=rs, metric_result_path=metric, results_dir=results,
+        git_commit="c", engine_version="0.3.1", adapter_command="python a.py",
+        predictions_dir=preds, dataset_revision="2b161d0",
+        dataset_manifest_path=str(manifest_src))
+    assert (results / "m_v16_quick_match_dataset_manifest.json").exists()
