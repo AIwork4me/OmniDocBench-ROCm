@@ -72,6 +72,9 @@ def _orchestrate_run(a) -> int:
         return 0
 
     if stage == "publish":
+        # adapter_command is the user-supplied --adapter-command (default "" — no
+        # infer ran in this invocation, so there is no real argv to record; use
+        # `run --stage all` for the auto-recorded adapter argv).
         metric_path = predictions.parent / "metric_result.json"
         stage_publish(
             model_id=a.model_id, platform=a.platform, version=a.version, cdm=a.cdm,
