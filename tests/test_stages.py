@@ -39,10 +39,10 @@ def test_stage_infer_runs_adapter_subprocess(tmp_path, monkeypatch):
     (img_dir / "a.png").write_bytes(b"x"); (img_dir / "b.png").write_bytes(b"x")
     adapter = tmp_path / "fake_adapter.py"; adapter.write_text(FAKE_ADAPTER)
     out_dir = tmp_path / "preds"
-    summary = stages.stage_infer(
+    result = stages.stage_infer(
         adapter_path=adapter, img_dir=img_dir, out_dir=out_dir,
         platform="linux-rocm", config={})
-    assert summary["count"] == 2 and summary["ok"] == 2
+    assert result.run_stats["count"] == 2 and result.run_stats["ok"] == 2
     assert (out_dir / "a.md").exists() and (out_dir / "_run_stats.json").exists()
 
 
@@ -121,3 +121,83 @@ def test_build_adapter_command_handles_paths_with_spaces():
     assert "http://a b/v1" in cmd
     assert "model name" in cmd
     assert cmd.count("/my adapter/run_adapter.py") == 1
+
+
+from omnidocbench_rocm.types import InferResult
+
+# Fake adapter that accepts the forwarded config flags, echoes its argv to
+# _argv.json, writes one .md per image, and writes _run_stats.json with
+# engine=<--backend>. Used by the stage_infer config-forwarding tests.
+FAKE_ADAPTER_CFG = '''
+import argparse, json, sys
+from pathlib import Path
+from omnidocbench_rocm.types import RunSummary, PageStatus
+p = argparse.ArgumentParser()
+p.add_argument("--img-dir", required=True)
+p.add_argument("--out-dir", required=True)
+p.add_argument("--platform", required=True)
+p.add_argument("--backend", default="smoke")
+p.add_argument("--server-url", default="")
+p.add_argument("--api-model-name", default="")
+p.add_argument("--skip-existing", action="store_true")
+a = p.parse_args()
+out = Path(a.out_dir); out.mkdir(parents=True, exist_ok=True)
+(out / "_argv.json").write_text(json.dumps(sys.argv[1:]))
+imgs = sorted(q for q in Path(a.img_dir).iterdir() if q.suffix.lower() in {".png", ".jpg"})
+for i in imgs:
+    (out / f"{i.stem}.md").write_text("# " + i.stem + "\\n", encoding="utf-8")
+rs = RunSummary(len(imgs), len(imgs), 0, 0, None,
+                [PageStatus(i.name, "ok") for i in imgs], engine=a.backend)
+rs.write(out / "_run_stats.json")
+'''
+
+# Fake adapter that exits non-zero with a stderr line.
+FAKE_ADAPTER_FAIL = '''
+import sys
+sys.stderr.write("boom: model exploded\\n")
+sys.exit(3)
+'''
+
+
+def test_stage_infer_invokes_adapter_with_config(tmp_path):
+    img_dir = tmp_path / "imgs"; img_dir.mkdir()
+    (img_dir / "a.png").write_bytes(b"x")
+    adapter = tmp_path / "cfg_adapter.py"; adapter.write_text(FAKE_ADAPTER_CFG)
+    out_dir = tmp_path / "preds"
+    stages.stage_infer(adapter_path=adapter, img_dir=img_dir, out_dir=out_dir,
+                       platform="linux-rocm",
+                       config={"backend": "vlm-vllm", "server_url": "http://x/v1",
+                               "api_model_name": "m", "skip_existing": True})
+    argv = json.loads((out_dir / "_argv.json").read_text())
+    assert "--backend" in argv and "vlm-vllm" in argv
+    assert "--server-url" in argv and "http://x/v1" in argv
+    assert "--api-model-name" in argv and "m" in argv
+    assert "--skip-existing" in argv
+
+
+def test_stage_infer_reads_run_stats(tmp_path):
+    img_dir = tmp_path / "imgs"; img_dir.mkdir()
+    (img_dir / "a.png").write_bytes(b"x")
+    adapter = tmp_path / "cfg_adapter.py"; adapter.write_text(FAKE_ADAPTER_CFG)
+    out_dir = tmp_path / "preds"
+    result = stages.stage_infer(adapter_path=adapter, img_dir=img_dir, out_dir=out_dir,
+                                platform="linux-rocm", config={"backend": "vlm-vllm"})
+    assert isinstance(result, InferResult)
+    assert result.run_stats["count"] == 1
+    assert result.run_stats["engine"] == "vlm-vllm"
+    assert result.adapter_argv[0] == sys.executable
+    assert "--backend" in result.adapter_argv
+
+
+def test_stage_infer_reports_adapter_stderr_on_failure(tmp_path):
+    img_dir = tmp_path / "imgs"; img_dir.mkdir()
+    (img_dir / "a.png").write_bytes(b"x")
+    adapter = tmp_path / "fail_adapter.py"; adapter.write_text(FAKE_ADAPTER_FAIL)
+    out_dir = tmp_path / "preds"
+    try:
+        stages.stage_infer(adapter_path=adapter, img_dir=img_dir, out_dir=out_dir,
+                           platform="linux-rocm", config={})
+        assert False, "should have raised SystemExit"
+    except SystemExit as e:
+        assert "boom: model exploded" in str(e)
+        assert "3" in str(e)

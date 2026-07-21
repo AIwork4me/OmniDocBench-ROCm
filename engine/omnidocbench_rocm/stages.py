@@ -14,7 +14,7 @@ import importlib.util
 from pathlib import Path
 
 from . import artifact_utils as au
-from .types import RunSummary
+from .types import RunSummary, InferResult
 from ._paths import dataset_dir, eval_venv, predictions_dir
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".gif"}
@@ -54,18 +54,23 @@ def stage_download(version: str, revision: str | None = None) -> Path:
 
 
 def stage_infer(*, adapter_path: Path, img_dir: Path, out_dir: Path,
-                platform: str, config: dict) -> dict:
-    """Invoke the adapter as a SUBPROCESS (filesystem-decoupled). Never import it."""
+                platform: str, config: dict) -> InferResult:
+    """Invoke the adapter as a SUBPROCESS (filesystem-decoupled). Never import it.
+
+    Returns the loaded _run_stats.json plus the actual argv that ran (so the
+    engine can record the real command in provenance).
+    """
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
     cmd = _build_adapter_command(adapter_path=adapter_path, img_dir=img_dir,
                                  out_dir=out_dir, platform=platform, config=config)
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
-        raise SystemExit(f"adapter failed ({proc.returncode}):\n{proc.stderr}")
+        raise SystemExit(f"adapter failed (exit {proc.returncode}):\n{proc.stderr}")
     rs_path = out_dir / "_run_stats.json"
     if not rs_path.exists():
         raise SystemExit(f"adapter wrote no _run_stats.json: {rs_path}")
-    return json.loads(rs_path.read_text(encoding="utf-8"))
+    run_stats = json.loads(rs_path.read_text(encoding="utf-8"))
+    return InferResult(run_stats=run_stats, adapter_argv=cmd)
 
 
 def _assert_full_set(run_stats_path: Path) -> None:

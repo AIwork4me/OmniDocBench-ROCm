@@ -25,8 +25,8 @@ def test_fake_adapter_infer_then_publish(tmp_path):
     preds = tmp_path / "preds"
     summary = stages.stage_infer(adapter_path=FIXTURE_ADAPTER, img_dir=imgs,
                                  out_dir=preds, platform="linux-rocm", config={})
-    assert summary["ok"] == 3
-    assert summary["limit_pages"] is None
+    assert summary.run_stats["ok"] == 3
+    assert summary.run_stats["limit_pages"] is None
 
     # fake a metric_result so publish can assemble readme_metrics
     run_stats = preds / "_run_stats.json"
