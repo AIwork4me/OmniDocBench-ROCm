@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.3.1 — self-contained publish bundles + validate-bundle (2026-07-21)
+
+- **`publish` emits a self-contained, committable bundle:** `metric_result.json`
+  + `run_stats.json` (+ optional scoring config + dataset manifest/identity)
+  are copied into `results_dir`; a deterministic SHA256 `prediction_manifest.json`
+  is written; `run_summary`/`provenance` reference the committed copies (runtime
+  sources kept as redacted `source_*` fields). CDM and non-CDM `save_name`s no
+  longer clobber each other.
+- **Provenance distinguishes prediction source from packaging:** new optional
+  fields `packaging_commit`, `prediction_source_commit`/`_command`/`_run_manifest`,
+  `prediction_manifest_{path,sha256}`, `dataset_identity_path`, `migration_type`.
+  `run --stage all` defaults the prediction source to the current run
+  (`migration_type=native-platform-run`); standalone `publish` accepts legacy
+  migration metadata.
+- **CLI hardening:** standalone `publish` gains `--backend` (the mismatch gate is
+  now enforced on the standalone path too); `run --stage publish` **requires**
+  `--metric-result` (no more guessing `predictions.parent/metric_result.json`).
+  New `omnidocbench-rocm validate-bundle <dir> [--model-card …] [--registry …]`
+  checks cross-artifact consistency and recomputes Overall from the committed
+  metric.
+- **Honest dataset identity:** `publish` rejects `"."` for `scoring_config_path`/
+  `dataset_manifest_path`; emits a minimal dataset identity (revision + GT file +
+  GT SHA256) when no full manifest is supplied.
+- **Registry cross-check:** `scripts/validate_registry.py` gained optional
+  `--model-card`/`--model-id`/`--platform` to assert the registry Overall/badge
+  agree with a model card.
+- **Template:** default `REVISION ?= 2b161d0`; `CDM ?= 1` / `RESUME ?= 0` flags
+  on the eval targets (clean run by default; `--cdm` on, `--skip-existing` off
+  unless `RESUME=1`).
+- **Docs:** README no longer calls CDM a stub or the registry a placeholder —
+  reflects the real `mineru2.5` community/95.56 state and that host CDM is
+  implemented and exercised.
+
 ## 0.3.0 — platform provenance (2026-07-21)
 
 - **Breaking:** standalone `publish` now **requires `--predictions-dir`** (the
