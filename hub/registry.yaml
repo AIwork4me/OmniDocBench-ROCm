@@ -34,3 +34,10 @@
   platforms:
     linux-rocm: {badge: community, overall: 95.56}
     windows-hip: {badge: community-wanted, overall: null}
+
+- model_id: hunyuan-ocr
+  repo: AIwork4me/HunyuanOCR-ROCm
+  platforms:
+    linux-rocm: {badge: community-wanted, overall: null}
+    windows-hip: {badge: community-wanted, overall: null}
+  note: CONFORMANT (code-complete). Platform-standard score/publish pending.
