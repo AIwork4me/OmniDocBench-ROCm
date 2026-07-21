@@ -27,7 +27,7 @@ verified image is the only path known to produce correct CDM.
 > `conda run -n <env> pip install ...` for the base image's conda-env name.
 
     python -m build
-    docker build -t omnidocbench-rocm-repro:0.2.0 \
+    docker build -t omnidocbench-rocm-repro:0.3.0 \
       --build-arg OMNIDOCBENCH_REF=2b161d0 \
       -f engine/omnidocbench_rocm/docker/Dockerfile.repro .
 
@@ -39,7 +39,7 @@ verified image is the only path known to produce correct CDM.
     docker run --rm \
       -v "$PREDICTIONS":/preds \
       -v "$GT_DIR":/gt \
-      omnidocbench-rocm-repro:0.2.0 \
+      omnidocbench-rocm-repro:0.3.0 \
       score --platform linux-rocm --predictions-dir /preds --version v16 \
             --run-stats /preds/_run_stats.json --dataset-dir /gt
 

@@ -19,7 +19,7 @@
 FROM ghcr.io/zeng-weijun/omnidocbench-eval:repro-ubuntu2204
 
 ARG OMNIDOCBENCH_REF=2b161d0
-ARG ENGINE_WHEEL=dist/omnidocbench_rocm-0.2.0-py3-none-any.whl
+ARG ENGINE_WHEEL=dist/omnidocbench_rocm-0.3.0-py3-none-any.whl
 WORKDIR /opt
 
 # Pin the OmniDocBench checkout to the engine's v1.6 ref (clone if the base lacks it).
@@ -42,11 +42,11 @@ ENV OMNIDOCBENCH_CHECKOUT=/opt/OmniDocBench
 ENV PATH=/usr/local/texlive/2025/bin/x86_64-linux:${PATH}
 
 # Entrypoint: reproduce SCORING from committed predictions.
-#   docker build -t omnidocbench-rocm-repro:0.2.0 \
+#   docker build -t omnidocbench-rocm-repro:0.3.0 \
 #     --build-arg OMNIDOCBENCH_REF=2b161d0 \
 #     -f engine/omnidocbench_rocm/docker/Dockerfile.repro .
 #   docker run --rm -v "$PREDICTIONS":/preds -v "$GT_DIR":/gt \
-#     omnidocbench-rocm-repro:0.2.0 \
+#     omnidocbench-rocm-repro:0.3.0 \
 #     score --platform linux-rocm --predictions-dir /preds --version v16 \
 #           --run-stats /preds/_run_stats.json --dataset-dir /gt
 #   Then: python scripts/check_verified.py VERIFIED.yaml   (|delta| <= 0.5)
