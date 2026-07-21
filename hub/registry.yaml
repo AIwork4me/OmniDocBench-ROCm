@@ -13,8 +13,8 @@
 # badge:   verified | community | community-wanted   (see contracts/badge-policy)
 # overall: OmniDocBench v1.6 overall score (number) or null when not yet measured.
 #
-# Status: the 3 v1 models ship as `community-wanted` on both platforms until
-# they are onboarded + verified. Scores are null until measured on AMD.
+# Status: models are onboarded progressively. mineru2.5 reached community on
+# linux-rocm (2026-07-21). Others remain community-wanted until onboarded.
 
 - model_id: paddleocr-vl-1.6
   repo: AIwork4me/PaddleOCR-VL-ROCm
@@ -31,5 +31,5 @@
 - model_id: mineru2.5
   repo: AIwork4me/MinerU-ROCm
   platforms:
-    linux-rocm: {badge: community-wanted, overall: null}
+    linux-rocm: {badge: community, overall: 95.56}
     windows-hip: {badge: community-wanted, overall: null}
