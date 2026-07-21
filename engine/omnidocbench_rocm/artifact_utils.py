@@ -69,32 +69,52 @@ def copy_artifact(*, source: Path, destination: Path) -> Path:
 def write_prediction_manifest(*, predictions_dir: Path, destination: Path,
                               model_id: str, platform: str, backend: str,
                               run_stats: dict) -> Path:
-    """Deterministic SHA256 manifest of non-empty ``.md`` predictions.
+    """Deterministic SHA256 manifest of the run's non-empty ``.md`` predictions.
 
-    Only existing, non-empty Markdown files are recorded, sorted by
-    ``relative_path``. ``failed_pages`` is derived from ``run_stats`` entries
-    whose status starts with ``fail``/``fallback``. ``source_prediction_dir``
-    is the runtime path (redacted downstream); no other absolute host path is
-    baked in. Output is deterministic (sorted keys + sorted file list).
+    Run-driven: iterates ``run_stats["stats"]`` (the pages the run actually
+    scored) and records the non-empty Markdown for each, so the manifest
+    describes THIS run — not stray files a dirty predictions directory may
+    contain. ``failed_pages`` records run pages whose prediction is missing or
+    empty. Falls back to globbing all non-empty ``*.md`` only when the run
+    carries no ``stats`` (degenerate/test case). ``source_prediction_dir`` is
+    the runtime path (redacted downstream). Output is deterministic (sorted
+    keys + sorted lists).
     """
     predictions_dir = Path(predictions_dir)
-    files = []
-    for path in sorted(predictions_dir.glob("*.md")):
-        size = path.stat().st_size
-        if size == 0:
-            continue
-        files.append({"relative_path": path.name,
-                      "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                      "size_bytes": size})
-    failed = []
-    for item in run_stats.get("stats", []) or []:
-        if not isinstance(item, dict):
-            continue
-        status = str(item.get("status", ""))
-        if status.startswith(("fail", "fallback")):
+    stats = run_stats.get("stats") or []
+    files: list[dict] = []
+    failed: list[dict] = []
+    if stats:
+        seen: set[str] = set()
+        for item in stats:
+            if not isinstance(item, dict):
+                continue
             image = item.get("image", "")
-            failed.append({"relative_path": (Path(image).stem + ".md") if image else "",
-                           "reason": str(item.get("error", status))})
+            if not image:
+                continue
+            md_name = Path(image).stem + ".md"
+            if md_name in seen:
+                continue
+            seen.add(md_name)
+            status = str(item.get("status", ""))
+            md_path = predictions_dir / md_name
+            if md_path.is_file() and md_path.stat().st_size > 0:
+                files.append({"relative_path": md_name,
+                              "sha256": hashlib.sha256(md_path.read_bytes()).hexdigest(),
+                              "size_bytes": md_path.stat().st_size})
+            else:
+                reason = str(item.get("error", status)) or "missing/empty prediction"
+                failed.append({"relative_path": md_name, "reason": reason})
+    else:
+        # Degenerate fallback: no per-page stats → record every non-empty .md.
+        for path in sorted(predictions_dir.glob("*.md")):
+            if path.stat().st_size == 0:
+                continue
+            files.append({"relative_path": path.name,
+                          "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                          "size_bytes": path.stat().st_size})
+    files.sort(key=lambda f: f["relative_path"])
+    failed.sort(key=lambda f: f["relative_path"])
     manifest = {
         "schema_version": 1,
         "model_id": model_id,

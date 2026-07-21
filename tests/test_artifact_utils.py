@@ -98,7 +98,9 @@ def test_prediction_manifest_hashes_nonempty_and_is_deterministic(tmp_path):
     (preds / "b.md").write_text("hello"); (preds / "a.md").write_text("world")
     (preds / "empty.md").write_text("")  # excluded
     rs = {"count": 3, "ok": 2, "fail": 1, "stats": [
-        {"image": "x.png", "status": "failed: empty prediction", "error": "empty prediction"}]}
+        {"image": "a.png", "status": "ok"},
+        {"image": "b.png", "status": "ok"},
+        {"image": "empty.png", "status": "failed: empty prediction", "error": "empty prediction"}]}
     dst = tmp_path / "m.json"
     au.write_prediction_manifest(predictions_dir=preds, destination=dst, model_id="m",
                                  platform="linux-rocm", backend="vlm-vllm", run_stats=rs)
@@ -115,12 +117,31 @@ def test_prediction_manifest_hashes_nonempty_and_is_deterministic(tmp_path):
     assert dst2.read_text() == dst.read_text()
 
 
+def test_prediction_manifest_run_driven_ignores_stray_files(tmp_path):
+    """A dirty preds dir with stragglers not in the run: manifest counts only
+    the run's pages (run-driven), so prediction_count == ok."""
+    preds = tmp_path / "preds"; preds.mkdir()
+    (preds / "a.md").write_text("x"); (preds / "b.md").write_text("y")
+    (preds / "stray.md").write_text("not part of the run")  # must be ignored
+    rs = {"count": 2, "ok": 2, "fail": 0, "stats": [
+        {"image": "a.png", "status": "ok"}, {"image": "b.png", "status": "ok"}]}
+    dst = tmp_path / "m.json"
+    au.write_prediction_manifest(predictions_dir=preds, destination=dst, model_id="m",
+                                 platform="linux-rocm", backend="vlm-vllm", run_stats=rs)
+    m = json.loads(dst.read_text())
+    assert m["prediction_count"] == 2
+    assert {f["relative_path"] for f in m["files"]} == {"a.md", "b.md"}
+    assert all(f["relative_path"] != "stray.md" for f in m["files"])
+
+
 def test_prediction_manifest_counts_match_run_stats(tmp_path):
     preds = tmp_path / "preds"; preds.mkdir()
     for n in ("a.md", "b.md", "c.md"):
         (preds / n).write_text("x")
     rs = {"count": 4, "ok": 3, "fail": 1, "stats": [
-        {"image": "z.png", "status": "failed: empty prediction", "error": "empty"}]}
+        {"image": "a.png", "status": "ok"}, {"image": "b.png", "status": "ok"},
+        {"image": "c.png", "status": "ok"},
+        {"image": "d.png", "status": "failed: empty prediction", "error": "empty"}]}
     dst = tmp_path / "m.json"
     au.write_prediction_manifest(predictions_dir=preds, destination=dst, model_id="m",
                                  platform="linux-rocm", backend="vlm-vllm", run_stats=rs)
