@@ -57,3 +57,19 @@ def test_write_provenance_validates(tmp_path):
     prov = json.loads(out.read_text())
     validate_artifact("provenance", prov)
     assert prov["platform"] == "linux-rocm" and prov["dataset_revision"] == "v1.6" and prov["engine_version"] == "0.1.0"
+
+
+def test_provenance_contains_backend(tmp_path):
+    rs = tmp_path / "_run_stats.json"
+    rs.write_text(json.dumps({"schema_version": 1, "count": 3, "ok": 3, "fail": 0, "fallback": 0, "limit_pages": None, "engine": "vllm", "stats": []}))
+    out = tmp_path / "prov.json"
+    au.write_provenance(destination=out, git_commit="c", engine_version="0.3.0",
+                        model_id="m", platform="linux-rocm", server_url="",
+                        api_model_name="", adapter_command="python a.py",
+                        scoring_config_path=tmp_path / "c.yaml",
+                        dataset_manifest_path=tmp_path / "m.json",
+                        dataset_revision="v1.6", predictions_dir=tmp_path / "preds",
+                        metric_result_paths=[tmp_path / "metric.json"],
+                        run_summary_paths=[tmp_path / "rs.json"], run_stats_path=rs)
+    prov = json.loads(out.read_text())
+    assert prov["backend"] == "vllm"

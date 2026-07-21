@@ -59,3 +59,19 @@ def test_minimal_model_card_still_validates():
         "overall": None, "hardware": {}, "artifacts": {},
     }
     validate_artifact("model_card", minimal)  # optional fields absent -> still valid
+
+
+def test_provenance_schema_accepts_backend():
+    base = {"schema_version": 1, "created_at_utc": "t", "git_commit": "c",
+            "platform": "linux-rocm", "engine_version": "0.3.0", "model_id": "m",
+            "adapter_command": "python a.py", "dataset_manifest_path": "m.json",
+            "dataset_revision": "v1.6", "prediction_dir": "/p", "page_count": 3,
+            "ok_pages": 3, "failed_pages": 0, "metric_result_paths": [],
+            "run_summary_paths": [], "run_stats_path": "/r.json", "backend": "vllm"}
+    validate_artifact("provenance", base)  # has backend -> valid
+    bad = dict(base); del bad["backend"]
+    try:
+        validate_artifact("provenance", bad)
+        assert False, "provenance should require backend"
+    except Exception:
+        pass
