@@ -7,6 +7,7 @@ being written to disk.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from dataclasses import dataclass
@@ -47,6 +48,108 @@ def copy_metric_report(source: Path, destination: Path) -> Path:
         raise FileNotFoundError(f"Metric report not found: {source}")
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, destination)
+    return destination
+
+
+def copy_artifact(*, source: Path, destination: Path) -> Path:
+    """Copy a required artifact into the results bundle.
+
+    Fails loudly when the source is absent (never silently skip a missing
+    metric/run_stats). Creates parent dirs; uses ``shutil.copyfile``.
+    """
+    source = Path(source)
+    if not source.is_file():
+        raise FileNotFoundError(f"Artifact source not found: {source}")
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, destination)
+    return destination
+
+
+def write_prediction_manifest(*, predictions_dir: Path, destination: Path,
+                              model_id: str, platform: str, backend: str,
+                              run_stats: dict) -> Path:
+    """Deterministic SHA256 manifest of the run's non-empty ``.md`` predictions.
+
+    Run-driven: iterates ``run_stats["stats"]`` (the pages the run actually
+    scored) and records the non-empty Markdown for each, so the manifest
+    describes THIS run — not stray files a dirty predictions directory may
+    contain. ``failed_pages`` records run pages whose prediction is missing or
+    empty. Falls back to globbing all non-empty ``*.md`` only when the run
+    carries no ``stats`` (degenerate/test case). ``source_prediction_dir`` is
+    the runtime path (redacted downstream). Output is deterministic (sorted
+    keys + sorted lists).
+    """
+    predictions_dir = Path(predictions_dir)
+    stats = run_stats.get("stats") or []
+    files: list[dict] = []
+    failed: list[dict] = []
+    if stats:
+        seen: set[str] = set()
+        for item in stats:
+            if not isinstance(item, dict):
+                continue
+            image = item.get("image", "")
+            if not image:
+                continue
+            md_name = Path(image).stem + ".md"
+            if md_name in seen:
+                continue
+            seen.add(md_name)
+            status = str(item.get("status", ""))
+            md_path = predictions_dir / md_name
+            if md_path.is_file() and md_path.stat().st_size > 0:
+                files.append({"relative_path": md_name,
+                              "sha256": hashlib.sha256(md_path.read_bytes()).hexdigest(),
+                              "size_bytes": md_path.stat().st_size})
+            else:
+                reason = str(item.get("error", status)) or "missing/empty prediction"
+                failed.append({"relative_path": md_name, "reason": reason})
+    else:
+        # Degenerate fallback: no per-page stats → record every non-empty .md.
+        for path in sorted(predictions_dir.glob("*.md")):
+            if path.stat().st_size == 0:
+                continue
+            files.append({"relative_path": path.name,
+                          "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                          "size_bytes": path.stat().st_size})
+    files.sort(key=lambda f: f["relative_path"])
+    failed.sort(key=lambda f: f["relative_path"])
+    manifest = {
+        "schema_version": 1,
+        "model_id": model_id,
+        "platform": platform,
+        "backend": backend,
+        "prediction_count": len(files),
+        "expected_page_count": run_stats.get("count"),
+        "failed_page_count": run_stats.get("fail"),
+        "source_prediction_dir": str(predictions_dir),
+        "hash_algorithm": "sha256",
+        "files": files,
+        "failed_pages": failed,
+    }
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8")
+    return destination
+
+
+def write_dataset_identity(*, destination: Path, dataset: str, version: str,
+                           revision: str, ground_truth_file: str,
+                           ground_truth_sha256: str) -> Path:
+    """Minimal dataset identity artifact when no full manifest is available.
+
+    Records the dataset name/version, pinned revision, the GT JSON filename,
+    and its SHA256 (so the bundle is self-identifying without a private path).
+    """
+    ident = {"schema_version": 1, "dataset": dataset, "version": version,
+             "revision": revision, "ground_truth_file": ground_truth_file,
+             "ground_truth_sha256": ground_truth_sha256 or "not_recorded"}
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(
+        json.dumps(ident, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8")
     return destination
 
 
@@ -119,6 +222,8 @@ def write_run_summary(
     metric_result_path: Path,
     destination: Path,
     cdm: bool,
+    committed_metric_result_path: Path | None = None,
+    committed_run_stats_path: Path | None = None,
 ) -> Path:
     run_stats = load_json(run_stats_path)
     metric_result = load_json(metric_result_path)
@@ -139,6 +244,10 @@ def write_run_summary(
         "limit_pages": run_stats.get("limit_pages"),
         "failure_samples": failures,
     }
+    # Self-contained bundles record the committed (repo-relative) copy path;
+    # fall back to the runtime source for callers that did not stage copies.
+    recorded_metric = committed_metric_result_path or metric_result_path
+    recorded_stats = committed_run_stats_path or run_stats_path
     summary = {
         "schema_version": 1,
         "save_name": save_name,
@@ -149,8 +258,8 @@ def write_run_summary(
         "ok_pages": run_stats.get("ok"),
         "failed_pages": run_stats.get("fail"),
         "fallback_pages": run_stats.get("fallback"),
-        "metric_result_path": str(metric_result_path),
-        "run_stats_path": str(run_stats_path),
+        "metric_result_path": str(recorded_metric),
+        "run_stats_path": str(recorded_stats),
         "readme_metrics": extract_readme_metrics(metric_result),
         "metric_quality": analyze_metric_quality(metric_result),
         "run_stats_summary": run_stats_summary,
@@ -178,6 +287,17 @@ def write_provenance(
     metric_result_paths: list[Path],
     run_summary_paths: list[Path],
     run_stats_path: Path,
+    dataset_identity_path: Path | None = None,
+    prediction_manifest_path: Path | None = None,
+    prediction_manifest_sha256: str = "",
+    source_metric_result_path: str = "",
+    source_run_stats_path: str = "",
+    source_prediction_dir: str = "",
+    packaging_commit: str = "",
+    prediction_source_commit: str = "",
+    prediction_source_command: str = "",
+    prediction_source_run_manifest: str = "",
+    migration_type: str = "",
 ) -> Path:
     run_stats = load_json(run_stats_path)
     provenance = {
@@ -202,6 +322,18 @@ def write_provenance(
         "run_summary_paths": [str(path) for path in run_summary_paths],
         "run_stats_path": str(run_stats_path),
         "backend": run_stats.get("engine", ""),   # adapter-reported (_run_stats.json)
+        # Self-contained-bundle + migration provenance (all optional).
+        "packaging_commit": packaging_commit or git_commit,
+        "prediction_source_commit": prediction_source_commit,
+        "prediction_source_command": prediction_source_command,
+        "prediction_source_run_manifest": prediction_source_run_manifest,
+        "prediction_manifest_path": str(prediction_manifest_path) if prediction_manifest_path else "",
+        "prediction_manifest_sha256": prediction_manifest_sha256,
+        "dataset_identity_path": str(dataset_identity_path) if dataset_identity_path else "",
+        "source_metric_result_path": source_metric_result_path,
+        "source_run_stats_path": source_run_stats_path,
+        "source_prediction_dir": source_prediction_dir,
+        "migration_type": migration_type,
     }
     validate_artifact("provenance", provenance)
     destination.parent.mkdir(parents=True, exist_ok=True)

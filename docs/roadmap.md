@@ -5,12 +5,12 @@ AMD/ROCm/ONNX Runtime upstream availability gates several of them.
 
 ## Near term
 
-- **Onboard the three v1 models** (`paddleocr-vl-1.6`, `unlimited-ocr`,
-  `mineru2.5`) to the central registry with real **Linux-ROCm** scores
-  (`community`, then `verified` via maintainer Docker reproduction).
-- **End-to-end CDM provisioning** on Linux (replace the current scaffold stub
-  with a real `engine/omnidocbench_rocm/cdm/` toolchain; texlive + ImageMagick 7
-  + Ghostscript).
+- **Onboard the remaining models** (`unlimited-ocr`, `hunyuan-ocr`) to the
+  central registry with real **Linux-ROCm** scores (`community`, then `verified`
+  via maintainer Docker reproduction). `paddleocr-vl-1.6` and `mineru2.5` are
+  already `community` on Linux-ROCm.
+- **Promote `community` results to `verified`** via maintainer Docker
+  reproduction (`Dockerfile.repro` + `VERIFIED.yaml`).
 - **Pin the OmniDocBench checkout revision** in `LinuxRocmBackend.score()`
   (currently hardcoded to `master`).
 

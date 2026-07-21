@@ -24,9 +24,11 @@ FORBIDDEN = (
 
 EXCLUDED_DIRS = ("docs/superpowers", "docs/audits", "docs/adr")
 # CHANGELOG records the rename; check_brand.py defines the forbidden tokens;
-# test_brand_residue.py uses them as detection fixtures. All three legitimately
-# contain the old brand.
-EXCLUDED_FILES = ("CHANGELOG.md", "scripts/check_brand.py", "tests/test_brand_residue.py")
+# test_brand_residue.py uses them as detection fixtures; the P1 migration
+# playbook cites the old name in its rename patterns / grep examples. All four
+# legitimately contain the old brand.
+EXCLUDED_FILES = ("CHANGELOG.md", "scripts/check_brand.py",
+                  "tests/test_brand_residue.py", "docs/p1-migration-playbook.md")
 SKIP_NAMES = {".git", "__pycache__", ".pytest_cache", "dist", "build", ".eggs", ".superpowers"}
 
 

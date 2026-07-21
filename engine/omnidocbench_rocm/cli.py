@@ -20,6 +20,7 @@ import omnidocbench_rocm
 from .stages import stage_download, stage_infer, stage_publish, stage_score
 from .backends import get_backend
 from .conformance import check_repo
+from .bundle_validator import validate_bundle
 from ._paths import dataset_dir, predictions_dir
 
 
@@ -72,10 +73,12 @@ def _orchestrate_run(a) -> int:
         return 0
 
     if stage == "publish":
-        # adapter_command is the user-supplied --adapter-command (default "" — no
-        # infer ran in this invocation, so there is no real argv to record; use
-        # `run --stage all` for the auto-recorded adapter argv).
-        metric_path = predictions.parent / "metric_result.json"
+        # Explicit metric_result only — never guess a path. adapter_command is the
+        # user-supplied --adapter-command (default "" — no infer ran in this
+        # invocation; use `run --stage all` for the auto-recorded adapter argv).
+        if not a.metric_result:
+            raise SystemExit("run --stage publish requires --metric-result")
+        metric_path = Path(a.metric_result)
         stage_publish(
             model_id=a.model_id, platform=a.platform, version=a.version, cdm=a.cdm,
             run_stats_path=run_stats_path, metric_result_path=metric_path,
@@ -84,7 +87,12 @@ def _orchestrate_run(a) -> int:
             adapter_command=a.adapter_command, predictions_dir=predictions,
             requested_backend=a.backend, server_url=a.server_url,
             api_model_name=a.api_model_name, scoring_config_path=a.scoring_config,
-            dataset_manifest_path=a.dataset_manifest, dataset_revision=a.revision)
+            dataset_manifest_path=a.dataset_manifest, dataset_revision=a.revision,
+            ground_truth_sha256=a.gt_sha256,
+            prediction_source_commit=a.prediction_source_commit,
+            prediction_source_command=a.prediction_source_command,
+            prediction_source_run_manifest=a.prediction_source_run_manifest,
+            migration_type=a.migration_type)
         return 0
 
     # stage == "all": full pipeline in order.
@@ -111,7 +119,12 @@ def _orchestrate_run(a) -> int:
         adapter_command=adapter_command, predictions_dir=predictions,
         requested_backend=a.backend, server_url=a.server_url,
         api_model_name=a.api_model_name, scoring_config_path=a.scoring_config,
-        dataset_manifest_path=a.dataset_manifest, dataset_revision=a.revision)
+        dataset_manifest_path=a.dataset_manifest, dataset_revision=a.revision,
+        ground_truth_sha256=a.gt_sha256,
+        prediction_source_commit=(a.prediction_source_commit or a.git_commit),
+        prediction_source_command=(a.prediction_source_command or adapter_command),
+        prediction_source_run_manifest=a.prediction_source_run_manifest,
+        migration_type=(a.migration_type or "native-platform-run"))
     return 0
 
 
@@ -164,6 +177,18 @@ def main(argv: list[str] | None = None) -> int:
     pu.add_argument("--scoring-config", default="")
     pu.add_argument("--dataset-manifest", default="")
     pu.add_argument("--dataset-revision", required=True)
+    pu.add_argument("--backend", default="",
+                    help="expected adapter backend; checked against _run_stats.json['engine']")
+    pu.add_argument("--gt-sha256", default="",
+                    help="ground-truth JSON SHA256 recorded in the dataset identity")
+    pu.add_argument("--prediction-source-commit", default="",
+                    help="provenance: commit that produced the predictions")
+    pu.add_argument("--prediction-source-command", default="",
+                    help="provenance: command that produced the predictions")
+    pu.add_argument("--prediction-source-run-manifest", default="",
+                    help="provenance: path to the legacy run_manifest.json")
+    pu.add_argument("--migration-type", default="",
+                    help="provenance: e.g. legacy_predictions_to_platform_artifacts")
 
     rn = sub.add_parser("run")
     rn.add_argument("--stage", default="all",
@@ -192,9 +217,24 @@ def main(argv: list[str] | None = None) -> int:
     rn.add_argument("--scoring-config", default="")
     rn.add_argument("--dataset-manifest", default="")
     rn.add_argument("--dataset-dir", default="")
+    rn.add_argument("--metric-result", default="",
+                    help="publish stage: explicit metric_result.json (required for --stage publish)")
+    rn.add_argument("--gt-sha256", default="",
+                    help="provenance: ground-truth JSON SHA256 for the dataset identity")
+    rn.add_argument("--prediction-source-commit", default="")
+    rn.add_argument("--prediction-source-command", default="")
+    rn.add_argument("--prediction-source-run-manifest", default="")
+    rn.add_argument("--migration-type", default="")
 
     cf = sub.add_parser("conformance")
     cf.add_argument("repo_path")
+
+    vb = sub.add_parser("validate-bundle")
+    vb.add_argument("results_dir", help="results/omnidocbench/<version>/<platform>/ bundle dir")
+    vb.add_argument("--model-card", default="",
+                    help="optional model_card.json to cross-check Overall + model_id")
+    vb.add_argument("--registry", default="",
+                    help="optional hub/registry.yaml to cross-check Overall + badge")
 
     a = p.parse_args(argv)
 
@@ -224,14 +264,29 @@ def main(argv: list[str] | None = None) -> int:
             results_dir=Path(a.results_dir), git_commit=a.git_commit,
             engine_version=omnidocbench_rocm.__version__,
             adapter_command=a.adapter_command, predictions_dir=Path(a.predictions_dir),
-            server_url=a.server_url, api_model_name=a.api_model_name,
-            scoring_config_path=a.scoring_config, dataset_manifest_path=a.dataset_manifest,
-            dataset_revision=a.dataset_revision)
+            requested_backend=a.backend, server_url=a.server_url,
+            api_model_name=a.api_model_name, scoring_config_path=a.scoring_config,
+            dataset_manifest_path=a.dataset_manifest, dataset_revision=a.dataset_revision,
+            ground_truth_sha256=a.gt_sha256,
+            prediction_source_commit=a.prediction_source_commit,
+            prediction_source_command=a.prediction_source_command,
+            prediction_source_run_manifest=a.prediction_source_run_manifest,
+            migration_type=a.migration_type)
         return 0
     if a.cmd == "run":
         return _orchestrate_run(a)
     if a.cmd == "conformance":
         report = check_repo(Path(a.repo_path))
+        if report.ok:
+            print("CONFORMANT"); return 0
+        print("NON-CONFORMANT:")
+        for f in report.failures:
+            print(" -", f)
+        return 1
+    if a.cmd == "validate-bundle":
+        report = validate_bundle(Path(a.results_dir),
+                                 model_card=(a.model_card or None),
+                                 registry=(a.registry or None))
         if report.ok:
             print("CONFORMANT"); return 0
         print("NON-CONFORMANT:")
