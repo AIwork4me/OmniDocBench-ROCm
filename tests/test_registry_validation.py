@@ -57,9 +57,20 @@ def test_duplicate_and_bad_fields():
     assert any("overall" in e for e in errs)
 
 
-@pytest.mark.xfail(reason="ADR-0006: live registry rows lack license/commercial_use "
-                          "until populated by Task 11", strict=True)
 def test_real_registry_valid():
+    """The live hub/registry.yaml must validate after Task 11 populated
+    license/commercial_use on every entry (ADR-0006)."""
     reg = Path(__file__).resolve().parent.parent / "hub" / "registry.yaml"
     rows = yaml.safe_load(reg.read_text()) or []
     assert validate_registry(rows) == []
+
+
+def test_live_registry_validates():
+    """Regression (Task 11 Step 1): load the live registry via the package's
+    generate_registry loader and assert validate_registry reports no errors."""
+    import sys
+    repo_root = Path(__file__).resolve().parent.parent
+    sys.path.insert(0, str(repo_root / "scripts"))
+    from generate_registry import generate_registry
+    errors = validate_registry(generate_registry(repo_root / "hub" / "registry.yaml"))
+    assert errors == [], errors

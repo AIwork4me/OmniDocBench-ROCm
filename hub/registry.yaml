@@ -18,25 +18,35 @@
 
 - model_id: paddleocr-vl-1.6
   repo: AIwork4me/PaddleOCR-VL-ROCm
+  license: MIT
+  commercial_use: no restriction
   platforms:
     linux-rocm: {badge: community, overall: 95.77}
     windows-hip: {badge: community, overall: 95.77}
 
 - model_id: unlimited-ocr
   repo: AIwork4me/Unlimited-OCR-ROCm
+  license: MIT
+  commercial_use: no restriction
   platforms:
     linux-rocm: {badge: community-wanted, overall: null}
     windows-hip: {badge: community-wanted, overall: null}
   note: CONFORMANT (code-complete). Platform-standard score/publish pending.
+    Repo LICENSE is MIT; upstream Baidu Unlimited-OCR weights license not
+    separately declared on the ROCm repo (verify HF card before redistribution).
 
 - model_id: mineru2.5
   repo: AIwork4me/MinerU-ROCm
+  license: MinerU Open Source License
+  commercial_use: commercial threshold MAU>100M or revenue>$20M
   platforms:
     linux-rocm: {badge: community, overall: 95.56}
     windows-hip: {badge: community-wanted, overall: null}
 
 - model_id: hunyuan-ocr
   repo: AIwork4me/HunyuanOCR-ROCm
+  license: Tencent Hunyuan Community License
+  commercial_use: see license (commercial-use conditions; not licensed in EU/UK/KR)
   platforms:
     linux-rocm: {badge: community-wanted, overall: null}
     windows-hip: {badge: community-wanted, overall: null}
