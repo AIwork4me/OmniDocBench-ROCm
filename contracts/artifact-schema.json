@@ -125,7 +125,9 @@
         "execution_provider": {"type": "string"},
         "backend_family": {"type": "string"},
         "compatibility_status": {"type": "string"},
-        "target_backend": {"type": "string"}
+        "target_backend": {"type": "string"},
+        "license": {"type": "string"},
+        "commercial_use": {"type": "string"}
       }
     }
   }
