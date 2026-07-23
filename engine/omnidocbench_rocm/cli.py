@@ -243,6 +243,10 @@ def main(argv: list[str] | None = None) -> int:
     ls.add_argument("--format", default="text", choices=["text", "json"],
                     help="output format (default: text)")
 
+    dr = sub.add_parser("doctor",
+                        help="check a repo's readiness: conformance + adapter_config hint")
+    dr.add_argument("repo_path")
+
     a = p.parse_args(argv)
 
     if a.cmd == "cdm":
@@ -317,6 +321,22 @@ def main(argv: list[str] | None = None) -> int:
             for r in rows:
                 print(f"{r['model_id']:<24} {r['best_badge']:<16} {r.get('license') or '—'}")
         return 0
+    if a.cmd == "doctor":
+        # ADR-0005 readiness: run the conformance gate, then surface a best-effort
+        # hint on whether adapter/adapter_config.py exists. Mirrors the
+        # ``conformance`` subcommand's report handling but with a READY/NOT READY
+        # verdict + readiness hint instead of a bare CONFORMANT/NON-CONFORMANT.
+        report = check_repo(Path(a.repo_path))
+        if report.ok:
+            print("READY: repo is conformant.")
+            # best-effort readiness hint
+            cfg = Path(a.repo_path) / "adapter" / "adapter_config.py"
+            print("  adapter_config.py present:", cfg.exists())
+            return 0
+        print("NOT READY:")
+        for f in report.failures:
+            print(" -", f)
+        return 1
     return 1
 
 
