@@ -31,3 +31,10 @@ def test_render_hub_external_reference_is_link_only():
     out = render_hub(ROWS, external_ref_url="https://example.com/paper")
     assert "External reference" in out
     assert "https://example.com/paper" in out
+
+
+def test_render_table_shows_license_column():
+    from scripts.generate_registry import render_table
+    out = render_table(ROWS[:1])
+    assert "| License |" in out
+    assert "| Apache-2.0 |" in out

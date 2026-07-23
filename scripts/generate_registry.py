@@ -30,7 +30,7 @@ from pathlib import Path
 import yaml
 
 # Columns rendered in the comparison table, in order.
-COLUMNS = ("Model", "Repo", "linux-rocm", "windows-hip")
+COLUMNS = ("Model", "Repo", "License", "linux-rocm", "windows-hip")
 
 
 def generate_registry(yaml_path: Path | str) -> list[dict]:
@@ -44,10 +44,12 @@ def generate_registry(yaml_path: Path | str) -> list[dict]:
 
 
 def render_table(rows: list[dict]) -> str:
-    """Render model rows as a 4-column Markdown comparison table.
+    """Render model rows as a 5-column Markdown comparison table.
 
-    Columns: ``Model | Repo | linux-rocm | windows-hip``. Each platform cell
-    shows ``<badge> (<overall>)``; an absent platform renders as an em-dash.
+    Columns: ``Model | Repo | License | linux-rocm | windows-hip``. Each
+    platform cell shows ``<badge> (<overall>)``; an absent platform renders as
+    an em-dash. The License cell shows ``row["license"]`` or an em-dash when
+    unset.
     """
     lines = [
         f"| {' | '.join(COLUMNS)} |",
@@ -56,9 +58,10 @@ def render_table(rows: list[dict]) -> str:
     for r in rows:
         platforms = r.get("platforms", {}) or {}
         lines.append(
-            "| {model} | {repo} | {linux} | {windows} |".format(
+            "| {model} | {repo} | {license} | {linux} | {windows} |".format(
                 model=r.get("model_id", ""),
                 repo=r.get("repo", ""),
+                license=r.get("license") or "—",
                 linux=_cell(platforms.get("linux-rocm")),
                 windows=_cell(platforms.get("windows-hip")),
             )

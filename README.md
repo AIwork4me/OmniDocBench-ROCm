@@ -150,12 +150,12 @@ cookiecutter https://github.com/AIwork4me/OmniDocBench-ROCm.git --directory temp
 `hub/registry.yaml` is the source of truth for the comparison table. Current
 state:
 
-| Model | Repo | linux-rocm | windows-hip |
-|---|---|---|---|
-| `mineru2.5` | AIwork4me/MinerU-ROCm | community (95.56) | community-wanted () |
-| `paddleocr-vl-1.6` | AIwork4me/PaddleOCR-VL-ROCm | community (95.77) | community (95.77) |
-| `unlimited-ocr` | AIwork4me/Unlimited-OCR-ROCm | community-wanted () | community-wanted () |
-| `hunyuan-ocr` | AIwork4me/HunyuanOCR-ROCm | community-wanted () | community-wanted () |
+| Model | Repo | License | linux-rocm | windows-hip |
+|---|---|---|---|---|
+| `mineru2.5` | AIwork4me/MinerU-ROCm | — | community (95.56) | community-wanted () |
+| `paddleocr-vl-1.6` | AIwork4me/PaddleOCR-VL-ROCm | — | community (95.77) | community (95.77) |
+| `unlimited-ocr` | AIwork4me/Unlimited-OCR-ROCm | — | community-wanted () | community-wanted () |
+| `hunyuan-ocr` | AIwork4me/HunyuanOCR-ROCm | — | community-wanted () | community-wanted () |
 
 (The table above is the output of `scripts/generate_registry.py` over
 `hub/registry.yaml` — one source of truth, rendered.) `scripts/validate_registry.py`
