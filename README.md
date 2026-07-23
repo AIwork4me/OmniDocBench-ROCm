@@ -152,9 +152,9 @@ state:
 
 | Model | Repo | License | linux-rocm | windows-hip |
 |---|---|---|---|---|
-| `mineru2.5` | AIwork4me/MinerU-ROCm | MinerU Open Source License | community (95.56) | community-wanted () |
 | `paddleocr-vl-1.6` | AIwork4me/PaddleOCR-VL-ROCm | MIT | community (95.77) | community (95.77) |
 | `unlimited-ocr` | AIwork4me/Unlimited-OCR-ROCm | MIT | community-wanted () | community-wanted () |
+| `mineru2.5` | AIwork4me/MinerU-ROCm | MinerU Open Source License | community (95.56) | community-wanted () |
 | `hunyuan-ocr` | AIwork4me/HunyuanOCR-ROCm | Tencent Hunyuan Community License | community-wanted () | community-wanted () |
 
 (The table above is the output of `scripts/generate_registry.py` over
