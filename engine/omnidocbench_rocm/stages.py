@@ -83,6 +83,25 @@ def _assert_full_set(run_stats_path: Path) -> dict:
     return rs
 
 
+def _derive_efficiency(run_stats: dict) -> dict:
+    """Engine-derived efficiency for run_summary.json (ADR-0003).
+
+    ``latency_s_per_page`` is the mean ``seconds`` over ok pages (pure, GPU-free:
+    the adapter already records per-page ``stats[].seconds``). Adapter-reported
+    ``peak_vram_mb`` / ``gpu`` (via ``run_stats['efficiency']``) are merged when
+    present. Returns an empty dict when there is nothing to report, so callers
+    can omit the key entirely (keeps smoke / no-efficiency runs clean).
+    """
+    ok_secs = [s.get("seconds", 0.0) for s in run_stats.get("stats", [])
+               if str(s.get("status")).startswith("ok") and s.get("seconds") is not None]
+    eff = {"latency_s_per_page": round(sum(ok_secs) / len(ok_secs), 3)} if ok_secs else {}
+    reported = run_stats.get("efficiency") or {}
+    for k in ("peak_vram_mb", "gpu"):
+        if reported.get(k) is not None:
+            eff[k] = reported[k]
+    return eff
+
+
 def stage_score(*, backend, predictions_dir: Path, version: str, cdm: bool,
                 run_stats_path: Path, scoring_config: Path | None = None,
                 dataset_dir: Path | None = None) -> Path:
@@ -112,6 +131,7 @@ def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,
     """
     run_stats = _assert_full_set(run_stats_path)
     actual_backend = run_stats.get("engine", "")
+    efficiency = _derive_efficiency(run_stats)
     if requested_backend and requested_backend != actual_backend:
         raise SystemExit(
             f"Refusing to publish: requested backend {requested_backend!r} "
@@ -161,7 +181,8 @@ def stage_publish(*, model_id: str, platform: str, version: str, cdm: bool,
         save_name=save_name, run_stats_path=Path(run_stats_path),
         metric_result_path=Path(metric_result_path),
         committed_metric_result_path=committed_metric,
-        committed_run_stats_path=committed_stats, destination=summary_path, cdm=cdm)
+        committed_run_stats_path=committed_stats, destination=summary_path, cdm=cdm,
+        efficiency=efficiency)
     au.write_provenance(
         destination=provenance_path, git_commit=git_commit, engine_version=engine_version,
         model_id=model_id, platform=platform, server_url=server_url,
