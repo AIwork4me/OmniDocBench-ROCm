@@ -1,10 +1,24 @@
 from pathlib import Path
+import pytest
 import yaml
 from scripts.validate_registry import validate_registry, validate_against_model_card
 
 GOOD = [{"model_id": "x", "repo": "AIwork4me/X-ROCm",
+         "license": "Apache-2.0", "commercial_use": "no restriction",
          "platforms": {"linux-rocm": {"badge": "verified", "overall": 95.0},
                        "windows-hip": {"badge": "community-wanted", "overall": None}}}]
+
+
+def test_registry_requires_license():
+    bad = [{k: v for k, v in GOOD[0].items() if k != "license"}]
+    errs = validate_registry(bad)
+    assert any("license" in e for e in errs), errs
+
+
+def test_registry_requires_commercial_use():
+    bad = [{k: v for k, v in GOOD[0].items() if k != "commercial_use"}]
+    errs = validate_registry(bad)
+    assert any("commercial_use" in e for e in errs), errs
 
 
 def test_valid_registry():
@@ -43,6 +57,8 @@ def test_duplicate_and_bad_fields():
     assert any("overall" in e for e in errs)
 
 
+@pytest.mark.xfail(reason="ADR-0006: live registry rows lack license/commercial_use "
+                          "until populated by Task 11", strict=True)
 def test_real_registry_valid():
     reg = Path(__file__).resolve().parent.parent / "hub" / "registry.yaml"
     rows = yaml.safe_load(reg.read_text()) or []
