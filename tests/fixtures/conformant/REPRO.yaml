@@ -1,0 +1,8 @@
+command: >-
+  omnidocbench-rocm infer
+  --adapter adapter/run_adapter.py
+  --img-dir <v16>
+  --out-dir preds
+weights_revision: de8f10ad2f00a0cefd790b526de8a65dcfdb3205
+backend: vllm
+environment: /opt/venv (vLLM 0.16.1 ROCm)

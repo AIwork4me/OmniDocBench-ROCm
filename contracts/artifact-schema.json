@@ -119,6 +119,17 @@
         }
       }
     },
+    "repro_recipe": {
+      "type": "object",
+      "required": ["command", "weights_revision", "backend", "environment"],
+      "properties": {
+        "command": {"type": "string"},
+        "weights_revision": {"type": "string"},
+        "backend": {"type": "string"},
+        "environment": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
     "model_card": {
       "type": "object",
       "required": ["schema_version", "model_id", "model_version", "platforms", "badge", "eval_date", "omnidocbench_version", "overall", "hardware", "artifacts"],
