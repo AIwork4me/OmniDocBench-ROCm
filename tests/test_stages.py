@@ -59,11 +59,14 @@ def test_stage_publish_refuses_limited_subset(tmp_path):
 
 
 def test_build_adapter_command_minimal():
-    cmd = _build_adapter_command(adapter_path=Path("/a/run_adapter.py"),
-                                 img_dir=Path("/imgs"), out_dir=Path("/out"),
+    adapter_path = Path("/a/run_adapter.py")
+    img_dir = Path("/imgs")
+    out_dir = Path("/out")
+    cmd = _build_adapter_command(adapter_path=adapter_path,
+                                 img_dir=img_dir, out_dir=out_dir,
                                  platform="linux-rocm", config={})
-    assert cmd == [sys.executable, "/a/run_adapter.py", "--img-dir", "/imgs",
-                   "--out-dir", "/out", "--platform", "linux-rocm"]
+    assert cmd == [sys.executable, str(adapter_path), "--img-dir", str(img_dir),
+                   "--out-dir", str(out_dir), "--platform", "linux-rocm"]
 
 
 def test_build_adapter_command_forwards_backend():
@@ -109,19 +112,22 @@ def test_build_adapter_command_omits_empty_values():
 
 
 def test_build_adapter_command_handles_paths_with_spaces():
-    cmd = _build_adapter_command(adapter_path=Path("/my adapter/run_adapter.py"),
-                                 img_dir=Path("/img dir"), out_dir=Path("/out dir"),
+    adapter_path = Path("/my adapter/run_adapter.py")
+    img_dir = Path("/img dir")
+    out_dir = Path("/out dir")
+    cmd = _build_adapter_command(adapter_path=adapter_path,
+                                 img_dir=img_dir, out_dir=out_dir,
                                  platform="linux-rocm",
                                  config={"backend": "v",
                                          "server_url": "http://a b/v1",
                                          "api_model_name": "model name"})
     # spaces stay inside one argv token (no shell splitting/quoting)
-    assert "/my adapter/run_adapter.py" in cmd
-    assert "/img dir" in cmd
-    assert "/out dir" in cmd
+    assert str(adapter_path) in cmd
+    assert str(img_dir) in cmd
+    assert str(out_dir) in cmd
     assert "http://a b/v1" in cmd
     assert "model name" in cmd
-    assert cmd.count("/my adapter/run_adapter.py") == 1
+    assert cmd.count(str(adapter_path)) == 1
 
 
 from omnidocbench_rocm.types import InferResult
