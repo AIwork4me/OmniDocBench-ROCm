@@ -66,6 +66,49 @@ def render_table(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
+# Tier = a model's *best* badge across platforms: verified > community > community-wanted.
+_BADGE_RANK = {"verified": 3, "community": 2, "community-wanted": 1}
+
+
+def _best_badge(row: dict) -> str:
+    """Return a model's highest-ranked platform badge.
+
+    Scans every platform entry's ``badge``; an entry lacking one defaults to
+    ``community-wanted``. A model with no platforms is also ``community-wanted``.
+    """
+    plats = row.get("platforms", {}) or {}
+    badges = [v.get("badge", "community-wanted") for v in plats.values() if isinstance(v, dict)]
+    return max(badges, key=lambda b: _BADGE_RANK.get(b, 0)) if badges else "community-wanted"
+
+
+def render_hub(rows: list[dict], external_ref_url: str | None = None) -> str:
+    """Render rows as a 3-tier hub comparison: Flagship / Community / Incoming.
+
+    Each model lands in the section matching its best badge (verified ->
+    Flagship, community -> Community, community-wanted -> Incoming). Sections
+    are emitted only when non-empty, joined by blank lines. When
+    ``external_ref_url`` is given, a final link section is appended naming the
+    OmniDocBench paper as cited-but-not-reproduced. Returns ``(no models)``
+    when no rows produced any section.
+    """
+    flagship, community, incoming = [], [], []
+    for r in rows:
+        {"verified": flagship, "community": community}.get(_best_badge(r), incoming).append(r)
+    parts = []
+    if flagship:
+        parts.append("## Flagship comparison (verified)\n\n" + render_table(flagship))
+    if community:
+        parts.append("## Community (also evaluated)\n\n" + render_table(community))
+    if incoming:
+        parts.append("## Incoming (community-wanted)\n\n" + render_table(incoming))
+    if external_ref_url:
+        parts.append(
+            "## External reference\n\n"
+            "Closed-SOTA calibration: [OmniDocBench paper](" + external_ref_url +
+            ") — cited, not reproduced here, never badged.")
+    return "\n\n".join(parts) if parts else "(no models)"
+
+
 def _cell(c: dict | None) -> str:
     """Format a per-platform entry as ``<badge> (<overall>)``.
 
