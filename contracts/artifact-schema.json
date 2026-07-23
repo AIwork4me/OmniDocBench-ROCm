@@ -24,7 +24,16 @@
             "seconds": {"type": "number"},
             "attempts": {"type": "integer"}
           }
-        }}
+        }},
+        "efficiency": {
+          "type": "object",
+          "properties": {
+            "latency_s_per_page": {"type": "number"},
+            "peak_vram_mb": {"type": "integer"},
+            "gpu": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
       }
     },
     "provenance": {
@@ -98,6 +107,15 @@
             "properties": {"valid": {"type": "boolean"}, "reason": {"type": "string"},
               "sample_count": {"type": ["integer", "null"]}, "exception_case_count": {"type": ["integer", "null"]}}
           }}
+        },
+        "efficiency": {
+          "type": "object",
+          "properties": {
+            "latency_s_per_page": {"type": "number"},
+            "peak_vram_mb": {"type": "integer"},
+            "gpu": {"type": "string"}
+          },
+          "additionalProperties": false
         }
       }
     },
