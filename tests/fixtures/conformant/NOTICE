@@ -1,0 +1,12 @@
+fixture-model (conformant)
+
+LICENSE OVERVIEW
+  Apache-2.0 (fixture; per ADR-0006 every model repo ships a NOTICE).
+
+COMPONENT LICENSES
+  None — this is a synthetic fixture with no bundled third-party components.
+
+This fixture is not affiliated with or endorsed by any upstream project.
+
+COPYLEFT / AGPL STATUS
+  None.
