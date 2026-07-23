@@ -61,12 +61,12 @@ def check_repo(repo: Path) -> ConformanceReport:
     if not (repo / "examples").is_dir() or not any((repo / "examples").iterdir()):
         r.add("missing examples/ demo")
     pp = repo / "pyproject.toml"
-    if not pp.exists() or "omnidocbench-rocm" not in pp.read_text():
+    if not pp.exists() or "omnidocbench-rocm" not in pp.read_text(encoding="utf-8"):
         r.add("pyproject.toml does not depend on omnidocbench-rocm")
     mc = repo / "model_card.json"
     if mc.exists():
         try:
-            validate_artifact("model_card", json.loads(mc.read_text()))
+            validate_artifact("model_card", json.loads(mc.read_text(encoding="utf-8")))
         except Exception as e:
             r.add(f"model_card.json invalid: {e}")
     return r

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.2 — Windows UTF-8 conformance (2026-07-23)
+
+- Read `pyproject.toml` and `model_card.json` explicitly as UTF-8 during
+  conformance checks. This fixes `UnicodeDecodeError` on Windows systems whose
+  default Python text encoding is CP936/GBK.
+- Add a regression test requiring explicit UTF-8 reads for every project text
+  file consumed by the conformance checker.
+- Make the full test suite portable across Windows and POSIX by using explicit
+  UTF-8 fixture reads and comparing generated paths in their native form.
+
 ## 0.3.1 — self-contained publish bundles + validate-bundle (2026-07-21)
 
 - **`publish` emits a self-contained, committable bundle:** `metric_result.json`

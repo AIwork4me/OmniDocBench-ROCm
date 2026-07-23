@@ -45,5 +45,5 @@ def test_duplicate_and_bad_fields():
 
 def test_real_registry_valid():
     reg = Path(__file__).resolve().parent.parent / "hub" / "registry.yaml"
-    rows = yaml.safe_load(reg.read_text()) or []
+    rows = yaml.safe_load(reg.read_text(encoding="utf-8")) or []
     assert validate_registry(rows) == []
