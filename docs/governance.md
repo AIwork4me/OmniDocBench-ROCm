@@ -14,6 +14,10 @@ Architecturally significant decisions are recorded as ADRs under
 
 - [ADR-0001 — ROCm project boundary](adr/0001-rocm-project-boundary.md)
 - [ADR-0002 — Package and CLI migration; legacy surface dropped](adr/0002-package-and-cli-migration.md)
+- [ADR-0003 — Trust bar: listing floor, verified apex, and completeness](adr/0003-trust-bar-and-reproduction-depth.md)
+- [ADR-0004 — Catalog scope and curation policy](adr/0004-catalog-scope-and-curation-policy.md)
+- [ADR-0005 — Entry points: no production runtime CLI](adr/0005-entry-points-no-production-runtime-cli.md)
+- [ADR-0006 — Licensing posture](adr/0006-licensing-posture.md)
 
 A new ADR is added when a decision is hard to reverse or non-obvious from the
 code (the brand, the backend boundary, schema evolution, the trust model).
