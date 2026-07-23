@@ -6,7 +6,7 @@ rows and renders a Markdown table consumed by the mkdocs hub site.
 """
 from pathlib import Path
 
-from scripts.generate_registry import generate_registry, render_table
+from omnidocbench_rocm.registry import generate_registry, render_table
 
 REG = """
 - model_id: paddleocr-vl-1.6

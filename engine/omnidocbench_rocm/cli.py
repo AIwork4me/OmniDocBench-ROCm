@@ -236,6 +236,13 @@ def main(argv: list[str] | None = None) -> int:
     vb.add_argument("--registry", default="",
                     help="optional hub/registry.yaml to cross-check Overall + badge")
 
+    ls = sub.add_parser("list",
+                        help="list catalogued models + their best badge (ADR-0005 discovery)")
+    ls.add_argument("--registry", default="hub/registry.yaml",
+                    help="path to registry.yaml (default: hub/registry.yaml)")
+    ls.add_argument("--format", default="text", choices=["text", "json"],
+                    help="output format (default: text)")
+
     a = p.parse_args(argv)
 
     if a.cmd == "cdm":
@@ -293,6 +300,23 @@ def main(argv: list[str] | None = None) -> int:
         for f in report.failures:
             print(" -", f)
         return 1
+    if a.cmd == "list":
+        # Discovery layer (ADR-0005): print each model_id + best badge + license.
+        # Reuses the package registry loader + _best_badge — same model the hub
+        # renders from, so the catalog and the hub never drift.
+        import json as _json
+
+        from .registry import _best_badge, generate_registry
+
+        rows = generate_registry(a.registry)
+        rows = [{"model_id": r.get("model_id"), "repo": r.get("repo"),
+                 "license": r.get("license"), "best_badge": _best_badge(r)} for r in rows]
+        if a.format == "json":
+            print(_json.dumps(rows, indent=2))
+        else:
+            for r in rows:
+                print(f"{r['model_id']:<24} {r['best_badge']:<16} {r.get('license') or '—'}")
+        return 0
     return 1
 
 
