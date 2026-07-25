@@ -6,7 +6,7 @@ rows and renders a Markdown table consumed by the mkdocs hub site.
 """
 from pathlib import Path
 
-from scripts.generate_registry import generate_registry, render_table
+from omnidocbench_rocm.registry import generate_registry, render_table
 
 REG = """
 - model_id: paddleocr-vl-1.6
@@ -43,16 +43,16 @@ def test_render_table():
     md = render_table(rows)
     lines = md.splitlines()
     # Header + separator + one row per model.
-    assert lines[0] == "| Model | Repo | linux-rocm | windows-hip |"
-    assert lines[1] == "|---|---|---|---|"
+    assert lines[0] == "| Model | Repo | License | linux-rocm | windows-hip |"
+    assert lines[1] == "|---|---|---|---|---|"
     assert len(lines) == 2 + len(rows)
     # Body cells carry badge + overall (or em-dash placeholder for null).
     assert "paddleocr-vl-1.6" in lines[2]
     assert "verified" in lines[2]
     assert "95.94" in lines[2]
     assert "community-wanted" in lines[3]
-    # The four expected columns are present in the header.
-    for col in ("Model", "Repo", "linux-rocm", "windows-hip"):
+    # The five expected columns are present in the header.
+    for col in ("Model", "Repo", "License", "linux-rocm", "windows-hip"):
         assert col in lines[0]
 
 
@@ -60,8 +60,8 @@ def test_render_table_empty():
     """An empty registry yields a header-only table (no body rows)."""
     md = render_table([])
     lines = md.splitlines()
-    assert lines[0] == "| Model | Repo | linux-rocm | windows-hip |"
-    assert lines[1] == "|---|---|---|---|"
+    assert lines[0] == "| Model | Repo | License | linux-rocm | windows-hip |"
+    assert lines[1] == "|---|---|---|---|---|"
     assert len(lines) == 2
 
 

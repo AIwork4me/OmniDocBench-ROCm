@@ -224,6 +224,7 @@ def write_run_summary(
     cdm: bool,
     committed_metric_result_path: Path | None = None,
     committed_run_stats_path: Path | None = None,
+    efficiency: dict | None = None,
 ) -> Path:
     run_stats = load_json(run_stats_path)
     metric_result = load_json(metric_result_path)
@@ -264,6 +265,8 @@ def write_run_summary(
         "metric_quality": analyze_metric_quality(metric_result),
         "run_stats_summary": run_stats_summary,
     }
+    if efficiency:  # backward-compat: omit when empty/None so smoke runs stay clean
+        summary["efficiency"] = efficiency
     validate_artifact("run_summary", summary)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")

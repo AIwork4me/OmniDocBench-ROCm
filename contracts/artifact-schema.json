@@ -24,7 +24,16 @@
             "seconds": {"type": "number"},
             "attempts": {"type": "integer"}
           }
-        }}
+        }},
+        "efficiency": {
+          "type": "object",
+          "properties": {
+            "latency_s_per_page": {"type": "number"},
+            "peak_vram_mb": {"type": "integer"},
+            "gpu": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
       }
     },
     "provenance": {
@@ -98,8 +107,28 @@
             "properties": {"valid": {"type": "boolean"}, "reason": {"type": "string"},
               "sample_count": {"type": ["integer", "null"]}, "exception_case_count": {"type": ["integer", "null"]}}
           }}
+        },
+        "efficiency": {
+          "type": "object",
+          "properties": {
+            "latency_s_per_page": {"type": "number"},
+            "peak_vram_mb": {"type": "integer"},
+            "gpu": {"type": "string"}
+          },
+          "additionalProperties": false
         }
       }
+    },
+    "repro_recipe": {
+      "type": "object",
+      "required": ["command", "weights_revision", "backend", "environment"],
+      "properties": {
+        "command": {"type": "string"},
+        "weights_revision": {"type": "string"},
+        "backend": {"type": "string"},
+        "environment": {"type": "string"}
+      },
+      "additionalProperties": true
     },
     "model_card": {
       "type": "object",
@@ -125,7 +154,9 @@
         "execution_provider": {"type": "string"},
         "backend_family": {"type": "string"},
         "compatibility_status": {"type": "string"},
-        "target_backend": {"type": "string"}
+        "target_backend": {"type": "string"},
+        "license": {"type": "string"},
+        "commercial_use": {"type": "string"}
       }
     }
   }

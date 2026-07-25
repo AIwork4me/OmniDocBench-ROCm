@@ -51,6 +51,18 @@ def test_model_card_accepts_optional_backend_fields():
     validate_artifact("model_card", card)  # must not raise
 
 
+def test_model_card_accepts_license_fields():
+    from omnidocbench_rocm.schema import validate_artifact
+    card = {
+        "schema_version": 1, "model_id": "x", "model_version": "0.1",
+        "platforms": ["linux-rocm"], "badge": {"linux-rocm": "community"},
+        "eval_date": "2026-07-23", "omnidocbench_version": "v1.6",
+        "overall": None, "hardware": {}, "artifacts": {},
+        "license": "Apache-2.0", "commercial_use": "no restriction",
+    }
+    validate_artifact("model_card", card)  # must not raise
+
+
 def test_minimal_model_card_still_validates():
     minimal = {
         "schema_version": 1, "model_id": "x", "model_version": "0.1",

@@ -1,10 +1,24 @@
 from pathlib import Path
+import pytest
 import yaml
 from scripts.validate_registry import validate_registry, validate_against_model_card
 
 GOOD = [{"model_id": "x", "repo": "AIwork4me/X-ROCm",
+         "license": "Apache-2.0", "commercial_use": "no restriction",
          "platforms": {"linux-rocm": {"badge": "verified", "overall": 95.0},
                        "windows-hip": {"badge": "community-wanted", "overall": None}}}]
+
+
+def test_registry_requires_license():
+    bad = [{k: v for k, v in GOOD[0].items() if k != "license"}]
+    errs = validate_registry(bad)
+    assert any("license" in e for e in errs), errs
+
+
+def test_registry_requires_commercial_use():
+    bad = [{k: v for k, v in GOOD[0].items() if k != "commercial_use"}]
+    errs = validate_registry(bad)
+    assert any("commercial_use" in e for e in errs), errs
 
 
 def test_valid_registry():
@@ -44,6 +58,19 @@ def test_duplicate_and_bad_fields():
 
 
 def test_real_registry_valid():
+    """The live hub/registry.yaml must validate after Task 11 populated
+    license/commercial_use on every entry (ADR-0006)."""
     reg = Path(__file__).resolve().parent.parent / "hub" / "registry.yaml"
     rows = yaml.safe_load(reg.read_text(encoding="utf-8")) or []
     assert validate_registry(rows) == []
+
+
+def test_live_registry_validates():
+    """Regression (Task 11 Step 1): load the live registry via the package's
+    generate_registry loader and assert validate_registry reports no errors."""
+    import sys
+    repo_root = Path(__file__).resolve().parent.parent
+    sys.path.insert(0, str(repo_root / "scripts"))
+    from generate_registry import generate_registry
+    errors = validate_registry(generate_registry(repo_root / "hub" / "registry.yaml"))
+    assert errors == [], errors

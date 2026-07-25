@@ -33,15 +33,19 @@ class RunSummary:
     limit_pages: int | None
     stats: list[PageStatus]
     engine: str = ""
+    efficiency: dict | None = None       # ADR-0003: optional {latency_s_per_page, peak_vram_mb, gpu}
 
     def to_run_stats(self) -> dict:
-        return {
+        d = {
             "schema_version": 1,
             "count": self.count, "ok": self.ok, "fail": self.fail,
             "fallback": self.fallback, "limit_pages": self.limit_pages,
             "engine": self.engine,
             "stats": [asdict(s) for s in self.stats],
         }
+        if self.efficiency is not None:   # omit when None: keeps smoke runs clean
+            d["efficiency"] = self.efficiency
+        return d
 
     def write(self, path: Path) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -56,6 +60,7 @@ class RunSummary:
             limit_pages=d.get("limit_pages"),
             stats=[PageStatus(**s) for s in d.get("stats", [])],
             engine=d.get("engine", ""),
+            efficiency=d.get("efficiency"),
         )
 
 

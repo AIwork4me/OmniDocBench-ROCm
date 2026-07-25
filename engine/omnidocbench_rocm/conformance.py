@@ -43,6 +43,17 @@ def check_repo(repo: Path) -> ConformanceReport:
         r.add("missing adapter/run_adapter.py")
     if not (repo / "eval" / "configs" / "omnidocbench_v16.yaml").exists():
         r.add("missing eval/configs/omnidocbench_v16.yaml")
+    # ADR-0006: every model repo must ship a NOTICE (license overview,
+    # component licenses, affiliation disclaimer, copyleft status). Mirrors the
+    # existing required-file checks above.
+    if not (repo / "NOTICE").exists():
+        r.add("missing NOTICE file")
+    # ADR-0003: every model repo must ship a REPRO.yaml at root pinning the
+    # exact inference command, weights revision, backend, and environment, so a
+    # third party can reproduce the published numbers. Schema-validated by the
+    # ``repro_recipe`` sub-schema; here we only gate on presence.
+    if not (repo / "REPRO.yaml").exists():
+        r.add("missing REPRO.yaml (reproduction recipe — ADR-0003)")
     for plat in ("linux-rocm", "windows-hip"):
         d = repo / "results" / "omnidocbench" / "v16" / plat
         # A declared results dir is "empty" if it holds no real artifacts —
