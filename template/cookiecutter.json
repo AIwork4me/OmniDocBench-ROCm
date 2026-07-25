@@ -3,5 +3,8 @@
   "model_slug": "model",
   "model_id": "model",
   "model_version": "0.1.0",
-  "license": ["Apache-2.0", "MIT"]
+  "license": ["Apache-2.0", "MIT"],
+  "backend": "TODO",
+  "gpu": "AMD gfx",
+  "env_type": "docker"
 }
