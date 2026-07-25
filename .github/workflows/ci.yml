@@ -29,6 +29,18 @@ jobs:
           python-version: '3.11'
       - run: pip install -e ".[dev]"
       - run: python scripts/validate_registry.py hub/registry.yaml
+      - name: Check comparison table matches registry
+        run: |
+          python scripts/generate_registry.py hub/registry.yaml > /tmp/current-table.md
+          # Extract the auto-generated section from README
+          sed -n '/<!-- registry-table -->/,/<!-- \/registry-table -->/p' README.md > /tmp/readme-table.md
+          if ! diff /tmp/current-table.md /tmp/readme-table.md; then
+            echo "ERROR: README comparison table is stale."
+            echo "Run: python scripts/generate_registry.py hub/registry.yaml"
+            echo "Then update the <!-- registry-table --> section of README.md."
+            exit 1
+          fi
+          echo "Comparison table up to date ✓"
       - run: python scripts/check_brand.py
       - run: python -m build
       - name: Install the built wheel and re-check the surface
