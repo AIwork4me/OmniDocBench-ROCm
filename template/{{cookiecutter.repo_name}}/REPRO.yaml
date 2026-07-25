@@ -1,17 +1,28 @@
-# Reproduction recipe (ADR-0003). A third party with AMD hardware should be able
-# to run `command` in `environment` using `weights_revision` on `backend` and
-# regenerate the committed predictions. Required by the `verified` badge.
-# Validates against the `repro_recipe` sub-schema in contracts/artifact-schema.json.
+# REPRO.yaml — machine-verifiable reproduction lockfile.
+# schema_version: 1
+# Fill in all TODO fields after scoring your model and publishing evidence.
 
-command: |
-  python adapter/run_adapter.py \
-    --img-dir <path-to-omnidocbench-v16-images> \
-    --out-dir results/omnidocbench/v16/linux-rocm \
-    --platform linux-rocm \
-    --backend <your-backend>
-
-weights_revision: "TODO: pinned weights rev or HF ref for {{cookiecutter.model_id}} v{{cookiecutter.model_version}} (e.g. commit sha, tag, or huggingface.co/<repo>@<rev>)"
-
-backend: "TODO: the backend name from adapter/adapter_config.py used for the committed result"
-
-environment: "TODO: pasteable venv/Docker — e.g. `omnidocbench-rocm:rocm6.2-py3.11` image tag, ROCm driver version, GPU, and any pinned dep versions"
+schema_version: 1
+model_id: "{{ cookiecutter.model_id }}"
+platform: "TODO"
+backend: "TODO"
+overall: 0.0
+tolerance: 0.5
+command: "TODO"
+weights:
+  model: "TODO"
+  revision: "TODO"
+  sha256: "TODO"
+environment:
+  type: "TODO"
+  image: "TODO"
+  rocm: "TODO"
+hardware:
+  gpu: "TODO"
+  vram_mb: 0
+dataset:
+  name: "OmniDocBench"
+  version: "v1.6"
+  revision: "2b161d0"
+  gt_sha256: "a45cd84b04ad8b793e775089640e6b681209abea33ead54c1828ddca35fae496"
+git_commit: "TODO"
