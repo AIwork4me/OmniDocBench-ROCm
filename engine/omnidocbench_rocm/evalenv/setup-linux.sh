@@ -7,7 +7,7 @@
 # join a started process"). The OmniDocBench checkout's own .venv (created by
 # OmniDocBench's setup) is the KNOWN-WORKING scorer venv. We prefer it.
 set -euo pipefail
-DATA_ROOT="${OMNIDOCBENCH_ROCM_DATA:-/root/ocr-eval/omnidocbench-rocm-data}"
+DATA_ROOT="${OMNIDOCBENCH_ROCM_DATA:-/root/datasets/omnidocbench-rocm-data}"
 VENV="$DATA_ROOT/eval-venv/linux-rocm"
 ODB="${OMNIDOCBENCH_CHECKOUT:-/workspace/OmniDocBench}"
 
