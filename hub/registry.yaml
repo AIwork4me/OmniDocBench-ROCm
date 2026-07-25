@@ -43,6 +43,16 @@
     linux-rocm: {badge: community, overall: 95.56}
     windows-hip: {badge: community, overall: 95.46}
 
+- model_id: mineru-pipeline
+  repo: AIwork4me/MinerU-ROCm
+  license: MinerU Open Source License
+  commercial_use: commercial threshold MAU>100M or revenue>$20M
+  supplementary: true
+  note: Supplementary model card in MinerU-ROCm repo. Pipeline backend (DirectML on windows-hip).
+  platforms:
+    linux-rocm: {badge: community, overall: 86.48}
+    windows-hip: {badge: community, overall: 86.59}
+
 - model_id: hunyuan-ocr
   repo: AIwork4me/HunyuanOCR-ROCm
   license: Tencent Hunyuan Community License
