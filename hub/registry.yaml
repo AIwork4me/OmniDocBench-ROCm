@@ -41,13 +41,12 @@
   commercial_use: commercial threshold MAU>100M or revenue>$20M
   platforms:
     linux-rocm: {badge: community, overall: 95.56}
-    windows-hip: {badge: community-wanted, overall: null}
+    windows-hip: {badge: community, overall: 95.46}
 
 - model_id: hunyuan-ocr
   repo: AIwork4me/HunyuanOCR-ROCm
   license: Tencent Hunyuan Community License
   commercial_use: see license (commercial-use conditions; not licensed in EU/UK/KR)
   platforms:
-    linux-rocm: {badge: community-wanted, overall: null}
+    linux-rocm: {badge: community, overall: 93.64}
     windows-hip: {badge: community-wanted, overall: null}
-  note: CONFORMANT (code-complete). Platform-standard score/publish pending.

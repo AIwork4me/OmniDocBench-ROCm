@@ -11,7 +11,7 @@ from pathlib import Path
 
 def data_root() -> Path:
     """Heavy data root on the big disk, never the 10 GB NFS repo."""
-    return Path(os.environ.get("OMNIDOCBENCH_ROCM_DATA", "/root/ocr-eval/omnidocbench-rocm-data"))
+    return Path(os.environ.get("OMNIDOCBENCH_ROCM_DATA", "/root/datasets/omnidocbench-rocm-data"))
 
 
 def dataset_dir(version: str) -> Path:
