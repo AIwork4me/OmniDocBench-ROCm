@@ -60,3 +60,17 @@
   platforms:
     linux-rocm: {badge: community, overall: 93.64}
     windows-hip: {badge: community-wanted, overall: null}
+
+- model_id: ovisocr2
+  repo: AIwork4me/OvisOCR2-ROCm
+  license: Apache-2.0
+  commercial_use: no restriction
+  platforms:
+    linux-rocm: {badge: community, overall: 95.87}
+    windows-hip: {badge: community-wanted, overall: null}
+  note: First end-to-end model to top OmniDocBench v1.6 (paper 96.58, arXiv 2607.13639).
+    0.8B Qwen3-VL + Qwen3-Next GDN on vLLM 0.19.0/ROCm (gfx1100). Reproduced 95.87 —
+    the top score in the zone; 3/4 metrics essentially perfect. 0.71-pt gap vs paper
+    is entirely formula CDM, a verified vLLM-0.19.0-vs-0.22.1 segmentation artifact
+    (26 of 2352 formulas).
+
