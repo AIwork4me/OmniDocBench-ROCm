@@ -61,6 +61,17 @@
     linux-rocm: {badge: community, overall: 93.64}
     windows-hip: {badge: community-wanted, overall: null}
 
+- model_id: logics-parsing-v2
+  repo: AIwork4me/Logics-Parsing-ROCm
+  license: Apache-2.0
+  commercial_use: no restriction
+  platforms:
+    linux-rocm: {badge: community, overall: 93.19}
+    windows-hip: {badge: community-wanted, overall: null}
+  note: Qwen3-VL based. Apache 2.0, no restrictions, no geographic limits.
+    Supports Mermaid flowcharts, ABC music notation, code blocks, LaTeX formulas.
+    ROCm v1.6 overall 93.19 vs official NVIDIA v1.5 93.23 (-0.04 delta).
+
 - model_id: ovisocr2
   repo: AIwork4me/OvisOCR2-ROCm
   license: Apache-2.0
