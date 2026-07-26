@@ -69,15 +69,18 @@ def copy_artifact(*, source: Path, destination: Path) -> Path:
 def write_prediction_manifest(*, predictions_dir: Path, destination: Path,
                               model_id: str, platform: str, backend: str,
                               run_stats: dict) -> Path:
-    """Deterministic SHA256 manifest of the run's non-empty ``.md`` predictions.
+    """Deterministic SHA256 manifest of the run's predictions.
 
     Run-driven: iterates ``run_stats["stats"]`` (the pages the run actually
-    scored) and records the non-empty Markdown for each, so the manifest
-    describes THIS run — not stray files a dirty predictions directory may
-    contain. ``failed_pages`` records run pages whose prediction is missing or
-    empty. Falls back to globbing all non-empty ``*.md`` only when the run
-    carries no ``stats`` (degenerate/test case). ``source_prediction_dir`` is
-    the runtime path (redacted downstream). Output is deterministic (sorted
+    scored) and records each page's Markdown, so the manifest describes THIS
+    run — not stray files a dirty predictions directory may contain. A page is
+    counted as a prediction when its ``.md`` is non-empty (any status), OR the
+    run marked it ``ok`` with an intentionally-empty ``.md`` (a blank /
+    image-only page whose correct output is no text, flagged ``empty=True``).
+    ``failed_pages`` records run pages whose prediction is missing (or empty
+    and not ``ok``). Falls back to globbing all non-empty ``*.md`` only when the
+    run carries no ``stats`` (degenerate/test case). ``source_prediction_dir``
+    is the runtime path (redacted downstream). Output is deterministic (sorted
     keys + sorted lists).
     """
     predictions_dir = Path(predictions_dir)
@@ -98,10 +101,20 @@ def write_prediction_manifest(*, predictions_dir: Path, destination: Path,
             seen.add(md_name)
             status = str(item.get("status", ""))
             md_path = predictions_dir / md_name
-            if md_path.is_file() and md_path.stat().st_size > 0:
-                files.append({"relative_path": md_name,
-                              "sha256": hashlib.sha256(md_path.read_bytes()).hexdigest(),
-                              "size_bytes": md_path.stat().st_size})
+            md_exists = md_path.is_file()
+            size = md_path.stat().st_size if md_exists else 0
+            # A real prediction: a non-empty .md (any status), or -- for blank /
+            # image-only pages -- an "ok" page whose correct output is no text,
+            # carried as an intentionally-empty .md (flagged empty=True). Failed
+            # pages carry no .md (the adapter unlinks on failure), so they fall
+            # through to failed_pages.
+            if md_exists and (size > 0 or status == "ok"):
+                entry = {"relative_path": md_name,
+                         "sha256": hashlib.sha256(md_path.read_bytes()).hexdigest(),
+                         "size_bytes": size}
+                if size == 0:
+                    entry["empty"] = True
+                files.append(entry)
             else:
                 reason = str(item.get("error", status)) or "missing/empty prediction"
                 failed.append({"relative_path": md_name, "reason": reason})

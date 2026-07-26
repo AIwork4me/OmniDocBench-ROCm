@@ -150,6 +150,30 @@ def test_prediction_manifest_counts_match_run_stats(tmp_path):
     assert m["expected_page_count"] == 4 and m["failed_page_count"] == 1
 
 
+def test_prediction_manifest_includes_ok_blank_page_empty_md(tmp_path):
+    """A blank / image-only page the run marked 'ok' carries an intentionally
+    empty .md (the correct prediction — there is no text). It must be COUNTED
+    in prediction_count (and listed in files with empty=True), not relegated to
+    failed_pages, so manifest prediction_count == run_stats ok holds for runs
+    that include blank pages."""
+    preds = tmp_path / "preds"; preds.mkdir()
+    (preds / "text.md").write_text("real content")
+    (preds / "blank.md").write_text("")  # legitimate empty (image-only page)
+    rs = {"count": 2, "ok": 2, "fail": 0, "stats": [
+        {"image": "text.png", "status": "ok"},
+        {"image": "blank.png", "status": "ok"}]}
+    dst = tmp_path / "m.json"
+    au.write_prediction_manifest(predictions_dir=preds, destination=dst, model_id="m",
+                                 platform="windows-hip", backend="vlm-llamacpp", run_stats=rs)
+    m = json.loads(dst.read_text())
+    assert m["prediction_count"] == 2                       # blank counted, not excluded
+    paths = {f["relative_path"]: f for f in m["files"]}
+    assert set(paths) == {"text.md", "blank.md"}
+    assert paths["blank.md"]["size_bytes"] == 0
+    assert paths["blank.md"].get("empty") is True
+    assert m["failed_pages"] == []                          # blank is not a failure
+
+
 def test_dataset_identity_records_revision_and_gt_sha(tmp_path):
     dst = tmp_path / "ident.json"
     au.write_dataset_identity(destination=dst, dataset="OmniDocBench", version="v1.6",
