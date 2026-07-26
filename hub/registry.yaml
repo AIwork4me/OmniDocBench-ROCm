@@ -83,6 +83,6 @@
     0.8B Qwen3-VL + Qwen3-Next GDN on vLLM 0.22.1/ROCm (gfx1100, the card's pinned
     version). Reproduced 95.88 — the top score in the zone; 3/4 metrics essentially
     perfect. The 0.70-pt gap vs paper is entirely formula CDM, a verified
-    MODEL-INHERENT segmentation difference (version-independent: 0.22.1 reproduces
+    MODEL-INHERENT segmentation difference (version-independent — 0.22.1 reproduces
     0.19.0's CDM exactly, 95.41 on both, full 1651-page set).
 
