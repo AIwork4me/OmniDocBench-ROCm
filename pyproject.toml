@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "omnidocbench-rocm"
-version = "0.3.2"
+version = "0.3.3"
 description = "OmniDocBench-ROCm: open adaptation, evaluation, reproduction, and collaboration platform for document-parsing models on the AMD ROCm software stack."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,6 +13,12 @@ dependencies = [
   "huggingface_hub>=0.24",
   "jsonschema>=4",
   "pyyaml>=6",
+  # rfc3339-validator is the backend jsonschema's FORMAT_CHECKER uses for the
+  # `date-time`/`date` formats. It is OPTIONAL in jsonschema — without it the
+  # checker is silently unregistered and RFC3339 is NOT enforced (ADR-0007 §3).
+  # Declaring it makes provenance.created_at_utc / canonical_result.eval_date
+  # validation real on every install (incl. CI). (Fixes CI red on main.)
+  "rfc3339-validator>=0.1",
 ]
 
 [project.optional-dependencies]
