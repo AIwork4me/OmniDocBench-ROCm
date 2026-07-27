@@ -63,3 +63,28 @@ git_commit: <repo commit verified>
 - A maintainer Docker reproduction + committed `VERIFIED.yaml` is the
   **additional gate** for `verified` only.
 - `community-wanted` has no gate (it is the default for an absent platform).
+
+---
+
+## v2: assurance levels (ADR-0008) — the precise replacement
+
+The single badge is a *lossy* projection. v2 records the **specific reproduction
+depth** achieved for EACH result, independently. The hub shows the concrete
+assurance of each result, never a flattened "verified".
+
+| Assurance | Maps to badge (lossy) | Meaning |
+|---|---|---|
+| `submitted` | community | submitted; not yet checked |
+| `evidence-complete` | community | evidence bundle schema-valid + consistent (= the `community` gate) |
+| `score-reproduced` | verified | scoring recomputed from predictions in a pinned toolchain within tolerance (= the `verified` gate) |
+| `inference-reproduced` | verified | inference re-run on AMD HW (noisy; informational) |
+| `cross-hardware-reproduced` | verified | reproduced on a *different* AMD GPU/arch |
+
+Rules (enforced by `assurance.py`):
+
+- Assurance is **per result** (it lives on each `result_record`).
+- Assurance **never propagates** — a model card MUST NOT carry a model-wide
+  `assurance`/`badge`/`verified` field.
+- The badges above remain valid for v1 cards and the legacy hub render; v2 cards
+  use assurance directly.
+

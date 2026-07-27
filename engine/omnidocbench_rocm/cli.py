@@ -247,6 +247,37 @@ def main(argv: list[str] | None = None) -> int:
                         help="check a repo's readiness: conformance + adapter_config hint")
     dr.add_argument("repo_path")
 
+    # ADR-0007: migrate a v1 model_card.json to v2 (idempotent, no guessing).
+    mmc = sub.add_parser("migrate-model-card",
+                         help="migrate a v1 model_card.json to Model Card v2")
+    mmc.add_argument("input")
+    mmc.add_argument("--check", action="store_true",
+                     help="dry-run: exit 0 if already v2, 1 if migration needed / invalid")
+    mmc.add_argument("--in-place", action="store_true")
+    mmc.add_argument("--output", default="")
+
+    # ADR-0009: validate a rocmdoc.yaml manifest (+ optional result alignment).
+    mfs = sub.add_parser("manifest", help="validate a rocmdoc.yaml capability manifest")
+    mfs.add_argument("manifest_path")
+    mfs.add_argument("--card", default="",
+                     help="model_card.json (v1 or v2) to check results align to declared capabilities")
+
+    # ADR-0010: classify a license into the open-source taxonomy.
+    lc = sub.add_parser("license-classify", help="classify an SPDX id / license name")
+    lc.add_argument("license")
+
+    # ADR-0011: run a behavioral conformance profile against a standard CLI.
+    cfp = sub.add_parser("conformance-profiles", help="run a behavioral conformance profile")
+    from .conformance_profiles import PROFILE_ORDER as _PROFILES
+    cfp.add_argument("profile", choices=list(_PROFILES))
+    cfp.add_argument("--cli", default="", help="path to the model's standard-CLI entrypoint")
+    cfp.add_argument("--img-dir", default="")
+    cfp.add_argument("--out-dir", default="")
+    cfp.add_argument("--result-record", default="",
+                     help="path to a result_record JSON (for reproducible-score)")
+    cfp.add_argument("--bundle-dir", default="")
+    cfp.add_argument("--backend", default="")
+
     a = p.parse_args(argv)
 
     if a.cmd == "cdm":
@@ -334,6 +365,62 @@ def main(argv: list[str] | None = None) -> int:
             print("  adapter_config.py present:", cfg.exists())
             return 0
         print("NOT READY:")
+        for f in report.failures:
+            print(" -", f)
+        return 1
+    if a.cmd == "migrate-model-card":
+        # ADR-0007: v1 -> v2 migration (idempotent, machine-readable report).
+        import json as _json
+        from .migrate import migrate_file
+        v2, report, exit_code = migrate_file(a.input, output=(a.output or None),
+                                             in_place=a.in_place, check=a.check)
+        if a.check:
+            print(_json.dumps(report, ensure_ascii=False, indent=2))
+            return exit_code
+        if not a.in_place and not a.output:
+            sys.stdout.write(_json.dumps(v2, ensure_ascii=False, indent=2) + "\n")
+        sys.stderr.write("[migrate] " + _json.dumps(report, ensure_ascii=False) + "\n")
+        return exit_code
+    if a.cmd == "manifest":
+        # ADR-0009: manifest validation + optional result alignment (no faking support).
+        import json as _json
+        from .manifest import load_manifest, validate_manifest, check_result_alignment
+        mf = load_manifest(a.manifest_path)
+        problems = validate_manifest(mf)
+        if a.card:
+            card = _json.loads(Path(a.card).read_text(encoding="utf-8"))
+            # accept v2 directly; migrate v1 on the fly for the alignment check
+            if card.get("schema_version") != 2:
+                from .migrate import migrate_v1_to_v2
+                card, _ = migrate_v1_to_v2(card)
+            problems += check_result_alignment(mf, card)
+        if problems:
+            print("MANIFEST INVALID:")
+            for f in problems:
+                print(" -", f)
+            return 1
+        print("MANIFEST VALID")
+        return 0
+    if a.cmd == "license-classify":
+        import json as _json
+        from .license_class import build_license_record
+        rec = build_license_record(spdx=a.license)
+        print(_json.dumps(rec, ensure_ascii=False, indent=2))
+        return 0
+    if a.cmd == "conformance-profiles":
+        # ADR-0011: behavioral profile against a standard CLI or a result record.
+        import json as _json
+        from .conformance_profiles import check_profile
+        rr = None
+        if a.result_record:
+            rr = _json.loads(Path(a.result_record).read_text(encoding="utf-8"))
+        report = check_profile(a.profile, cli_path=(a.cli or None),
+                               img_dir=(a.img_dir or None), out_dir=(a.out_dir or None),
+                               requested_backend=a.backend, result_record=rr,
+                               bundle_dir=(a.bundle_dir or None))
+        if report.ok:
+            print(f"CONFORMANT: profile {a.profile!r} passed"); return 0
+        print(f"NON-CONFORMANT: profile {a.profile!r}")
         for f in report.failures:
             print(" -", f)
         return 1

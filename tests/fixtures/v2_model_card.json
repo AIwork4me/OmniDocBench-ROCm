@@ -1,0 +1,48 @@
+{
+  "schema_version": 2,
+  "model_id": "fixture-vlm",
+  "model_version": "1.2.0",
+  "license": {
+    "category": "open-source-ai",
+    "spdx": "Apache-2.0",
+    "commercial_use": "no restriction"
+  },
+  "primary_result_id": "fixture-vlm__linux-rocm__vllm__fp16__v1-6__a2784b01d87b",
+  "results": [
+    {
+      "result_id": "fixture-vlm__linux-rocm__vllm__fp16__v1-6__a2784b01d87b",
+      "status": "valid",
+      "assurance": "evidence-complete",
+      "primary": true,
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "implementation": {
+        "backend": "vllm",
+        "precision": "fp16"
+      },
+      "coverage": {
+        "platform": "linux-rocm",
+        "full_set": true,
+        "page_count": 1651
+      },
+      "metrics": {
+        "overall": 95.12,
+        "edit_dist": 0.03,
+        "teds": 0.98,
+        "formula_cdm": 0.92
+      },
+      "hardware": {
+        "gpu": "gfx1100"
+      },
+      "provenance": {
+        "created_at_utc": "2026-07-21T00:00:00Z",
+        "git_commit": "abcdef0"
+      }
+    }
+  ],
+  "platforms": [
+    "linux-rocm"
+  ]
+}

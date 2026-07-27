@@ -62,3 +62,33 @@ print(report.ok, report.failures)
 ```
 
 See `contracts/badge-policy.md` for how conformance maps to badge tiers.
+
+---
+
+## v2: behavioral conformance profiles (ADR-0011)
+
+`check_repo` (above) is **structural**. v2 adds **behavioral** profiles that run
+a model's standard CLI as a subprocess and check how it behaves. Profiles are
+cumulative:
+
+| Profile | Adds |
+|---|---|
+| `base` | `version --json` works, valid `cli_version` |
+| `runtime-core` | + `capabilities` + `doctor --json`, pure JSON, offline-capable, standard exit codes |
+| `benchmark-omnidocbench-v16` | + full-set `parse` on v1.6, valid `cli_result`, backend match, partial-success handling |
+| `reproducible-score` | provenance-complete + artifact hashes valid (on a `result_record`) |
+
+Behavioral checks: CLI JSON stdout purity, exit codes (0/1/2/3/4/5), offline mode,
+actual-backend validation, partial-success (run continues, never crashes — R2),
+provenance completeness, and artifact-hash validation. Run in CI against fake-CLI
+fixtures (success / partial / fatal / badjson / backend_mismatch) — **no GPU**.
+
+```bash
+omnidocbench-rocm conformance-profiles runtime-core --cli path/to/cli
+omnidocbench-rocm conformance-profiles reproducible-score --result-record result_record.json
+```
+
+See `contracts/cli-contract.md` for the standard CLI contract. A model with only
+`run_adapter.py` gets the standard CLI via the bridge
+(`python -m omnidocbench_rocm.cli_bridge`).
+

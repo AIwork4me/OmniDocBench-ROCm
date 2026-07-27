@@ -1,0 +1,112 @@
+{
+  "schema_version": 2,
+  "model_id": "example-vlm",
+  "model_version": "1.0",
+  "license": {
+    "category": "open-source-ai",
+    "spdx": "Apache-2.0",
+    "name": "",
+    "url": "",
+    "commercial_use": "",
+    "geographic_restrictions": "",
+    "acceptable_use_restrictions": ""
+  },
+  "primary_result_id": "example-vlm__linux-rocm__vllm__fp16__v1-6__b798ce0f7766",
+  "results": [
+    {
+      "result_id": "example-vlm__linux-rocm__vllm__fp16__v1-6__b798ce0f7766",
+      "status": "valid",
+      "assurance": "score-reproduced",
+      "primary": true,
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "implementation": {
+        "backend": "vllm",
+        "precision": "fp16",
+        "serving_stack": "vllm-rocm"
+      },
+      "coverage": {
+        "platform": "linux-rocm",
+        "full_set": true,
+        "page_count": 1651
+      },
+      "metrics": {
+        "overall": 95.5,
+        "edit_dist": 1.04,
+        "teds": 0.99,
+        "formula_cdm": 0.94
+      },
+      "hardware": {
+        "gpu": "gfx1100",
+        "vram_mb": 24576,
+        "rocm_driver": "6.2"
+      },
+      "software": {
+        "os": "Ubuntu 22.04",
+        "python": "3.11",
+        "rocm": "6.2"
+      },
+      "artifacts": {
+        "run_summary": "results/omnidocbench/v16/linux-rocm/run_summary.json",
+        "provenance": "results/omnidocbench/v16/linux-rocm/provenance.json"
+      },
+      "provenance": {
+        "created_at_utc": "2026-07-27T00:00:00Z",
+        "git_commit": "0123abcdef",
+        "engine_version": "0.3.2",
+        "dataset_revision": "2b161d0"
+      }
+    },
+    {
+      "result_id": "example-vlm__windows-hip__llama-cpp-hip__fp16__v1-6__640846109f92",
+      "status": "valid",
+      "assurance": "evidence-complete",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "implementation": {
+        "backend": "llama-cpp-hip",
+        "precision": "fp16",
+        "serving_stack": "vllm-rocm"
+      },
+      "coverage": {
+        "platform": "windows-hip",
+        "full_set": true,
+        "page_count": 1651
+      },
+      "metrics": {
+        "overall": 95.1,
+        "edit_dist": 1.04,
+        "teds": 0.99,
+        "formula_cdm": 0.94
+      },
+      "hardware": {
+        "gpu": "gfx1100",
+        "vram_mb": 24576,
+        "rocm_driver": "6.2"
+      },
+      "software": {
+        "os": "Ubuntu 22.04",
+        "python": "3.11",
+        "rocm": "6.2"
+      },
+      "artifacts": {
+        "run_summary": "results/omnidocbench/v16/windows-hip/run_summary.json",
+        "provenance": "results/omnidocbench/v16/windows-hip/provenance.json"
+      },
+      "provenance": {
+        "created_at_utc": "2026-07-27T00:00:00Z",
+        "git_commit": "0123abcdef",
+        "engine_version": "0.3.2",
+        "dataset_revision": "2b161d0"
+      }
+    }
+  ],
+  "platforms": [
+    "linux-rocm",
+    "windows-hip"
+  ]
+}

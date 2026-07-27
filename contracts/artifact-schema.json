@@ -158,6 +158,269 @@
         "license": {"type": "string"},
         "commercial_use": {"type": "string"}
       }
+    },
+    "license_record": {
+      "type": "object",
+      "description": "A normalized license declaration shared by model cards, manifests, and the hub registry. category is the ONLY required field; never default a missing/unclear license to open-source-ai — use unknown (ADR-0010).",
+      "required": ["category"],
+      "properties": {
+        "category": {"enum": ["open-source-ai", "open-weights", "source-available", "restricted", "closed", "unknown"]},
+        "spdx": {"type": "string", "description": "SPDX identifier e.g. Apache-2.0, empty when non-SPDX"},
+        "name": {"type": "string", "description": "Human license name e.g. Tencent Hunyuan Community License"},
+        "url": {"type": "string"},
+        "commercial_use": {"type": "string", "description": "free-text summary; 'permitted' | 'restricted' | a clause"},
+        "geographic_restrictions": {"type": "string", "description": "e.g. 'not licensed in EU/UK/KR'; empty when none"},
+        "acceptable_use_restrictions": {"type": "string", "description": "AUP-style usage limits; empty when none"}
+      },
+      "additionalProperties": true
+    },
+    "result_record": {
+      "type": "object",
+      "description": "The canonical result record — the single source of truth for ONE combination of platform + backend + precision + benchmark (ADR-0007, ADR-0012). result_id is unique AND reproducibly generated from the tuple. retracted/invalid/superseded records are RETAINED, never deleted. metrics is intentionally extensible (additionalProperties true) so new metrics do not require a schema bump.",
+      "required": ["result_id", "status", "assurance", "benchmark", "metrics", "provenance"],
+      "properties": {
+        "result_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{2,191}$"},
+        "status": {"enum": ["valid", "invalid", "retracted", "superseded"]},
+        "assurance": {"enum": ["submitted", "evidence-complete", "score-reproduced", "inference-reproduced", "cross-hardware-reproduced"]},
+        "primary": {"type": "boolean", "description": "explicit flag marking this as the model's primary result; NEVER auto-assigned to the highest score (ADR-0012)"},
+        "benchmark": {
+          "type": "object",
+          "required": ["name", "version"],
+          "properties": {
+            "name": {"type": "string"},
+            "version": {"type": "string"},
+            "metric_set": {"type": "string"}
+          },
+          "additionalProperties": true
+        },
+        "implementation": {
+          "type": "object",
+          "properties": {
+            "backend": {"type": "string"},
+            "execution_provider": {"type": "string"},
+            "precision": {"type": "string"},
+            "serving_stack": {"type": "string"},
+            "engine_version": {"type": "string"}
+          },
+          "additionalProperties": true
+        },
+        "coverage": {
+          "type": "object",
+          "properties": {
+            "platform": {"enum": ["linux-rocm", "windows-hip"]},
+            "page_count": {"type": "integer"},
+            "full_set": {"type": "boolean"},
+            "categories": {"type": "array", "items": {"type": "string"}}
+          },
+          "additionalProperties": true
+        },
+        "metrics": {
+          "type": "object",
+          "required": ["overall"],
+          "properties": {
+            "overall": {"type": ["number", "null"]}
+          },
+          "additionalProperties": true
+        },
+        "hardware": {
+          "type": "object",
+          "properties": {
+            "gpu": {"type": "string"},
+            "vram_mb": {"type": "integer"},
+            "rocm_driver": {"type": "string"},
+            "cpu": {"type": "string"},
+            "memory_gb": {"type": "integer"}
+          },
+          "additionalProperties": true
+        },
+        "software": {
+          "type": "object",
+          "properties": {
+            "os": {"type": "string"},
+            "python": {"type": "string"},
+            "rocm": {"type": "string"},
+            "packages": {"type": "object"}
+          },
+          "additionalProperties": true
+        },
+        "artifacts": {
+          "type": "object",
+          "properties": {
+            "run_summary": {"type": "string"},
+            "provenance": {"type": "string"},
+            "metric_result": {"type": "string"},
+            "prediction_manifest": {"type": "string"},
+            "dataset_identity": {"type": "string"},
+            "prediction_manifest_sha256": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$"},
+            "metric_result_sha256": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$"}
+          },
+          "additionalProperties": true
+        },
+        "provenance": {
+          "type": "object",
+          "description": "Provenance block. Base validity only requires the block exist; inner fields are optional because their PRESENCE is a depth/assurance concern, enforced by the conformance profiles (evidence-complete requires created_at_utc+git_commit+artifacts; reproducible-score requires dataset hashes). This keeps legacy-card migration structurally valid while profiles enforce completeness.",
+          "properties": {
+            "created_at_utc": {"type": "string", "format": "date-time"},
+            "git_commit": {"type": "string"},
+            "engine_version": {"type": "string"},
+            "adapter_command": {"type": "string"},
+            "dataset_revision": {"type": "string"},
+            "dataset_manifest_sha256": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$"},
+            "reproduced_by": {"type": "string"},
+            "reproduced_at_utc": {"type": "string", "format": "date-time"},
+            "reproduction_backend": {"type": "string"}
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "model_card_v2": {
+      "type": "object",
+      "description": "Model Card v2 (schema_version 2). results[] holds one result_record per platform+backend+precision+benchmark combination. platforms is DERIVED from results (validate_card_v2 recomputes it); when present in the file it must match the derivation. primary_result_id (when set) is an explicit choice, never auto-pick-highest (ADR-0007, ADR-0012).",
+      "required": ["schema_version", "model_id", "results"],
+      "properties": {
+        "schema_version": {"const": 2},
+        "model_id": {"type": "string"},
+        "model_version": {"type": "string"},
+        "upstream": {"type": "object", "additionalProperties": true},
+        "license": {"$ref": "#/$defs/license_record"},
+        "platforms": {"type": "array", "items": {"type": "string"}},
+        "primary_result_id": {"type": "string"},
+        "results": {"type": "array", "items": {"$ref": "#/$defs/result_record"}, "minItems": 1}
+      },
+      "additionalProperties": true
+    },
+    "rocmdoc_manifest": {
+      "type": "object",
+      "description": "rocmdoc.yaml — a CAPABILITY declaration, NOT a benchmark result (ADR-0009). Declares what the model CAN do and under what license; the result_record records what was actually measured. result-alignment validation forbids a result from claiming a platform/backend the manifest does not declare (no faking supported platforms).",
+      "required": ["schema_version", "project", "upstream", "model", "licenses", "interfaces", "implementations"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "project": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {"name": {"type": "string"}, "description": {"type": "string"}, "repo": {"type": "string"}, "homepage": {"type": "string"}},
+          "additionalProperties": true
+        },
+        "upstream": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {"name": {"type": "string"}, "repo": {"type": "string"}, "revision": {"type": "string"}, "url": {"type": "string"}},
+          "additionalProperties": true
+        },
+        "model": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {"id": {"type": "string"}, "version": {"type": "string"}, "task": {"type": "string"}, "arch": {"type": "string"}, "params_b": {"type": "number"}},
+          "additionalProperties": true
+        },
+        "licenses": {
+          "type": "object",
+          "properties": {"code": {"$ref": "#/$defs/license_record"}, "weights": {"$ref": "#/$defs/license_record"}},
+          "additionalProperties": true
+        },
+        "interfaces": {"type": "array", "items": {"enum": ["standard-cli", "adapter-script", "api-server"]}, "minItems": 1},
+        "implementations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["platform", "backend"],
+            "properties": {
+              "platform": {"enum": ["linux-rocm", "windows-hip"]},
+              "backend": {"type": "string"},
+              "precision": {"type": "string"},
+              "interface": {"enum": ["standard-cli", "adapter-script", "api-server"]},
+              "status": {"enum": ["supported", "planned", "experimental", "unsupported"]}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "cli_version": {
+      "type": "object",
+      "description": "The JSON emitted by `<adapter-cli> version --json` (standard CLI contract, ADR-0011).",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "engine_version": {"type": "string"},
+        "schema_version": {"type": "integer"}
+      },
+      "additionalProperties": true
+    },
+    "cli_capabilities": {
+      "type": "object",
+      "description": "The JSON emitted by `<adapter-cli> capabilities --json` (standard CLI contract, ADR-0011). Declares supported platforms/backends/interfaces — must agree with rocmdoc.yaml.",
+      "required": ["platforms"],
+      "properties": {
+        "platforms": {"type": "array", "items": {
+          "type": "object",
+          "required": ["platform", "backend"],
+          "properties": {
+            "platform": {"enum": ["linux-rocm", "windows-hip"]},
+            "backend": {"type": "string"},
+            "precision": {"type": "string"},
+            "interface": {"enum": ["standard-cli", "adapter-script", "api-server"]}
+          },
+          "additionalProperties": true
+        }},
+        "interfaces": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "cli_result": {
+      "type": "object",
+      "description": "Canonical result.json emitted by `<adapter-cli> parse ... --json` and by the CLI->adapter bridge (standard CLI contract, ADR-0011). status: ok = full set parsed, partial = some pages failed (run continued, never raised), failed = could not produce output. Exit codes are normative in contracts/cli-contract.md.",
+      "required": ["schema_version", "status", "pages"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "status": {"enum": ["ok", "partial", "failed"]},
+        "backend": {"type": "string"},
+        "engine": {"type": "string"},
+        "page_count": {"type": "integer"},
+        "ok": {"type": "integer"},
+        "failed": {"type": "integer"},
+        "skipped": {"type": "integer"},
+        "output_dir": {"type": "string"},
+        "full_set": {"type": "boolean"},
+        "pages": {"type": "array", "items": {
+          "type": "object",
+          "required": ["image", "status"],
+          "properties": {
+            "image": {"type": "string"},
+            "status": {"enum": ["ok", "failed", "skipped"]},
+            "error": {"type": "string"},
+            "seconds": {"type": "number"}
+          },
+          "additionalProperties": true
+        }}
+      },
+      "additionalProperties": true
+    },
+    "canonical_result": {
+      "type": "object",
+      "description": "One entry in hub/canonical_results.json — the central repo's single source of truth for a measured score (ADR-0012). The hub comparison table and the README generated-results section are DERIVED from this; nothing hand-writes a score. assurance + status are per-result and never propagated across results.",
+      "required": ["result_id", "model_id", "platform", "benchmark", "overall", "assurance", "status"],
+      "properties": {
+        "result_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{2,191}$"},
+        "model_id": {"type": "string"},
+        "platform": {"enum": ["linux-rocm", "windows-hip"]},
+        "backend": {"type": "string"},
+        "precision": {"type": "string"},
+        "benchmark": {"type": "object", "required": ["name", "version"], "additionalProperties": true},
+        "overall": {"type": ["number", "null"]},
+        "submetrics": {"type": "object"},
+        "assurance": {"enum": ["submitted", "evidence-complete", "score-reproduced", "inference-reproduced", "cross-hardware-reproduced"]},
+        "status": {"enum": ["valid", "invalid", "retracted", "superseded"]},
+        "primary": {"type": "boolean"},
+        "license_category": {"enum": ["open-source-ai", "open-weights", "source-available", "restricted", "closed", "unknown"]},
+        "eval_date": {"type": "string", "format": "date"},
+        "note": {"type": "string"}
+      },
+      "additionalProperties": true
     }
   }
 }

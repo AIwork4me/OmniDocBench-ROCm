@@ -1,0 +1,42 @@
+# Example rocmdoc.yaml capability manifest (ADR-0009).
+# A manifest DECLARES capability (platforms/backends/licenses); it is NOT a
+# benchmark result. Validate + align to a card:
+#   omnidocbench-rocm manifest examples/rocmdoc.example.yaml --card examples/model_card_v2.example.json
+schema_version: 1
+project:
+  name: Example-VLM-ROCm
+  repo: AIwork4me/Example-VLM-ROCm
+  description: Worked example of a v2-conformant model repo.
+upstream:
+  name: Example-VLM
+  repo: example-org/example-vlm
+  revision: v1.0
+model:
+  id: example-vlm
+  version: "1.0"
+  task: document-parsing
+  arch: VLM
+  params_b: 8.0
+licenses:
+  code:
+    category: open-source-ai
+    spdx: Apache-2.0
+    commercial_use: permitted
+  weights:
+    category: open-weights
+    spdx: Apache-2.0
+    commercial_use: permitted
+interfaces:
+  - adapter-script
+  - standard-cli
+implementations:
+  - platform: linux-rocm
+    backend: vllm
+    precision: fp16
+    interface: adapter-script
+    status: supported
+  - platform: windows-hip
+    backend: llama-cpp-hip
+    precision: fp16
+    interface: adapter-script
+    status: supported
