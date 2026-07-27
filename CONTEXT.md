@@ -163,3 +163,46 @@ tail if a contributor with that hardware evaluates a model there.
 providing cloud Radeon 7900 XTX access. The canonical place developers obtain
 the reference hardware; usable for maintainer reproductions and as an audience
 channel (not a CI runner).
+
+## v2 vocabulary (ADR-0007 → 0012)
+
+**Result record**:
+The atomic unit of evidence — ONE combination of platform + backend + precision +
+benchmark, with its own `status`, `assurance`, `metrics`, `provenance`. A Model
+Card v2 holds a `results[]` array of these. result_id is unique + reproducibly
+generated from the tuple.
+_Avoid_: putting two combinations' scores in one record.
+
+**result_id**:
+A deterministic id for a result record: `<model>__<platform>__<backend>__<precision>__<benchmark>__<sha12>`.
+Same tuple → same id; the join key between cards, the manifest, and canonical_results.
+
+**Assurance**:
+The specific reproduction depth of a result — `submitted` | `evidence-complete` |
+`score-reproduced` | `inference-reproduced` | `cross-hardware-reproduced`. Per
+result; never propagates across results. The precise replacement for the single
+`verified` badge (ADR-0008).
+_Avoid_: a model-wide "verified"/"assurance" field; collapsing assurance to one word.
+
+**Manifest (rocmdoc.yaml)**:
+A capability declaration (platforms/backends/licenses/interfaces) — NOT a result.
+Result alignment forbids a result from claiming a platform the manifest does not
+declare (no faking support, ADR-0009).
+_Avoid_: putting a score in the manifest; conflating "declared" with "measured".
+
+**Canonical results (single source of truth)**:
+`hub/canonical_results.json` — the ONLY place scores live. The README results
+section + hub table are derived from it; `generate --check` catches drift
+(ADR-0012). No auto-pick-highest-as-primary.
+_Avoid_: hand-writing a score in the README or registry.
+
+**License category**:
+Normalized classification — `open-source-ai` | `open-weights` | `source-available`
+| `restricted` | `closed` | `unknown`. Default for any unclear license is
+`unknown`, NEVER `open-source-ai` (ADR-0010).
+
+**Standard CLI**:
+The v2 adapter surface — `version`/`capabilities`/`doctor`/`parse --json` with a
+fixed exit-code scheme. The central repo validates it; never imports a runtime
+(ADR-0011).
+

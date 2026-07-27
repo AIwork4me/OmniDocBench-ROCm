@@ -1,0 +1,57 @@
+# rocmdoc.yaml — capability manifest for {{cookiecutter.repo_name}} (ADR-0009).
+#
+# A manifest DECLARES what this model can do (platforms/backends/interfaces/
+# licenses). It is NOT a benchmark result — results live in model_card.json
+# (v2) / the evidence bundle. Validation forbids a result from claiming a
+# platform/backend this manifest does not declare (no faking support).
+#
+# Validate:  omnidocbench-rocm manifest rocmdoc.yaml --card model_card.json
+schema_version: 1
+
+project:
+  name: {{cookiecutter.repo_name}}
+  repo: AIwork4me/{{cookiecutter.repo_name}}
+  description: ROCm/HIP adaptation of {{cookiecutter.model_id}}.
+
+upstream:
+  name: TODO upstream project name
+  repo: TODO upstream owner/repo
+  revision: TODO pinned weights/commit revision
+
+model:
+  id: {{cookiecutter.model_id}}
+  version: {{cookiecutter.model_version}}
+  task: document-parsing
+  arch: TODO  # e.g. VLM, pipeline, transformer-encoder-decoder
+
+licenses:
+  code:
+    category: {{ 'open-source-ai' if cookiecutter.license in ('Apache-2.0','MIT') else 'unknown' }}
+    spdx: {{cookiecutter.license}}
+    commercial_use: ""               # fill if restricted
+    geographic_restrictions: ""      # fill if any
+    acceptable_use_restrictions: ""
+  weights:
+    category: unknown               # set explicitly — never default to open-source-ai
+    spdx: ""
+    commercial_use: ""
+    geographic_restrictions: ""
+    acceptable_use_restrictions: ""
+
+# Which integration surfaces this model exposes. 'adapter-script' = the legacy
+# run_adapter.py (contracts/adapter.md); 'standard-cli' = the v2 contract
+# (version/capabilities/doctor/parse --json); 'api-server' = hosted endpoint.
+interfaces:
+  - adapter-script
+
+implementations:
+  - platform: linux-rocm
+    backend: {{cookiecutter.backend}}
+    precision: fp16
+    interface: adapter-script
+    status: supported            # supported | planned | experimental | unsupported
+  - platform: windows-hip
+    backend: TODO
+    precision: fp16
+    interface: adapter-script
+    status: planned              # not yet result-backing

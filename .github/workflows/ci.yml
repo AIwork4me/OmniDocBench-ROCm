@@ -31,16 +31,20 @@ jobs:
       - run: python scripts/validate_registry.py hub/registry.yaml
       - name: Check comparison table matches registry
         run: |
-          python scripts/generate_registry.py hub/registry.yaml > /tmp/current-table.md
-          # Extract the auto-generated section from README
-          sed -n '/<!-- registry-table -->/,/<!-- \/registry-table -->/p' README.md > /tmp/readme-table.md
+          set -e
+          # Normalize both sides by dropping blank lines so only content is compared.
+          python scripts/generate_registry.py hub/registry.yaml | sed '/^$/d' > /tmp/current-table.md
+          awk '/<!-- registry-table -->/{f=1;next} /<!-- \/registry-table -->/{f=0;next} f' README.md \
+            | grep -v '^<!-- generated' | sed '/^$/d' > /tmp/readme-table.md
           if ! diff /tmp/current-table.md /tmp/readme-table.md; then
             echo "ERROR: README comparison table is stale."
             echo "Run: python scripts/generate_registry.py hub/registry.yaml"
-            echo "Then update the <!-- registry-table --> section of README.md."
+            echo "and splice the output into the <!-- registry-table --> block of README.md."
             exit 1
           fi
           echo "Comparison table up to date ✓"
+      - name: Generated canonical-results drift check (ADR-0012)
+        run: python -m omnidocbench_rocm.registry generate --check
       - run: python scripts/check_brand.py
       - run: python -m build
       - name: Install the built wheel and re-check the surface
@@ -56,3 +60,51 @@ jobs:
           python -c "from cookiecutter.main import cookiecutter; cookiecutter('template', no_input=True, output_dir='/tmp/r')"
           python scripts/check_conformance.py /tmp/r/Model-ROCm
           python /tmp/r/Model-ROCm/adapter/run_adapter.py --img-dir /tmp/r/Model-ROCm/examples --out-dir /tmp/smoke --platform linux-rocm --backend smoke
+
+  # v2 contracts job (ADR-0007..0012): schema + behavioral conformance (no GPU) +
+  # model_card v1/v2 compatibility + license classification + result_id uniqueness.
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e ".[dev]"
+      - name: Schema validation (artifact-schema.json $defs compile + examples validate)
+        run: |
+          python -c "
+          from omnidocbench_rocm.schema import available_artifacts, validate_artifact
+          import json
+          assert 'model_card_v2' in available_artifacts()
+          assert 'result_record' in available_artifacts()
+          assert 'rocmdoc_manifest' in available_artifacts()
+          assert 'cli_result' in available_artifacts()
+          assert 'canonical_result' in available_artifacts()
+          # examples validate
+          validate_artifact('model_card_v2', json.load(open('examples/model_card_v2.example.json')))
+          print('schema + examples valid ✓')
+          "
+      - name: Behavioral conformance tests (no GPU; fake-CLI fixtures)
+        run: python -m pytest -q tests/test_conformance_profiles.py tests/test_cli_contract.py tests/test_cli_bridge.py tests/test_v2_cli.py
+      - name: model_card v1/v2 compatibility (v1 readable, v2 valid, migration idempotent)
+        run: |
+          set -e
+          # v1 card still validates against the v1 $def
+          python -c "
+          import json
+          from omnidocbench_rocm.schema import validate_artifact
+          validate_artifact('model_card', json.load(open('tests/fixtures/v1_model_card.json')))
+          print('v1 model_card still readable ✓')
+          "
+          # migrate v1 -> tmp v2, then --check must be idempotent (exit 0)
+          omnidocbench-rocm migrate-model-card tests/fixtures/v1_model_card.json --output /tmp/mc_v2.json
+          omnidocbench-rocm migrate-model-card /tmp/mc_v2.json --check
+          # the shipped v2 fixture validates
+          omnidocbench-rocm migrate-model-card tests/fixtures/v2_model_card.json --check
+      - name: License classification check (ADR-0010)
+        run: python scripts/check_license_class.py
+      - name: result_id uniqueness check (ADR-0007/0012)
+        run: python scripts/check_result_ids.py
+      - name: Canonical-results drift check (ADR-0012, belt-and-suspenders)
+        run: python -m omnidocbench_rocm.registry generate --check

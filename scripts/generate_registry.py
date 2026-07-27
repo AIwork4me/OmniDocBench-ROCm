@@ -42,4 +42,6 @@ if __name__ == "__main__":  # pragma: no cover - manual CLI for hub authors
         help="Path to registry.yaml (default: hub/registry.yaml).",
     )
     args = ap.parse_args()
-    print(render_table(generate_registry(args.yaml_path)))
+    # render_hub (3-tier Flagship/Community/Incoming) is what the README
+    # <!-- registry-table --> block holds; the CI drift gate compares against this.
+    print(render_hub(generate_registry(args.yaml_path)))

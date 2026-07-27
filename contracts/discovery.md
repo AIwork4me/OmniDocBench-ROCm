@@ -133,3 +133,21 @@ References:
 - Adapter contract: `contracts/adapter.md`
 - Badge policy: `contracts/badge-policy.md`
 - Pitfalls knowledge base: `docs/pitfalls.md`
+
+---
+
+## v2 additions (ADR-0007 / 0009 / 0011)
+
+- **Model Card v2** (`schema_version: 2`): one `result_record` per
+  platform+backend+precision+benchmark combination, each with its own
+  `assurance`. `model_card.json` MAY be v2; v1 remains valid. Migrate with
+  `omnidocbench-rocm migrate-model-card model_card.json`. result_id is the stable
+  join key to `hub/canonical_results.json`.
+- **`rocmdoc.yaml`** (capability manifest, ADR-0009): declares supported
+  platforms/backends/licenses. A result claiming a platform the manifest does not
+  declare is rejected (no faking support). See `contracts/manifest.md`.
+- **Standard CLI** (ADR-0011): `version`/`capabilities`/`doctor`/`parse --json`.
+  See `contracts/cli-contract.md`.
+- **Canonical results** (ADR-0012): `hub/canonical_results.json` is the single
+  source of truth for scores; the README results section is generated from it.
+

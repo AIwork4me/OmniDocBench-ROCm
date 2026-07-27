@@ -19,6 +19,7 @@
 - model_id: paddleocr-vl-1.6
   repo: AIwork4me/PaddleOCR-VL-ROCm
   license: MIT
+  license_category: open-source-ai
   commercial_use: no restriction
   platforms:
     linux-rocm: {badge: community, overall: 95.77}
@@ -27,6 +28,7 @@
 - model_id: unlimited-ocr
   repo: AIwork4me/Unlimited-OCR-ROCm
   license: MIT
+  license_category: open-source-ai
   commercial_use: no restriction
   platforms:
     linux-rocm: {badge: community-wanted, overall: null}
@@ -38,6 +40,7 @@
 - model_id: mineru2.5
   repo: AIwork4me/MinerU-ROCm
   license: MinerU Open Source License
+  license_category: restricted
   commercial_use: commercial threshold MAU>100M or revenue>$20M
   platforms:
     linux-rocm: {badge: community, overall: 95.56}
@@ -46,6 +49,7 @@
 - model_id: mineru-pipeline
   repo: AIwork4me/MinerU-ROCm
   license: MinerU Open Source License
+  license_category: restricted
   commercial_use: commercial threshold MAU>100M or revenue>$20M
   supplementary: true
   note: Supplementary model card in MinerU-ROCm repo. Pipeline backend (DirectML on windows-hip).
@@ -56,6 +60,7 @@
 - model_id: hunyuan-ocr
   repo: AIwork4me/HunyuanOCR-ROCm
   license: Tencent Hunyuan Community License
+  license_category: restricted
   commercial_use: see license (commercial-use conditions; not licensed in EU/UK/KR)
   platforms:
     linux-rocm: {badge: community, overall: 93.64}
@@ -64,6 +69,7 @@
 - model_id: logics-parsing-v2
   repo: AIwork4me/Logics-Parsing-ROCm
   license: Apache-2.0
+  license_category: open-source-ai
   commercial_use: no restriction
   platforms:
     linux-rocm: {badge: community, overall: 93.19}
@@ -75,6 +81,7 @@
 - model_id: ovisocr2
   repo: AIwork4me/OvisOCR2-ROCm
   license: Apache-2.0
+  license_category: open-source-ai
   commercial_use: no restriction
   platforms:
     linux-rocm: {badge: community, overall: 95.88}
@@ -85,4 +92,5 @@
     perfect. The 0.70-pt gap vs paper is entirely formula CDM, a verified
     MODEL-INHERENT segmentation difference (version-independent — 0.22.1 reproduces
     0.19.0's CDM exactly, 95.41 on both, full 1651-page set).
+
 
