@@ -333,6 +333,7 @@ def to_public_row(record: dict) -> dict:
         "comparison_track_id": ir.get("comparison_track_id"),
         "run_spec_hash": ir.get("run_spec_hash"),
         "status": ir.get("status", "valid"),
+        "primary": ir.get("primary"),
         "source": src,
     }
     # drop None values to keep the derived row clean

@@ -1,0 +1,64 @@
+{
+  "result_id": "unlimited-ocr__linux-rocm__vllm__bf16__v1-6__6bf73567be17",
+  "status": "valid",
+  "assurance": "submitted",
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6"
+  },
+  "implementation": {
+    "backend": "vllm",
+    "precision": "bf16",
+    "serving_stack": "vLLM/ROCm serving (TRITON/ROCM_ATTN MoE kernels)"
+  },
+  "coverage": {
+    "platform": "linux-rocm",
+    "page_count": 150,
+    "full_set": false,
+    "note": "150-page representative sample; NOT the full set"
+  },
+  "metrics": {
+    "overall": 22.3,
+    "overall_note": "FAILING — regresses to first-token EOS on ~10% of pages (forward-pass numerics, bf16+optimized kernels vs PyTorch eager). NOT R-SWA, NOT a config/decoding bug (ruled out by ablation). No passing vLLM score yet."
+  },
+  "hardware": {
+    "gpu": "AMD gfx1100"
+  },
+  "provenance": {
+    "note": "Different result from the PyTorch fast path (same model, different backend). Documented failing measurement; not a candidate result_record for promotion."
+  },
+  "producer_assurance": "submitted",
+  "run_spec": {
+    "model": {
+      "model_id": "unlimited-ocr",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "unlimited-ocr-vllm-linux-rocm",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "precision": "bf16",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "canary",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:528aac8f285d8c344b493d7ce4fa75a3f9fdf3acaca1fc4fab02be20564ead1b",
+  "comparison_track_id": "omnidocbench-v1-6-canary-default-11666b79",
+  "accelerator_family": "rocm",
+  "model_id": "unlimited-ocr",
+  "primary": false
+}

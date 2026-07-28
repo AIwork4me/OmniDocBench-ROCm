@@ -1,0 +1,89 @@
+{
+  "result_id": "mineru2-5__linux-rocm__vlm-vllm__bf16__v1-6__69a85af9bd8e",
+  "status": "valid",
+  "assurance": "evidence-complete",
+  "primary": true,
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6",
+    "metric_set": "quick_match + cdm"
+  },
+  "implementation": {
+    "backend": "vlm-vllm",
+    "precision": "bf16",
+    "serving_stack": "vLLM-on-ROCm (mineru-pro)",
+    "engine_version": "mineru 2605 / mineru_vl_utils 1.0.5"
+  },
+  "coverage": {
+    "platform": "linux-rocm",
+    "page_count": 1651,
+    "full_set": true,
+    "ok_pages": 1649,
+    "failed_pages": 2,
+    "note": "2 empty predictions (cover/decoration pages), recorded"
+  },
+  "metrics": {
+    "overall": 95.56,
+    "text_edit_dist": 0.0359,
+    "formula_cdm_percent": 96.73,
+    "table_tides_percent": 93.54,
+    "reading_order_edit_dist": 0.124,
+    "overall_note": "platform CDM-scored. A prior standalone-path score of 95.46 existed from the same prediction set (delta +0.10 pp, Formula-CDM 96.46->96.73); 95.56 is the platform value."
+  },
+  "hardware": {
+    "gpu": "AMD gfx1100 (Radeon PRO W7900)",
+    "vram_mb": 49152,
+    "rocm_driver": "ROCm 7.2"
+  },
+  "software": {
+    "rocm": "7.2"
+  },
+  "artifacts": {
+    "run_summary": "results/omnidocbench/v16/linux-rocm/mineru2.5_v16_quick_match_cdm_run_summary.json",
+    "provenance": "results/omnidocbench/v16/linux-rocm/mineru2.5_v16_quick_match_cdm_provenance.json",
+    "metric_result": "results/omnidocbench/v16/linux-rocm/mineru2.5_v16_quick_match_cdm_metric_result.json",
+    "prediction_manifest": "results/omnidocbench/v16/linux-rocm/mineru2.5_v16_quick_match_cdm_prediction_manifest.json",
+    "prediction_manifest_sha256": "sha256:9f4bf28e81e3bd9c981c1e879eafa29bde96594303accbb44e0b871590b097eb"
+  },
+  "provenance": {
+    "created_at_utc": "2026-07-21T14:43:57Z",
+    "git_commit": "bb4ad481ba3a20f3ce54fc80c6808f8a1691aa43",
+    "engine_version": "0.3.1",
+    "adapter_command": "python adapter/run_adapter.py --backend vlm-vllm --server-url http://127.0.0.1:8265/v1 --api-model-name mineru-pro",
+    "dataset_revision": "2b161d0",
+    "note": "hashes reconciled 2026-07-27: prediction_manifest_sha256 recomputed against the committed (path-redacted) artifact (original run-time digest preserved in provenance.prediction_manifest_sha256_run_time). Page conservation verified (ok+failed+fallback==1651). evidence-complete; NOT score-reproduced (re-scoring not run in all-safe)."
+  },
+  "producer_assurance": "evidence-complete",
+  "run_spec": {
+    "model": {
+      "model_id": "mineru2.5",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "mineru2.5-vlm-vllm-linux-rocm",
+      "platform": "linux-rocm",
+      "backend": "vlm-vllm",
+      "precision": "bf16",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:1c46d5c3a85f856f485c1fa74aab0e57a1819e99c659b3a221466cd343f56c95",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+  "accelerator_family": "rocm",
+  "model_id": "mineru2.5"
+}

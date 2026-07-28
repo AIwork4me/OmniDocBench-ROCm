@@ -280,20 +280,31 @@ def check(registry_yaml: Path | str = "hub/registry.yaml",
         problems.append("README generated-results section is stale — run "
                         "`python -m omnidocbench_rocm.registry generate`")
 
-    # cross-check: registry.yaml platform overall must equal canonical (mirror).
-    # Only the CURRENT valid canonical result represents the registry number —
-    # retracted/superseded entries legitimately carry different numbers and are
-    # excluded. Two valid entries for the same (model, platform) is an ambiguous
-    # current truth and is itself flagged.
+    # cross-check: registry.yaml platform overall must mirror canonical.
+    # Multiple VALID canonical results per (model, platform) are ALLOWED (multi-
+    # backend, ADR-0016/0017) — the registry mirrors the one flagged `primary`
+    # (ADR-0012/0016). Only flag ambiguity when no single primary is designated.
     reg_by_id = _registry_index(registry_yaml)
-    canon_pairs: dict[tuple[str, str], dict] = {}
+    canon_by_key: dict[tuple[str, str], list[dict]] = {}
     for r in canonical:
         if r.get("status") != "valid":
             continue
-        key = (r.get("model_id", ""), r.get("platform", ""))
-        if key in canon_pairs:
-            problems.append(f"multiple valid canonical results for {key} (ambiguous current truth)")
-        canon_pairs[key] = r
+        canon_by_key.setdefault((r.get("model_id", ""), r.get("platform", "")), []).append(r)
+    canon_pairs: dict[tuple[str, str], dict] = {}
+    for key, rs in canon_by_key.items():
+        if len(rs) == 1:
+            canon_pairs[key] = rs[0]
+            continue
+        primaries = [r for r in rs if r.get("primary") is True]
+        if len(primaries) == 1:
+            canon_pairs[key] = primaries[0]            # multi-backend OK; primary represents
+        elif len(primaries) == 0:
+            problems.append(f"multiple valid canonical results for {key} with no `primary` "
+                            "designated (ambiguous — set primary, ADR-0016)")
+            canon_pairs[key] = rs[0]
+        else:
+            problems.append(f"multiple `primary` canonical results for {key} (ambiguous)")
+            canon_pairs[key] = primaries[0]
     for mid, row in reg_by_id.items():
         for plat, entry in (row.get("platforms") or {}).items():
             if not isinstance(entry, dict):

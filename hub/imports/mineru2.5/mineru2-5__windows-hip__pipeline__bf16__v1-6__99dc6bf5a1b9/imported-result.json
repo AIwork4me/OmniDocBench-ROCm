@@ -1,0 +1,78 @@
+{
+  "result_id": "mineru2-5__windows-hip__pipeline__bf16__v1-6__99dc6bf5a1b9",
+  "status": "valid",
+  "assurance": "evidence-complete",
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6",
+    "metric_set": "quick_match + cdm"
+  },
+  "implementation": {
+    "backend": "pipeline",
+    "precision": "bf16",
+    "serving_stack": "MinerU 3.4.4 pipeline; ONNX DirectML + audited CPU override (slanet-plus)",
+    "engine_version": "mineru 3.4.4"
+  },
+  "coverage": {
+    "platform": "windows-hip",
+    "page_count": 1651,
+    "full_set": true
+  },
+  "metrics": {
+    "overall": 86.59,
+    "text_edit_dist": 0.05655,
+    "formula_cdm_percent": 83.39,
+    "table_tides_percent": 82.04,
+    "reading_order_edit_dist": 0.1531
+  },
+  "hardware": {
+    "gpu": "AMD Radeon 8060S (Strix Halo)",
+    "rocm_driver": "Windows HIP 7.2.53211"
+  },
+  "artifacts": {
+    "run_summary": "results/omnidocbench/v16/windows-hip/mineru-pipeline_v16_quick_match_cdm_run_summary.json",
+    "provenance": "results/omnidocbench/v16/windows-hip/mineru-pipeline_v16_quick_match_cdm_provenance.json",
+    "metric_result": "results/omnidocbench/v16/windows-hip/mineru-pipeline_v16_quick_match_cdm_metric_result.json",
+    "prediction_manifest": "results/omnidocbench/v16/windows-hip/mineru-pipeline_v16_quick_match_cdm_prediction_manifest.json",
+    "prediction_manifest_sha256": "sha256:0c36bb569ceb6728c5e805181a0782fbc062fcfc3bd7932dc4af4d3b2c7b2f95"
+  },
+  "provenance": {
+    "note": "hashes reconciled 2026-07-27: prediction_manifest_sha256 recomputed against the committed (path-redacted) artifact (original run-time digest preserved in provenance.prediction_manifest_sha256_run_time). Page conservation verified (ok+failed+fallback==1651). evidence-complete; NOT score-reproduced (re-scoring not run in all-safe).",
+    "created_at_utc": "2026-07-23T01:46:25Z",
+    "git_commit": "66e662f21c6268138282860554a3cda9e661a77c"
+  },
+  "producer_assurance": "evidence-complete",
+  "run_spec": {
+    "model": {
+      "model_id": "mineru2.5",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "mineru2.5-pipeline-windows-hip",
+      "platform": "windows-hip",
+      "backend": "pipeline",
+      "precision": "bf16",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:79a59d78931b65750863659faf3c6cbe0151502149219c33d72b0b47d88e80ab",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+  "accelerator_family": "rocm",
+  "model_id": "mineru2.5",
+  "primary": false
+}

@@ -1,0 +1,84 @@
+{
+  "result_id": "mineru2-5__windows-hip__vlm-llamacpp__bf16__v1-6__ae0d908ab9d6",
+  "status": "valid",
+  "assurance": "evidence-complete",
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6",
+    "metric_set": "quick_match + cdm"
+  },
+  "implementation": {
+    "backend": "vlm-llamacpp",
+    "precision": "q8_0",
+    "serving_stack": "llama.cpp HIP (build b9892, Q8_0)",
+    "engine_version": "mineru 2605"
+  },
+  "coverage": {
+    "platform": "windows-hip",
+    "page_count": 1651,
+    "full_set": true,
+    "ok_pages": 1649,
+    "failed_pages": 2
+  },
+  "metrics": {
+    "overall": 95.46,
+    "text_edit_dist": 0.03734,
+    "formula_cdm_percent": 97.008,
+    "table_tides_percent": 93.105,
+    "reading_order_edit_dist": 0.1225
+  },
+  "hardware": {
+    "gpu": "AMD Radeon 8060S (Strix Halo, gfx1151)",
+    "memory": "128 GB unified"
+  },
+  "software": {
+    "os": "Windows",
+    "rocm": "HIP 7.2.53211"
+  },
+  "artifacts": {
+    "run_summary": "results/omnidocbench/v16/windows-hip/mineru2.5_v16_quick_match_cdm_run_summary.json",
+    "provenance": "results/omnidocbench/v16/windows-hip/mineru2.5_v16_quick_match_cdm_provenance.json",
+    "metric_result": "results/omnidocbench/v16/windows-hip/mineru2.5_v16_quick_match_cdm_metric_result.json",
+    "prediction_manifest": "results/omnidocbench/v16/windows-hip/mineru2.5_v16_quick_match_cdm_prediction_manifest.json",
+    "prediction_manifest_sha256": "sha256:e264a2c77f04bd0ba8d7e9a0ca13f62961d4c3a01c8166290140d092afc39d9b"
+  },
+  "provenance": {
+    "git_commit": "274c4fe",
+    "note": "hashes reconciled 2026-07-27: prediction_manifest_sha256 recomputed against the committed (path-redacted) artifact (original run-time digest preserved in provenance.prediction_manifest_sha256_run_time). Page conservation verified (ok+failed+fallback==1651). evidence-complete; NOT score-reproduced (re-scoring not run in all-safe).",
+    "created_at_utc": "2026-07-24T23:39:50Z"
+  },
+  "producer_assurance": "evidence-complete",
+  "run_spec": {
+    "model": {
+      "model_id": "mineru2.5",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "mineru2.5-vlm-llamacpp-windows-hip",
+      "platform": "windows-hip",
+      "backend": "vlm-llamacpp",
+      "precision": "q8_0",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:bb21fbc7a05c14e7266701e904cd61e329d65987de6884bf957de9b1694b1df5",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+  "accelerator_family": "rocm",
+  "model_id": "mineru2.5",
+  "primary": true
+}

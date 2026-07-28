@@ -27,7 +27,7 @@
       overall: null
     windows-hip:
       badge: community
-      overall: null
+      overall: 95.77
   note: Upstream PaddleOCR-VL model + weights are Apache-2.0 (verified on the PaddlePaddle/PaddleOCR
     GitHub LICENSE and the PaddlePaddle/PaddleOCR-VL HuggingFace card). The AIwork4me/PaddleOCR-VL-ROCm
     packaging repo is separately MIT (its own LICENSE/NOTICE) — that MIT covers only
@@ -41,7 +41,7 @@
   platforms:
     linux-rocm:
       badge: community-wanted
-      overall: null
+      overall: 92.451
     windows-hip:
       badge: community-wanted
       overall: null
@@ -58,10 +58,10 @@
   platforms:
     linux-rocm:
       badge: community
-      overall: null
+      overall: 95.56
     windows-hip:
       badge: community
-      overall: null
+      overall: 95.46
 - model_id: mineru-pipeline
   name: MinerU Pipeline
   repo: AIwork4me/MinerU-ROCm
@@ -87,7 +87,7 @@
   platforms:
     linux-rocm:
       badge: community
-      overall: null
+      overall: 93.64
     windows-hip:
       badge: community-wanted
       overall: null
@@ -100,7 +100,7 @@
   platforms:
     linux-rocm:
       badge: community
-      overall: null
+      overall: 93.19
     windows-hip:
       badge: community-wanted
       overall: null
