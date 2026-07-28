@@ -38,3 +38,25 @@ def test_render_table_shows_license_column():
     out = render_table(ROWS[:1])
     assert "| License |" in out
     assert "| Apache-2.0 |" in out
+
+
+def test_render_table_uses_display_name_and_links_repo():
+    """Model column shows the official ``name`` (not the model_id slug); Repo is a link.
+
+    Rows without ``name`` keep falling back to ``model_id`` — that path is covered
+    by the tier tests above (rows a/b/c carry no ``name`` and still render their id).
+    """
+    from omnidocbench_rocm.registry import render_table
+    row = {
+        "model_id": "paddleocr-vl-1.6",
+        "name": "PaddleOCR-VL 1.6",
+        "repo": "AIwork4me/PaddleOCR-VL-ROCm",
+        "license": "Apache-2.0",
+        "platforms": {"linux-rocm": {"badge": "community", "overall": 95.77}},
+    }
+    out = render_table([row])
+    # official display name is the Model cell; the lowercase slug is NOT shown
+    assert "| PaddleOCR-VL 1.6 |" in out
+    assert "paddleocr-vl-1.6" not in out
+    # Repo is a clickable github link, not bare text
+    assert "[AIwork4me/PaddleOCR-VL-ROCm](https://github.com/AIwork4me/PaddleOCR-VL-ROCm)" in out
