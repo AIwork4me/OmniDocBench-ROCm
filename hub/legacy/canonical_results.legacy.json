@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "source_of_truth": "Scores live ONLY in imported results (hub/imports/, ADR-0013); this file is the derived public view. Legacy stubs retained in hub/legacy/.",
+  "schema_version": 1,
+  "source_of_truth": "scores live ONLY here (ADR-0012); README + hub are derived",
   "results": [
     {
       "result_id": "paddleocr-vl-1-6__linux-rocm__default__default__v1-6__61885a1a6159",
@@ -15,9 +15,8 @@
       "overall": 95.77,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "open-source-ai",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "open-source-ai"
     },
     {
       "result_id": "paddleocr-vl-1-6__windows-hip__default__default__v1-6__755f46d26fb7",
@@ -32,9 +31,8 @@
       "overall": 95.77,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "open-source-ai",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "open-source-ai"
     },
     {
       "result_id": "mineru2-5__linux-rocm__default__default__v1-6__63c733102e3f",
@@ -49,9 +47,8 @@
       "overall": 95.56,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "restricted",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "restricted"
     },
     {
       "result_id": "mineru2-5__windows-hip__default__default__v1-6__da529f9df4ad",
@@ -66,9 +63,8 @@
       "overall": 95.46,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "restricted",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "restricted"
     },
     {
       "result_id": "mineru-pipeline__linux-rocm__default__default__v1-6__ef3df41a8e4e",
@@ -83,9 +79,8 @@
       "overall": 86.48,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "restricted",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "restricted"
     },
     {
       "result_id": "mineru-pipeline__windows-hip__default__default__v1-6__3b0291a2a300",
@@ -100,9 +95,8 @@
       "overall": 86.59,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "restricted",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "restricted"
     },
     {
       "result_id": "hunyuan-ocr__linux-rocm__default__default__v1-6__8bae5c861c6d",
@@ -117,9 +111,8 @@
       "overall": 93.64,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "restricted",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "restricted"
     },
     {
       "result_id": "logics-parsing-v2__linux-rocm__default__default__v1-6__54b49c85ab0a",
@@ -134,9 +127,8 @@
       "overall": 93.19,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "open-source-ai",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "open-source-ai"
     },
     {
       "result_id": "ovisocr2__linux-rocm__default__default__v1-6__de96c5d3699c",
@@ -151,9 +143,8 @@
       "overall": 95.88,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "open-source-ai",
-      "note": "Round-2 §8: quarantined — default/default identity, no immutable source; superseded pending a real source import."
+      "status": "valid",
+      "license_category": "open-source-ai"
     },
     {
       "result_id": "paddleocr-vl-1-6__linux-rocm__mistake__default__v1-6__a8aa19703e4f",
@@ -171,39 +162,6 @@
       "status": "retracted",
       "license_category": "open-source-ai",
       "note": "retracted example — wrong backend; retained, hidden from list"
-    },
-    {
-      "result_id": "ovisocr2__linux-rocm__vllm__bf16__v1-6__7d3d44f37a91",
-      "model_id": "ovisocr2",
-      "platform": "linux-rocm",
-      "backend": "vllm",
-      "precision": "bf16",
-      "benchmark": {
-        "name": "OmniDocBench",
-        "version": "v1.6"
-      },
-      "overall": 95.88,
-      "producer_assurance": "submitted",
-      "assurance": "submitted",
-      "platform_review": {
-        "status": "accepted",
-        "assurance": "evidence-accepted",
-        "reviewer": {
-          "id": "reviewer-1",
-          "type": "human"
-        },
-        "reviewed_at": "2026-07-28T00:00:00Z",
-        "review_artifacts": [
-          "hub/imports/ovisocr2/ovisocr2__linux-rocm__vllm__bf16__v1-6__7d3d44f37a91/imported-result.json"
-        ]
-      },
-      "status": "valid",
-      "source": {
-        "repository": "AIwork4me/OvisOCR2-ROCm",
-        "commit": "8511898432e7bb58821f2c85751157a438d56c2e",
-        "path": "model_card_v2.json",
-        "source_sha256": "sha256:5ac8fa85ec629dd5fd4dbe37c314b6742037dc2ca110b60d436285f07b86423d"
-      }
     }
   ]
 }

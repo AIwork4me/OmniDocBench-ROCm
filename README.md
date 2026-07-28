@@ -43,15 +43,16 @@ by hand. Retracted/invalid results are retained in the store but hidden here.
 
 | Model | Platform | Overall | Assurance | License | Status |
 |---|---|---|---|---|---|
-| `hunyuan-ocr` | linux-rocm | 93.64 | evidence-complete | restricted | valid |
-| `logics-parsing-v2` | linux-rocm | 93.19 | evidence-complete | open-source-ai | valid |
-| `mineru-pipeline` | linux-rocm | 86.48 | evidence-complete | restricted | valid |
-| `mineru-pipeline` | windows-hip | 86.59 | evidence-complete | restricted | valid |
-| `mineru2.5` | linux-rocm | 95.56 | evidence-complete | restricted | valid |
-| `mineru2.5` | windows-hip | 95.46 | evidence-complete | restricted | valid |
-| `ovisocr2` | linux-rocm | 95.88 | evidence-complete | open-source-ai | valid |
-| `paddleocr-vl-1.6` | linux-rocm | 95.77 | evidence-complete | open-source-ai | valid |
-| `paddleocr-vl-1.6` | windows-hip | 95.77 | evidence-complete | open-source-ai | valid |
+| `hunyuan-ocr` | linux-rocm | 93.64 | evidence-complete | restricted | superseded (superseded) |
+| `logics-parsing-v2` | linux-rocm | 93.19 | evidence-complete | open-source-ai | superseded (superseded) |
+| `mineru-pipeline` | linux-rocm | 86.48 | evidence-complete | restricted | superseded (superseded) |
+| `mineru-pipeline` | windows-hip | 86.59 | evidence-complete | restricted | superseded (superseded) |
+| `mineru2.5` | linux-rocm | 95.56 | evidence-complete | restricted | superseded (superseded) |
+| `mineru2.5` | windows-hip | 95.46 | evidence-complete | restricted | superseded (superseded) |
+| `ovisocr2` | linux-rocm | 95.88 | evidence-complete | open-source-ai | superseded (superseded) |
+| `ovisocr2` | linux-rocm | 95.88 | submitted | open-source-ai | valid |
+| `paddleocr-vl-1.6` | linux-rocm | 95.77 | evidence-complete | open-source-ai | superseded (superseded) |
+| `paddleocr-vl-1.6` | windows-hip | 95.77 | evidence-complete | open-source-ai | superseded (superseded) |
 
 <sub>1 result(s) hidden (status retracted/invalid); retained in canonical_results.json, never deleted.</sub>
 <!-- END GENERATED RESULTS -->

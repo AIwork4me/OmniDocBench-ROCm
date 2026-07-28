@@ -108,8 +108,10 @@ def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None
                                  "detail": f"valid row backend={row.get('backend')!r} "
                                            f"precision={row.get('precision')!r}; a valid result must not be default/default"})
 
-        # missing immutable source
-        if not row.get("source"):
+        # missing immutable source — only a PUBLIC (valid) result must carry one;
+        # superseded/retracted/invalid legacy rows are retained for history and
+        # are not held to the public-source requirement (Round-2 §8).
+        if status == "valid" and not row.get("source"):
             findings.append({"kind": "missing-source", "severity": "medium",
                              "result_id": rid,
                              "detail": "canonical row has no immutable source reference (registry-only stub; not imported)"})

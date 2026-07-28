@@ -328,6 +328,7 @@ def to_public_row(record: dict) -> dict:
         "overall": metrics.get("overall", ir.get("overall")),
         "producer_assurance": record.get("producer_assurance")
                               or derive_producer_assurance(ir),
+        "assurance": record.get("producer_assurance") or derive_producer_assurance(ir),
         "platform_review": record.get("platform_review") or assurance.default_platform_review(),
         "comparison_track_id": ir.get("comparison_track_id"),
         "run_spec_hash": ir.get("run_spec_hash"),
