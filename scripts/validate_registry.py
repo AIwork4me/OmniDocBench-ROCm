@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Validate hub/registry.yaml structure for the OmniDocBench-ROCm registry.
 
-Checks each entry: model_id present; repo well-formed owner/name; license +
-commercial_use present (ADR-0006); platform keys valid; badge enum; overall
-type (number|null); no duplicate model_id; no missing platform data.
+Checks each entry: model_id present; name present (official display name shown
+in the table — without it the renderer silently falls back to the lowercase
+model_id slug); repo well-formed owner/name; license + commercial_use present
+(ADR-0006); platform keys valid; badge enum; overall type (number|null); no
+duplicate model_id; no missing platform data.
 Exit 0 = valid, 1 = invalid.
 """
 from __future__ import annotations
@@ -29,6 +31,10 @@ def validate_registry(rows: list[dict]) -> list[str]:
             errors.append(f"{ctx}: duplicate model_id '{mid}'")
         else:
             seen.add(mid)
+        name = r.get("name")
+        if not name or not isinstance(name, str):
+            errors.append(f"{ctx}: missing name (official display name; the Model "
+                          "column falls back to the lowercase model_id slug without it)")
         repo = r.get("repo")
         if not isinstance(repo, str) or repo.count("/") != 1 or any(c.isspace() for c in repo):
             errors.append(f"{ctx}: illegal repo '{repo}' (expected owner/name)")

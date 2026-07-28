@@ -58,7 +58,9 @@ def render_table(rows: list[dict]) -> str:
     Columns: ``Model | Repo | License | linux-rocm | windows-hip``. Each
     platform cell shows ``<badge> (<overall>)``; an absent platform renders as
     an em-dash. The License cell shows ``row["license"]`` or an em-dash when
-    unset.
+    unset. The Model cell shows the official display name ``row["name"]``,
+    falling back to ``model_id`` when no name is declared. The Repo cell is a
+    clickable ``[owner/repo](https://github.com/owner/repo)`` link.
     """
     lines = [
         f"| {' | '.join(COLUMNS)} |",
@@ -66,10 +68,12 @@ def render_table(rows: list[dict]) -> str:
     ]
     for r in rows:
         platforms = r.get("platforms", {}) or {}
+        repo = r.get("repo", "")
+        repo_cell = f"[{repo}](https://github.com/{repo})" if repo else "—"
         lines.append(
             "| {model} | {repo} | {license} | {linux} | {windows} |".format(
-                model=r.get("model_id", ""),
-                repo=r.get("repo", ""),
+                model=r.get("name") or r.get("model_id", ""),
+                repo=repo_cell,
                 license=r.get("license") or "—",
                 linux=_cell(platforms.get("linux-rocm")),
                 windows=_cell(platforms.get("windows-hip")),

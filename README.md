@@ -17,19 +17,18 @@
 
 | Model | Repo | License | linux-rocm | windows-hip |
 |---|---|---|---|---|
-| paddleocr-vl-1.6 | AIwork4me/PaddleOCR-VL-ROCm | MIT | community (95.77) | community (95.77) |
-| mineru2.5 | AIwork4me/MinerU-ROCm | MinerU Open Source License | community (95.56) | community (95.46) |
-| mineru-pipeline | AIwork4me/MinerU-ROCm | MinerU Open Source License | community (86.48) | community (86.59) |
-| hunyuan-ocr | AIwork4me/HunyuanOCR-ROCm | Tencent Hunyuan Community License | community (93.64) | community-wanted () |
-| logics-parsing-v2 | AIwork4me/Logics-Parsing-ROCm | Apache-2.0 | community (93.19) | community-wanted () |
-| ovisocr2 | AIwork4me/OvisOCR2-ROCm | Apache-2.0 | community (95.88) | community-wanted () |
+| PaddleOCR-VL 1.6 | [AIwork4me/PaddleOCR-VL-ROCm](https://github.com/AIwork4me/PaddleOCR-VL-ROCm) | Apache-2.0 | community (95.77) | community (95.77) |
+| MinerU2.5-Pro | [AIwork4me/MinerU-ROCm](https://github.com/AIwork4me/MinerU-ROCm) | MinerU Open Source License | community (95.56) | community (95.46) |
+| MinerU Pipeline | [AIwork4me/MinerU-ROCm](https://github.com/AIwork4me/MinerU-ROCm) | MinerU Open Source License | community (86.48) | community (86.59) |
+| HunyuanOCR 1.5 | [AIwork4me/HunyuanOCR-ROCm](https://github.com/AIwork4me/HunyuanOCR-ROCm) | Tencent Hunyuan Community License | community (93.64) | community-wanted () |
+| Logics-Parsing v2 | [AIwork4me/Logics-Parsing-ROCm](https://github.com/AIwork4me/Logics-Parsing-ROCm) | Apache-2.0 | community (93.19) | community-wanted () |
+| OvisOCR2 | [AIwork4me/OvisOCR2-ROCm](https://github.com/AIwork4me/OvisOCR2-ROCm) | Apache-2.0 | community (95.88) | community-wanted () |
 
 ## Incoming (community-wanted)
 
 | Model | Repo | License | linux-rocm | windows-hip |
 |---|---|---|---|---|
-| unlimited-ocr | AIwork4me/Unlimited-OCR-ROCm | MIT | community-wanted () | community-wanted () |
-
+| Unlimited-OCR | [AIwork4me/Unlimited-OCR-ROCm](https://github.com/AIwork4me/Unlimited-OCR-ROCm) | MIT | community-wanted () | community-wanted () |
 <!-- /registry-table -->
 
 ## Results (canonical)

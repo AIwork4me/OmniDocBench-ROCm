@@ -3,7 +3,7 @@ import pytest
 import yaml
 from scripts.validate_registry import validate_registry, validate_against_model_card
 
-GOOD = [{"model_id": "x", "repo": "AIwork4me/X-ROCm",
+GOOD = [{"model_id": "x", "name": "X", "repo": "AIwork4me/X-ROCm",
          "license": "Apache-2.0", "commercial_use": "no restriction",
          "platforms": {"linux-rocm": {"badge": "verified", "overall": 95.0},
                        "windows-hip": {"badge": "community-wanted", "overall": None}}}]
@@ -13,6 +13,14 @@ def test_registry_requires_license():
     bad = [{k: v for k, v in GOOD[0].items() if k != "license"}]
     errs = validate_registry(bad)
     assert any("license" in e for e in errs), errs
+
+
+def test_registry_requires_name():
+    # Without `name`, render_table silently shows the lowercase model_id slug —
+    # the exact regression this guards (see render_table model-cell fallback).
+    bad = [{k: v for k, v in GOOD[0].items() if k != "name"}]
+    errs = validate_registry(bad)
+    assert any("name" in e for e in errs), errs
 
 
 def test_registry_requires_commercial_use():
