@@ -183,6 +183,14 @@
         "status": {"enum": ["valid", "invalid", "retracted", "superseded"]},
         "assurance": {"enum": ["submitted", "evidence-complete", "score-reproduced", "inference-reproduced", "cross-hardware-reproduced"]},
         "primary": {"type": "boolean", "description": "explicit flag marking this as the model's primary result; NEVER auto-assigned to the highest score (ADR-0012)"},
+        "producer_assurance": {"enum": ["submitted", "evidence-complete"], "description": "Round-2 (ADR-0013): producer-OWNED evidence depth — what the model repo SUBMITTED. The central platform never rewrites this. The legacy `assurance` field is retained as a lossy back-compat projection."},
+        "run_spec": {"$ref": "#/$defs/run_spec_record"},
+        "run_spec_hash": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$", "description": "Round-2 (ADR-0015): sha256 of canonical_json(run_spec). Same run_spec -> same hash -> same result identity. A valid result must NOT carry backend/precision == 'default' (the v2 anti-pattern); unknown must be the literal 'unknown'."},
+        "comparison_track_id": {"type": "string", "description": "Round-2 (ADR-0016): the comparison track this result belongs to. Results are compared ONLY within a track."},
+        "legacy_result_ids": {"type": "array", "items": {"type": "string"}, "description": "Round-2 (ADR-0015): prior result_id values superseded by this identity (v2->v3 migration). Retained for traceability; never deleted."},
+        "topology": {"type": "object", "additionalProperties": true, "description": "Round-2 (ADR-0017): runtime topology — embedded-python | managed-local-server | external-server | native-binary."},
+        "components": {"type": "object", "additionalProperties": {"$ref": "#/$defs/component_record"}, "description": "Round-2 (ADR-0017): per-stage components (layout/vlm/ocr/rendering/postprocessing) for composite pipelines."},
+        "accelerator_family": {"enum": ["rocm", "hip", "directml", "cpu", "mixed"], "description": "Round-2 (ADR-0017): whole-pipeline accelerator classification. A mixed pipeline (e.g. DirectML layout + HIP VLM) is 'mixed', NEVER 'rocm'."},
         "benchmark": {
           "type": "object",
           "required": ["name", "version"],
@@ -287,6 +295,9 @@
         "license": {"$ref": "#/$defs/license_record"},
         "platforms": {"type": "array", "items": {"type": "string"}},
         "primary_result_id": {"type": "string"},
+        "primary_selection": {"$ref": "#/$defs/primary_selection_record"},
+        "comparison_tracks": {"type": "array", "items": {"$ref": "#/$defs/comparison_track_record"}},
+        "licenses": {"type": "object", "properties": {"code": {"$ref": "#/$defs/code_license_record"}, "model": {"$ref": "#/$defs/model_openness_record"}}, "additionalProperties": true, "description": "Round-2 (ADR-0014): split of code license vs model openness. The legacy single `license` field is retained as a back-compat projection."},
         "results": {"type": "array", "items": {"$ref": "#/$defs/result_record"}, "minItems": 1}
       },
       "additionalProperties": true
@@ -417,8 +428,140 @@
         "status": {"enum": ["valid", "invalid", "retracted", "superseded"]},
         "primary": {"type": "boolean"},
         "license_category": {"enum": ["open-source-ai", "open-weights", "source-available", "restricted", "closed", "unknown"]},
+        "producer_assurance": {"enum": ["submitted", "evidence-complete"], "description": "Round-2 (ADR-0013): copied verbatim from the source model-repo result; central never rewrites it."},
+        "platform_review": {"$ref": "#/$defs/platform_review_record"},
+        "comparison_track_id": {"type": "string"},
+        "run_spec_hash": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$"},
+        "source": {"$ref": "#/$defs/source_reference_record", "description": "Round-2 (ADR-0013): immutable source reference back to the model-repo canonical result/card. An imported canonical_result MUST carry a source; absence means not-yet-imported (registry-only stub)."},
         "eval_date": {"type": "string", "format": "date"},
         "note": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "run_spec_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0015) Identity v3 run specification. The COMPLETE set of fields that scientifically affect a result. canonical_json(run_spec) -> sha256 -> run_spec_hash -> result_id (v3). Unknown values MUST be the literal string 'unknown' — never masked as a default. A scientifically-material change in any field produces a NEW run_spec_hash and therefore a NEW result identity.",
+      "properties": {
+        "model": {"type": "object", "description": "model_id, model_revision, weights_revision, weights_sha256 (when obtainable).", "additionalProperties": true},
+        "implementation": {"type": "object", "description": "implementation_id, platform, topology, backend, backend_version, precision, quantization, architecture, components.", "additionalProperties": true},
+        "benchmark": {"type": "object", "description": "benchmark_id, benchmark_version, dataset_revision, dataset_subset, page_set_hash, scorer_revision, scoring_protocol.", "additionalProperties": true},
+        "inference": {"type": "object", "description": "prompt_hash, preprocessing_config_hash, postprocessing_config_hash, runtime_config_hash.", "additionalProperties": true}
+      },
+      "additionalProperties": true
+    },
+    "component_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0017) one stage of a composite pipeline. requested_provider and actual_provider are recorded SEPARATELY; a CPU preprocessing stage or a DirectML layout stage must not be labeled rocm. A component change feeds into run_spec_hash.",
+      "properties": {
+        "engine": {"type": "string"},
+        "runtime": {"type": "string"},
+        "execution_provider": {"type": "string"},
+        "requested_provider": {"type": "string"},
+        "actual_provider": {"type": "string"},
+        "actual_provider_required": {"type": "boolean"},
+        "model": {"type": "string"},
+        "acceleration": {"type": "string"},
+        "dpi": {"type": "integer"},
+        "revision": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "platform_review_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0013) central-platform INDEPENDENT review of an imported result. Orthogonal to producer_assurance. Lives ONLY on the central imported record, NEVER in a model-repo card. Default status is not-reviewed; a legacy `verified` badge does NOT migrate to score-reproduced without a real review record. score-reproduced requires a real scorer replay artifact; inference-reproduced requires real GPU evidence; cross-hardware-reproduced requires a second hardware's evidence.",
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["not-reviewed", "accepted", "rejected", "needs-more-evidence"]},
+        "assurance": {"enum": ["evidence-accepted", "score-reproduced", "inference-reproduced", "cross-hardware-reproduced"]},
+        "reviewer": {"type": "object", "properties": {"id": {"type": "string"}, "type": {"enum": ["human", "trusted-runner"]}}, "additionalProperties": true},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "review_commit": {"type": "string"},
+        "review_artifacts": {"type": "array", "items": {"type": "string"}},
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "source_reference_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0013) immutable pointer to the model-repo artifact a central imported result was derived from. commit MUST be a full 40-hex SHA (no main/master/latest floating refs). source_sha256 is recomputed and verified at import. Same source -> idempotent import; changed source -> NEW import record (the old one is never overwritten).",
+      "required": ["repository", "commit", "path", "source_sha256"],
+      "properties": {
+        "repository": {"type": "string"},
+        "commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "path": {"type": "string"},
+        "json_pointer": {"type": "string"},
+        "source_sha256": {"type": "string", "pattern": "^sha256:[0-9a-fA-F]{64}$"}
+      },
+      "additionalProperties": true
+    },
+    "import_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0013) a central import of a model-repo canonical result. imported_result is the source result VERBATIM (score never mutated); producer_assurance is copied from the source; platform_review defaults to not-reviewed and is set only by a separate review step. Import is idempotent and never overwrites a prior import.",
+      "required": ["source", "imported_at", "importer_version", "import_schema_version", "imported_result"],
+      "properties": {
+        "source": {"$ref": "#/$defs/source_reference_record"},
+        "imported_at": {"type": "string", "format": "date-time"},
+        "importer_version": {"type": "string"},
+        "import_schema_version": {"type": "integer"},
+        "imported_result": {"type": "object", "additionalProperties": true},
+        "producer_assurance": {"enum": ["submitted", "evidence-complete"]},
+        "platform_review": {"$ref": "#/$defs/platform_review_record"}
+      },
+      "additionalProperties": true
+    },
+    "comparison_track_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0016) a comparison track. Results are compared ONLY within a track. Different benchmark version / scorer protocol / dataset subset (full vs canary, layout-only vs full document) => different track. External paper results never enter a ROCm track. Track definitions are versioned; a content change yields a new track_id or version.",
+      "required": ["track_id", "benchmark"],
+      "properties": {
+        "track_id": {"type": "string"},
+        "version": {"type": "string"},
+        "benchmark": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string"}, "version": {"type": "string"}}, "additionalProperties": true},
+        "dataset": {"type": "object", "additionalProperties": true},
+        "scorer": {"type": "object", "additionalProperties": true},
+        "eligibility": {"type": "object", "additionalProperties": true}
+      },
+      "additionalProperties": true
+    },
+    "primary_selection_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0016) explicit primary-result selection. NEVER auto-pick-highest. The selected result must be valid and belong to the named track. Superseded/retracted/invalid results can never be primary. Selection history is retained.",
+      "required": ["model_id", "comparison_track_id", "result_id"],
+      "properties": {
+        "model_id": {"type": "string"},
+        "comparison_track_id": {"type": "string"},
+        "result_id": {"type": "string"},
+        "selected_by": {"type": "string"},
+        "selected_at": {"type": "string", "format": "date-time"},
+        "rationale": {"type": "string"},
+        "policy_version": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "code_license_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0014) code (software) license, SEPARATE from model/weights openness. Apache-2.0 code is open-source-software, which does NOT imply the weights are open-source-ai.",
+      "required": ["category"],
+      "properties": {
+        "category": {"enum": ["open-source-software", "proprietary", "unknown"]},
+        "spdx": {"type": "string"},
+        "url": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "model_openness_record": {
+      "type": "object",
+      "description": "Round-2 (ADR-0014) model/weights openness, SEPARATE from code license. Weights being downloadable does NOT imply open-source-ai. When uncertain use 'unknown' with an assessment_basis. Special licenses (e.g. Tencent Hunyuan Community License) must be expressed accurately, usually source-available/restricted with geographic + acceptable-use restrictions.",
+      "required": ["category"],
+      "properties": {
+        "category": {"enum": ["open-source-ai", "open-weights", "source-available", "restricted", "closed", "unknown"]},
+        "weights_license": {"type": "string"},
+        "assessment_basis": {"type": "string"},
+        "commercial_use": {"type": "string"},
+        "geographic_restrictions": {"type": "array", "items": {"type": "string"}},
+        "acceptable_use_restrictions": {"type": "array", "items": {"type": "string"}},
+        "attribution_required": {"type": "boolean"},
+        "url": {"type": "string"}
       },
       "additionalProperties": true
     }

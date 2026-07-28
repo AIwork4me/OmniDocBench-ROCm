@@ -278,6 +278,63 @@ def main(argv: list[str] | None = None) -> int:
     cfp.add_argument("--bundle-dir", default="")
     cfp.add_argument("--backend", default="")
 
+    # ---- Round-2 (ADR-0013): central source-import / review / hub CLI --------
+    # import-result: default DRY-RUN; never mutates a score; never auto-raises
+    # platform_review. The source of truth is the immutable --commit, not the
+    # local --source-file (the file is hashed only to verify source_sha256).
+    ir_imp = sub.add_parser("import-result",
+                            help="import a model-repo canonical result into hub/imports/ (dry-run by default)")
+    ir_imp.add_argument("--repository", required=True)
+    ir_imp.add_argument("--commit", required=True, help="full 40-hex immutable source SHA")
+    ir_imp.add_argument("--path", required=True, help="canonical path of the source in its repo")
+    ir_imp.add_argument("--source-file", required=True,
+                        help="local copy of the source content (hashed to verify source_sha256)")
+    ir_imp.add_argument("--result-id", required=True)
+    ir_imp.add_argument("--model-id", default="")
+    ir_imp.add_argument("--json-pointer", default="")
+    ir_imp.add_argument("--hub-dir", default="hub")
+    ir_imp.add_argument("--write", action="store_true",
+                        help="actually persist the import (default: dry-run, no write)")
+
+    ir_val = sub.add_parser("validate-import", help="validate an import record (SHA + identity + no score mutation)")
+    ir_val.add_argument("--repository", default="")
+    ir_val.add_argument("--commit", default="")
+    ir_val.add_argument("--path", default="")
+    ir_val.add_argument("--source-file", default="")
+    ir_val.add_argument("--hub-dir", default="hub")
+    ir_val.add_argument("--model-id", default="")
+    ir_val.add_argument("--result-id", default="")
+
+    ir_rev = sub.add_parser("review-result",
+                            help="set the central platform_review on an imported result (evidence required)")
+    ir_rev.add_argument("--hub-dir", default="hub")
+    ir_rev.add_argument("--model-id", required=True)
+    ir_rev.add_argument("--result-id", required=True)
+    ir_rev.add_argument("--status", required=True,
+                        choices=["accepted", "rejected", "needs-more-evidence"])
+    ir_rev.add_argument("--assurance", default="",
+                        choices=["", "evidence-accepted", "score-reproduced",
+                                  "inference-reproduced", "cross-hardware-reproduced"])
+    ir_rev.add_argument("--reviewer-id", required=True)
+    ir_rev.add_argument("--reviewer-type", required=True, choices=["human", "trusted-runner"])
+    ir_rev.add_argument("--reviewed-at", required=True)
+    ir_rev.add_argument("--artifact", action="append", default=[])
+    ir_rev.add_argument("--notes", default="")
+
+    ir_gen = sub.add_parser("generate-hub",
+                            help="derive hub/canonical_results.json from the imports store (deterministic)")
+    ir_gen.add_argument("--hub-dir", default="hub")
+    ir_gen.add_argument("--write", action="store_true",
+                        help="overwrite hub/canonical_results.json (default: print to stdout)")
+
+    ir_drift = sub.add_parser("check-drift",
+                              help="detect fact drift: default/default stubs, missing sources, "
+                                   "score mismatches, duplicate ids, registry-score-as-fact, "
+                                   "verified-without-review")
+    ir_drift.add_argument("--hub-dir", default="hub")
+    ir_drift.add_argument("--canonical", default="hub/canonical_results.json")
+    ir_drift.add_argument("--registry", default="hub/registry.yaml")
+
     a = p.parse_args(argv)
 
     if a.cmd == "cdm":
@@ -424,6 +481,130 @@ def main(argv: list[str] | None = None) -> int:
         for f in report.failures:
             print(" -", f)
         return 1
+    if a.cmd == "import-result":
+        import json as _json
+        from datetime import datetime, timezone
+        from . import source_import as SI
+        if not SI.is_immutable_commit(a.commit):
+            sys.stderr.write(f"[import-result] --commit {a.commit!r} is not a 40-hex immutable SHA\n")
+            return 2
+        src_text = Path(a.source_file).read_text(encoding="utf-8")
+        try:
+            doc = _json.loads(src_text)
+        except _json.JSONDecodeError as e:
+            sys.stderr.write(f"[import-result] source-file is not JSON: {e}\n"); return 2
+        results = doc.get("results") if isinstance(doc, dict) else None
+        if isinstance(results, list):
+            match = next((r for r in results if r.get("result_id") == a.result_id), None)
+            if match is None:
+                sys.stderr.write(f"[import-result] result-id {a.result_id!r} not found in {a.source_file}\n")
+                return 2
+            imported_result = {**match, "model_id": a.model_id or doc.get("model_id") or match.get("model_id", "")}
+        else:
+            imported_result = {**doc, **({"model_id": a.model_id} if a.model_id else {})}
+        src = SI.build_source(repository=a.repository, commit=a.commit, path=a.path,
+                              content=src_text, json_pointer=a.json_pointer)
+        pa = SI.derive_producer_assurance(imported_result)
+        imp = SI.build_import(source=src, imported_result=imported_result,
+                              importer_version=omnidocbench_rocm.__version__,
+                              imported_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                              producer_assurance=pa)
+        problems = SI.validate_import(imp, source_content=src_text)
+        status = {"result_id": imported_result.get("result_id"), "validation": problems,
+                  "source_sha256": src["source_sha256"], "producer_assurance": pa,
+                  "platform_review": imp["platform_review"], "write": "dry-run (no --write)"}
+        if problems:
+            print(_json.dumps(status, indent=2, ensure_ascii=False)); return 1
+        if a.write:
+            status["write"] = SI.write_import(a.hub_dir, imp)
+        print(_json.dumps(status, indent=2, ensure_ascii=False))
+        return 0
+    if a.cmd == "validate-import":
+        import json as _json
+        from . import source_import as SI
+        rec = None; content = None
+        if a.model_id and a.result_id:
+            rec = SI.load_import(a.hub_dir, a.model_id, a.result_id)
+        if rec is None and a.source_file and a.commit:
+            content = Path(a.source_file).read_text(encoding="utf-8")
+            doc = _json.loads(content)
+            results = doc.get("results") if isinstance(doc, dict) else None
+            if isinstance(results, list) and a.result_id:
+                ir = next((r for r in results if r.get("result_id") == a.result_id), None)
+            else:
+                ir = doc
+            src = SI.build_source(repository=a.repository, commit=a.commit, path=a.path, content=content)
+            ir = {**ir, "model_id": a.model_id or ir.get("model_id", "")}
+            rec = SI.build_import(source=src, imported_result=ir,
+                                  importer_version=omnidocbench_rocm.__version__,
+                                  imported_at="1970-01-01T00:00:00Z",
+                                  producer_assurance=SI.derive_producer_assurance(ir))
+        if rec is None:
+            sys.stderr.write("[validate-import] no import found; supply --model-id/--result-id "
+                             "or --source-file/--commit/--result-id\n"); return 2
+        problems = SI.validate_import(rec, source_content=content)
+        print(_json.dumps({"valid": not problems, "problems": problems}, indent=2, ensure_ascii=False))
+        return 0 if not problems else 1
+    if a.cmd == "review-result":
+        import json as _json
+        from . import source_import as SI
+        review = {"status": a.status}
+        if a.assurance:
+            review["assurance"] = a.assurance
+        review["reviewer"] = {"id": a.reviewer_id, "type": a.reviewer_type}
+        review["reviewed_at"] = a.reviewed_at
+        if a.artifact:
+            review["review_artifacts"] = a.artifact
+        if a.notes:
+            review["notes"] = a.notes
+        problems = SI.set_review(a.hub_dir, a.model_id, a.result_id, review)
+        if problems:
+            print(_json.dumps({"written": False, "problems": problems}, indent=2, ensure_ascii=False))
+            return 1
+        print(_json.dumps({"written": True, "review": review}, indent=2, ensure_ascii=False))
+        return 0
+    if a.cmd == "generate-hub":
+        import json as _json
+        from . import hub as H
+        doc = H.generate_hub(a.hub_dir)
+        if a.write:
+            Path(a.hub_dir).mkdir(parents=True, exist_ok=True)
+            (Path(a.hub_dir) / "canonical_results.json").write_text(
+                _json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            sys.stderr.write("[generate-hub] wrote hub/canonical_results.json\n")
+        else:
+            print(_json.dumps(doc, indent=2, ensure_ascii=False))
+        return 0
+    if a.cmd == "check-drift":
+        import json as _json
+        from . import hub as H
+        rows = H.load_canonical(a.canonical)
+        imports = H.load_imports_store(a.hub_dir)
+        reg_scores: dict = {}
+        regp = Path(a.registry)
+        if regp.exists():
+            try:
+                import yaml as _yaml
+                data = _yaml.safe_load(regp.read_text(encoding="utf-8"))
+                # registry.yaml is a top-level list of model entries, each with
+                # platforms.{linux-rocm,windows-hip}.overall (Round-2 §3.6 retires these).
+                entries = data if isinstance(data, list) else (data or {}).get("models") or []
+                for m in entries:
+                    if not isinstance(m, dict):
+                        continue
+                    mid = m.get("model_id")
+                    for k in ("overall", "score"):
+                        if isinstance(m.get(k), (int, float)):
+                            reg_scores[mid] = m[k]
+                    for plat, pv in (m.get("platforms") or {}).items():
+                        if isinstance(pv, dict) and isinstance(pv.get("overall"), (int, float)):
+                            reg_scores[(mid, plat)] = pv["overall"]
+            except Exception as e:
+                sys.stderr.write(f"[check-drift] registry parse skipped: {e}\n")
+        findings = H.check_drift(canonical_rows=rows, imports=imports,
+                                 registry_scores=reg_scores or None)
+        print(_json.dumps({"findings": findings, "count": len(findings)}, indent=2, ensure_ascii=False))
+        return 0 if not findings else 1
     return 1
 
 

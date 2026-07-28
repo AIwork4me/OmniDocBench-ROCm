@@ -32,9 +32,20 @@ REQUIRED_README_SECTIONS = ["Install", "Demo", "Evaluation", "Reproducibility", 
 class ConformanceReport:
     ok: bool = True
     failures: list[str] = field(default_factory=list)
+    # Round-2: a profile that could not run (e.g. needs GPU, RUN_GPU=false) is
+    # NOT a pass and NOT a failure-of-the-artifact — it is "not-run". The hub /
+    # matrix render this distinctly. ``ok`` stays False for not-run so it is
+    # never reported as passed (Round-2 §4 / §15).
+    status: str = ""
 
     def add(self, msg: str):
         self.failures.append(msg); self.ok = False
+
+    def mark_not_run(self, reason: str):
+        """Record that a profile could not execute (never reported as passed)."""
+        self.status = "not-run"
+        self.ok = False
+        self.failures.append(f"NOT_RUN: {reason}")
 
 
 def check_repo(repo: Path) -> ConformanceReport:

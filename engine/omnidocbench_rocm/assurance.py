@@ -148,3 +148,113 @@ def validate_assurance(level: str) -> None:
     validate_artifact("canonical_result", shell)
     # keep linters honest about probe
     del probe
+
+
+# ===========================================================================
+# Round-2 (ADR-0013): producer_assurance vs platform_review
+#
+# v2 conflated two orthogonal concerns into one per-result `assurance` enum:
+#   (1) what the model repo SUBMITTED (producer evidence depth), and
+#   (2) what the central platform INDEPENDENTLY verified.
+# Round-2 splits them. The producer side is owned by the sub-repo and copied
+# verbatim on import; the platform side lives ONLY on the central imported
+# record and defaults to `not-reviewed`. A legacy `verified` badge NEVER
+# migrates to a platform score-reproduced without a real review record.
+# ===========================================================================
+
+# Producer-owned evidence depth. Lives on the sub-repo result record.
+PRODUCER_ASSURANCE_LEVELS = ("submitted", "evidence-complete")
+
+# Central-platform review statuses. Default for any imported result.
+PLATFORM_REVIEW_STATUSES = (
+    "not-reviewed", "accepted", "rejected", "needs-more-evidence",
+)
+
+# Central-platform review assurance levels (only meaningful when status=accepted).
+PLATFORM_REVIEW_ASSURANCES = (
+    "evidence-accepted",
+    "score-reproduced",
+    "inference-reproduced",
+    "cross-hardware-reproduced",
+)
+
+
+def default_platform_review() -> dict:
+    """The review record every freshly-imported result starts with.
+
+    Central NEVER auto-raises this. Raising it is a separate, auditable step
+    (:func:`omnidocbench_rocm.source_import.set_review`) that requires evidence.
+    """
+    return {"status": "not-reviewed"}
+
+
+def producer_assurance_from_legacy(level: str) -> str:
+    """Project a v2 (mixed) assurance level onto the producer-only axis.
+
+    Honest migration: a v2 ``score-reproduced`` / ``inference-reproduced`` /
+    ``cross-hardware-reproduced`` was a *platform* reproduction claim, not extra
+    producer evidence — so it maps to ``evidence-complete`` on the producer side,
+    and the platform side starts at ``not-reviewed`` (no review record exists).
+    This is the deliberate downgrade Round-2 §11 requires ("即使旧 badge 是
+    verified，也不能直接迁移为 score-reproduced").
+    """
+    if level in PRODUCER_ASSURANCE_LEVELS:
+        return level
+    if level in ASSURANCE_LEVELS:  # any of the *-reproduced levels
+        return "evidence-complete"
+    return "submitted"
+
+
+def validate_platform_review(record: dict) -> list[str]:
+    """Structural problems with a platform_review record (empty = clean).
+
+    Enforces the Round-2 invariants:
+      * status is a known value;
+      * assurance (if set) is a known value AND only present when accepted;
+      * accepted review that claims score-/inference-/cross-hardware-reproduced
+        MUST carry a reviewer, reviewed_at, and (for the deeper levels) at least
+        one review_artifact — the real scorer replay / inference evidence.
+    """
+    if not isinstance(record, dict):
+        return ["platform_review: not an object"]
+    problems: list[str] = []
+    status = record.get("status")
+    if status not in PLATFORM_REVIEW_STATUSES:
+        problems.append(f"platform_review: bad status {status!r}")
+    assurance = record.get("assurance")
+    if assurance is not None and assurance not in PLATFORM_REVIEW_ASSURANCES:
+        problems.append(f"platform_review: bad assurance {assurance!r}")
+    # assurance is only meaningful for an accepted review
+    if assurance is not None and status != "accepted":
+        problems.append(f"platform_review: assurance {assurance!r} set but status={status!r} "
+                        "(assurance only applies to accepted reviews)")
+    reviewer = record.get("reviewer") or {}
+    reviewed_at = record.get("reviewed_at")
+    if status == "accepted":
+        if not reviewer.get("id"):
+            problems.append("platform_review: accepted review missing reviewer.id")
+        if reviewer.get("type") not in ("human", "trusted-runner"):
+            problems.append(f"platform_review: accepted review missing/invalid reviewer.type "
+                            f"{reviewer.get('type')!r}")
+        if not reviewed_at:
+            problems.append("platform_review: accepted review missing reviewed_at")
+        # deeper reproductions REQUIRE evidence artifacts (no rubber-stamping)
+        if assurance in ("score-reproduced", "inference-reproduced",
+                          "cross-hardware-reproduced"):
+            arts = record.get("review_artifacts") or []
+            if not arts:
+                problems.append(f"platform_review: assurance {assurance!r} requires at least one "
+                                "review_artifact (the real replay/inference evidence)")
+    return problems
+
+
+def review_can_claim(record: dict, target_assurance: str) -> bool:
+    """True iff a review record honestly justifies claiming ``target_assurance``.
+
+    Used by the import/review flow so a fixture scorer pass can NOT auto-promote
+    platform_review — only a review record with the right evidence can.
+    """
+    if target_assurance not in PLATFORM_REVIEW_ASSURANCES:
+        return False
+    return not validate_platform_review({**record, "status": "accepted",
+                                          "assurance": target_assurance})
