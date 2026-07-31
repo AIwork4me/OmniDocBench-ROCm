@@ -92,3 +92,27 @@ def test_generate_hub_is_deterministic(tmp_path):
     doc = hub.generate_hub(tmp_path)
     assert doc["results"][0]["overall"] == 90.0
     assert doc["results"][0]["source"]["commit"] == "a" * 40
+
+
+def test_registry_score_check_only_applies_to_primary():
+    """registry mirrors the PRIMARY per (model,platform); an alternate backend's
+    different score is NOT drift (ADR-0016). Only a primary mismatching the
+    registry is flagged."""
+    from omnidocbench_rocm import hub
+
+    def row(rid, overall, primary=False):
+        r = {"result_id": rid, "status": "valid", "model_id": "m", "platform": "linux-rocm",
+             "backend": "vllm", "precision": "fp16", "overall": overall,
+             "source": {"commit": "a" * 40, "source_sha256": "sha256:" + "f" * 64}}
+        if primary:
+            r["primary"] = True
+        return r
+
+    rows = [row("m-a", 93.0, primary=True), row("m-b", 91.0)]  # primary + alternate
+    # alternate 91.0 != registry 93.0, but alternate is exempt -> NO finding
+    f = hub.check_drift(canonical_rows=rows, registry_scores={("m", "linux-rocm"): 93.0})
+    assert not any(x["kind"] == "registry-score-as-fact" for x in f), f
+    # primary 93.0 != registry 99.0 -> flagged on the primary only
+    f2 = hub.check_drift(canonical_rows=rows, registry_scores={("m", "linux-rocm"): 99.0})
+    assert any(x["kind"] == "registry-score-as-fact" and x["result_id"] == "m-a" for x in f2)
+    assert not any(x["result_id"] == "m-b" for x in f2)

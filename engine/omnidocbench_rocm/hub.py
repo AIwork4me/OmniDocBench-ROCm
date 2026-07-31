@@ -95,6 +95,22 @@ def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None
     by_id: dict[str, int] = {}
     imports_by_id = {((r.get("imported_result") or {}).get("result_id")): r for r in imports}
 
+    # The registry mirrors ONLY the PRIMARY result per (model, platform) (ADR-0016);
+    # alternate backends legitimately carry different scores. So registry-score-as-
+    # fact must compare against the primary row only — never alternates (else every
+    # multi-backend repo would false-positive). Mirrors registry.check() primary-per-track.
+    primary_rids: set[str] = set()
+    _groups: dict[tuple, list[dict]] = {}
+    for _r in canonical_rows:
+        if _r.get("status", "valid") != "valid":
+            continue
+        _groups.setdefault((_r.get("model_id"), _r.get("platform")), []).append(_r)
+    for _rs in _groups.values():
+        _prims = [r for r in _rs if r.get("primary") is True]
+        rep = _prims[0] if len(_prims) == 1 else _rs[0]
+        if rep.get("result_id") is not None:
+            primary_rids.add(rep["result_id"])
+
     for row in canonical_rows:
         rid = row.get("result_id")
         by_id[rid] = by_id.get(rid, 0) + 1
@@ -126,8 +142,10 @@ def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None
                                  "result_id": rid,
                                  "detail": f"canonical overall {row['overall']} != imported {src_overall}"})
 
-        # registry score as fact source (keyed by result-id, model-id, or (model,platform))
-        if registry_scores:
+        # registry score as fact source — ONLY for the primary row of each
+        # (model, platform); the registry mirrors the primary, so an alternate
+        # backend's different score is NOT drift (ADR-0016).
+        if registry_scores and rid in primary_rids:
             reg = (registry_scores.get(rid)
                    or registry_scores.get(row.get("model_id"))
                    or registry_scores.get((row.get("model_id"), row.get("platform"))))
