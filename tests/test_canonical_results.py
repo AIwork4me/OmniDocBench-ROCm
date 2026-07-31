@@ -76,7 +76,7 @@ def test_check_detects_score_drift_between_canonical_and_registry(tmp_path):
     shutil.copy(CANON, work / "canonical.json")
     reg_text = REG.read_text(encoding="utf-8")
     # tamper one registry overall so it disagrees with canonical
-    reg_text2 = reg_text.replace("95.56", "95.99", 1)
+    reg_text2 = reg_text.replace("95.88", "95.99", 1)
     (work / "registry.yaml").write_text(reg_text2, encoding="utf-8")
     (work / "README.md").write_text(
         render_results_section(load_canonical(work / "canonical.json"), work / "registry.yaml"),

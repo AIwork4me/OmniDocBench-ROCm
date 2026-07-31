@@ -1,0 +1,89 @@
+{
+  "result_id": "logics-parsing-v2__linux-rocm__vllm__bf16__v1-6__4bee8ff0de24",
+  "status": "valid",
+  "assurance": "evidence-complete",
+  "primary": true,
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6",
+    "metric_set": "quick_match + cdm"
+  },
+  "implementation": {
+    "backend": "vllm",
+    "precision": "bf16",
+    "serving_stack": "vLLM-on-ROCm 0.16.1+rocm721",
+    "engine_version": "vllm 0.16.1"
+  },
+  "coverage": {
+    "platform": "linux-rocm",
+    "page_count": 1651,
+    "full_set": true,
+    "ok_pages": 1651,
+    "failed_pages": 0
+  },
+  "metrics": {
+    "overall": 93.19,
+    "text_edit_dist": 0.0409,
+    "formula_cdm_percent": 95.52,
+    "table_tides_percent": 88.14,
+    "reading_order_edit_dist": 0.1384,
+    "official_reference_note": "Official Logics-Parsing-v2 = 93.23 on OmniDocBench v1.5 (NVIDIA). This repo = 93.19 on v1.6 (ROCm); delta -0.04 (within noise) — external reference, NOT our result (docs/benchmark-context.md)."
+  },
+  "hardware": {
+    "gpu": "AMD gfx1100",
+    "vram_mb": 49152,
+    "rocm_driver": "7.12"
+  },
+  "software": {
+    "rocm": "7.12"
+  },
+  "artifacts": {
+    "run_summary": "results/omnidocbench/v16/linux-rocm/logics-parsing-v2_v16_quick_match_run_summary.json",
+    "provenance": "results/omnidocbench/v16/linux-rocm/logics-parsing-v2_v16_quick_match_provenance.json",
+    "metric_result": "results/omnidocbench/v16/linux-rocm/logics-parsing-v2_v16_quick_match_metric_result.json",
+    "run_stats": "results/omnidocbench/v16/linux-rocm/logics-parsing-v2_v16_quick_match_run_stats.json",
+    "prediction_manifest": "results/omnidocbench/v16/linux-rocm/logics-parsing-v2_v16_quick_match_prediction_manifest.json",
+    "dataset_identity": "results/omnidocbench/v16/linux-rocm/logics-parsing-v2_v16_quick_match_dataset_identity.json",
+    "prediction_manifest_sha256": "sha256:38185df315b3af5376212605cf2b0baf4d137a8789dffc254da0dd0d71d029cf"
+  },
+  "provenance": {
+    "created_at_utc": "2026-07-26T05:13:21Z",
+    "git_commit": "5dd91aa700d393a27b37d79a51e3de73d568ddc7",
+    "adapter_command": "python adapter/run_adapter.py --backend vllm --platform linux-rocm",
+    "dataset_revision": "2b161d0",
+    "note": "prediction_manifest_sha256 verified against the committed file; page conservation 1651==1651 ok, 0 failed. NOT score-reproduced (re-scoring not performed in all-safe mode)."
+  },
+  "producer_assurance": "evidence-complete",
+  "run_spec": {
+    "model": {
+      "model_id": "logics-parsing-v2",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "logics-parsing-v2-vllm-linux-rocm",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "precision": "bf16",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:fa765236dac34bcad1bf13a72683edaeaab71e9af7bc190f080d240c4797035d",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+  "accelerator_family": "rocm",
+  "model_id": "logics-parsing-v2"
+}

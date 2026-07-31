@@ -1,0 +1,83 @@
+{
+  "result_id": "unlimited-ocr__linux-rocm__pytorch-fast__bf16__v1-6__9a8dee1433b4",
+  "status": "valid",
+  "assurance": "submitted",
+  "primary": true,
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6",
+    "metric_set": "official-leaderboard methodology (page CDM/TEDS aggregates)"
+  },
+  "implementation": {
+    "backend": "pytorch-fast",
+    "precision": "bf16",
+    "serving_stack": "PyTorch embedded fast path (bucketed batching), torch 2.10+rocm7.0, weights 84757cb0",
+    "engine_version": "pytorch eager"
+  },
+  "coverage": {
+    "platform": "linux-rocm",
+    "page_count": 1651,
+    "full_set": true,
+    "gpu_count": 4,
+    "note": "4-GPU run (~0.21 pp/s aggregate); NOT a single-GPU result (§17.5)"
+  },
+  "metrics": {
+    "overall": 92.451,
+    "text_edit_dist": 0.087,
+    "formula_cdm_percent": 95.831,
+    "table_tides_percent": 90.221,
+    "table_tides_structure_only_percent": 93.38,
+    "reading_order_edit_dist": 0.1435,
+    "overall_note": "Self-reported PyTorch fast-path (README); scorer raw overall_notebook 92.4506. Supersedes prior baseline 91.97 (torch 2.5.1+rocm6.2; same combination, older measurement — documented in docs/benchmark-context.md, NOT a separate result_id)."
+  },
+  "hardware": {
+    "gpu": "AMD gfx1100 (Radeon PRO W7900) x4",
+    "vram_mb_per_gpu": 49152,
+    "rocm_driver": "7.0"
+  },
+  "software": {
+    "rocm": "7.0",
+    "packages": {
+      "torch": "2.10+rocm7.0"
+    }
+  },
+  "artifacts": {
+    "claimed_manifest": "README references a committed manifest; locate/verify to upgrade assurance"
+  },
+  "provenance": {
+    "note": "submitted only: no committed platform metric_result/run_summary/provenance in results/omnidocbench/v16/linux-rocm/. The 16GB-VRAM / zero-accuracy-loss / production-stable claims in the README need trackable artifact evidence before promotion (§17.5). NOT score-reproduced."
+  },
+  "producer_assurance": "submitted",
+  "run_spec": {
+    "model": {
+      "model_id": "unlimited-ocr",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "unlimited-ocr-pytorch-fast-linux-rocm",
+      "platform": "linux-rocm",
+      "backend": "pytorch-fast",
+      "precision": "bf16",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:aae973ebf080685edeb24d99f62bc2005904ffa75cc143e925a10a2ea48ff000",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+  "accelerator_family": "rocm",
+  "model_id": "unlimited-ocr"
+}

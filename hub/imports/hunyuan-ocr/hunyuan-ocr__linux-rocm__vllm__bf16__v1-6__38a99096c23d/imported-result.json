@@ -1,0 +1,99 @@
+{
+  "result_id": "hunyuan-ocr__linux-rocm__vllm__bf16__v1-6__38a99096c23d",
+  "status": "valid",
+  "assurance": "evidence-complete",
+  "primary": true,
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6",
+    "metric_set": "quick_match + cdm"
+  },
+  "implementation": {
+    "backend": "vllm",
+    "precision": "bf16",
+    "serving_stack": "vllm-rocm 0.16.1",
+    "engine_version": "vllm 0.16.1.dev0+g89a77b108"
+  },
+  "coverage": {
+    "platform": "linux-rocm",
+    "page_count": 1651,
+    "full_set": true,
+    "categories": [
+      "full_1651"
+    ]
+  },
+  "metrics": {
+    "overall": 93.64,
+    "text_edit_dist": 0.0452,
+    "formula_cdm_percent": 92.46,
+    "table_teds_percent": 92.97,
+    "reading_order_edit_dist": 0.1382,
+    "overall_formula": "((1-text_edit_dist)*100 + formula_cdm_percent + table_teds_percent)/3",
+    "aggregation_note": "Canonical Overall computed from platform run_summary.json readme_metrics + metric_result.json PAGE aggregates (text 0.0452, CDM 92.46, TEDS 92.97). README historically quoted 91.31 using a MIXED aggregation (page CDM + all_page_avg TEDS=86.00); 93.64 is the raw-evidence-derived value (rules 1.3/8.3)."
+  },
+  "hardware": {
+    "gpu": "AMD gfx1100 (Radeon PRO W7900, RDNA3)",
+    "vram_mb": 49152,
+    "rocm_driver": "ROCm 7.2 (hip 7.2.53211-e1a6bc5663)"
+  },
+  "software": {
+    "os": "Linux",
+    "python": "3.12.3",
+    "rocm": "7.2",
+    "packages": {
+      "torch": "2.9.1+gitff65f5b",
+      "vllm": "0.16.1.dev0+g89a77b108.d20260317"
+    }
+  },
+  "artifacts": {
+    "run_summary": "results/omnidocbench/v16/linux-rocm/hunyuan-ocr_v16_quick_match_cdm_run_summary.json",
+    "provenance": "results/omnidocbench/v16/linux-rocm/hunyuan-ocr_v16_quick_match_cdm_provenance.json",
+    "metric_result": "results/omnidocbench/v16/linux-rocm/hunyuan-ocr_v16_quick_match_cdm_metric_result.json",
+    "run_stats": "results/omnidocbench/v16/linux-rocm/hunyuan-ocr_v16_quick_match_cdm_run_stats.json",
+    "prediction_manifest": "results/omnidocbench/v16/linux-rocm/hunyuan-ocr_v16_quick_match_cdm_prediction_manifest.json",
+    "dataset_identity": "results/omnidocbench/v16/linux-rocm/hunyuan-ocr_v16_quick_match_cdm_dataset_identity.json",
+    "prediction_manifest_sha256": "sha256:995f8fff28d6f2ccc5e285708e2073151518dd38af034f44818e7263158d07d9"
+  },
+  "provenance": {
+    "created_at_utc": "2026-07-25T10:21:27Z",
+    "git_commit": "df0bbdd4c9c5f4bcf34c7c7c56cf6eaf4eb86017",
+    "engine_version": "0.3.1",
+    "adapter_command": "python adapter/run_adapter.py --backend-name vllm --server-alias HYVL-vllm-seq-capped --model tencent/HunyuanOCR --concurrency 1 --max-pixels 3400000",
+    "dataset_revision": "2b161d0",
+    "prediction_dir": "artifacts/predictions_vllm_full_seq",
+    "note": "prediction_manifest_sha256 verified against the committed file; page conservation 1651 == 1651 ok_pages, 0 failed, 0 fallback. NOT score-reproduced: re-scoring was not performed in all-safe mode."
+  },
+  "producer_assurance": "evidence-complete",
+  "run_spec": {
+    "model": {
+      "model_id": "hunyuan-ocr",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "hunyuan-ocr-vllm-linux-rocm",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "precision": "bf16",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:2f79b7db85e6ee89ab39fad93611890e7c99b40f8f90e6e8c9d15419a0641880",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+  "accelerator_family": "rocm",
+  "model_id": "hunyuan-ocr"
+}

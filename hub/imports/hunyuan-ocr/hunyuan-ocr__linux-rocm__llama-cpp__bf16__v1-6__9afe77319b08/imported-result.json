@@ -1,0 +1,76 @@
+{
+  "result_id": "hunyuan-ocr__linux-rocm__llama-cpp__bf16__v1-6__9afe77319b08",
+  "status": "valid",
+  "assurance": "submitted",
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6",
+    "metric_set": "quick_match + cdm"
+  },
+  "implementation": {
+    "backend": "llama-cpp",
+    "precision": "bf16",
+    "serving_stack": "llama.cpp HIP (ggml 0.16.0)"
+  },
+  "coverage": {
+    "platform": "linux-rocm",
+    "page_count": 1651,
+    "full_set": true,
+    "categories": [
+      "full_1651"
+    ]
+  },
+  "metrics": {
+    "overall": 92.09,
+    "aggregation_note": "Documented in README as 'most reliable formal result, scored twice' (full 1651, uncapped). No committed platform metric_result/run_summary artifacts in results/ — recorded as submitted only."
+  },
+  "hardware": {
+    "gpu": "AMD gfx1100 (RDNA3, 48GB)",
+    "rocm_driver": "ROCm 7.2"
+  },
+  "software": {
+    "rocm": "7.2"
+  },
+  "artifacts": {
+    "report": "reports/project-stage-summary.md",
+    "repro": "REPRO.yaml"
+  },
+  "provenance": {
+    "git_commit": "df0bbdd4c9c5f4bcf34c7c7c56cf6eaf4eb86017",
+    "note": "Documented full-set result; prediction artifacts were not committed to this repo (machine-local). Assurance capped at submitted pending artifact migration; not evidence-complete."
+  },
+  "producer_assurance": "submitted",
+  "run_spec": {
+    "model": {
+      "model_id": "hunyuan-ocr",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "hunyuan-ocr-llama-cpp-linux-rocm",
+      "platform": "linux-rocm",
+      "backend": "llama-cpp",
+      "precision": "bf16",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:e96cbcc89f7884d5a447de819d35058e3d76b700e8c930b09b0fef50f6b5b25e",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+  "accelerator_family": "rocm",
+  "model_id": "hunyuan-ocr",
+  "primary": false
+}

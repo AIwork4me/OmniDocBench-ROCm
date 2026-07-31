@@ -1,0 +1,78 @@
+{
+  "result_id": "mineru2-5__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec",
+  "status": "valid",
+  "assurance": "evidence-complete",
+  "benchmark": {
+    "name": "OmniDocBench",
+    "version": "v1.6",
+    "metric_set": "quick_match + cdm"
+  },
+  "implementation": {
+    "backend": "pipeline",
+    "precision": "bf16",
+    "serving_stack": "MinerU 3.4.4 pipeline (layout+OCR+MFR), not the VLM",
+    "engine_version": "mineru 3.4.4 (commit 0dfc9460)"
+  },
+  "coverage": {
+    "platform": "linux-rocm",
+    "page_count": 1651,
+    "full_set": true
+  },
+  "metrics": {
+    "overall": 86.48,
+    "text_edit_dist": 0.0566,
+    "formula_cdm_percent": 83.07,
+    "table_tides_percent": 82.04,
+    "reading_order_edit_dist": 0.1534
+  },
+  "hardware": {
+    "gpu": "AMD gfx1100 x4 (eval pinned to GPU 3)",
+    "rocm_driver": "ROCm 7.2.1"
+  },
+  "artifacts": {
+    "run_summary": "results/omnidocbench/v16/linux-rocm/mineru-pipeline_v16_quick_match_cdm_run_summary.json",
+    "provenance": "results/omnidocbench/v16/linux-rocm/mineru-pipeline_v16_quick_match_cdm_provenance.json",
+    "metric_result": "results/omnidocbench/v16/linux-rocm/mineru-pipeline_v16_quick_match_cdm_metric_result.json",
+    "prediction_manifest": "results/omnidocbench/v16/linux-rocm/mineru-pipeline_v16_quick_match_cdm_prediction_manifest.json",
+    "prediction_manifest_sha256": "sha256:65a6ff4ce252906fc134780bcd41367f9fcf76d25b461e7b864d1e858d7976ac"
+  },
+  "provenance": {
+    "note": "hashes reconciled 2026-07-27: prediction_manifest_sha256 recomputed against the committed (path-redacted) artifact (original run-time digest preserved in provenance.prediction_manifest_sha256_run_time). Page conservation verified (ok+failed+fallback==1651). evidence-complete; NOT score-reproduced (re-scoring not run in all-safe).",
+    "created_at_utc": "2026-07-21T14:43:59Z",
+    "git_commit": "bb4ad481ba3a20f3ce54fc80c6808f8a1691aa43"
+  },
+  "producer_assurance": "evidence-complete",
+  "run_spec": {
+    "model": {
+      "model_id": "mineru2.5",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "mineru2.5-pipeline-linux-rocm",
+      "platform": "linux-rocm",
+      "backend": "pipeline",
+      "precision": "bf16",
+      "topology": "unknown"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:fe8e35574e4f6853b1297e12e24163fbbc5b945f399d3cf1a4e7fa7548201938",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+  "accelerator_family": "rocm",
+  "model_id": "mineru2.5",
+  "primary": false
+}

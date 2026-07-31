@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "source_of_truth": "scores live ONLY here (ADR-0012); README + hub are derived",
+  "schema_version": 2,
+  "source_of_truth": "derived from hub/imports/ (ADR-0013); legacy stubs retained from hub/legacy/.",
   "results": [
     {
       "result_id": "paddleocr-vl-1-6__linux-rocm__default__default__v1-6__61885a1a6159",
@@ -15,7 +15,7 @@
       "overall": 95.77,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "open-source-ai"
     },
     {
@@ -31,7 +31,7 @@
       "overall": 95.77,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "open-source-ai"
     },
     {
@@ -47,7 +47,7 @@
       "overall": 95.56,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "restricted"
     },
     {
@@ -63,7 +63,7 @@
       "overall": 95.46,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "restricted"
     },
     {
@@ -79,7 +79,7 @@
       "overall": 86.48,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "restricted"
     },
     {
@@ -95,7 +95,7 @@
       "overall": 86.59,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "restricted"
     },
     {
@@ -111,7 +111,7 @@
       "overall": 93.64,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "restricted"
     },
     {
@@ -127,7 +127,7 @@
       "overall": 93.19,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "open-source-ai"
     },
     {
@@ -143,7 +143,7 @@
       "overall": 95.88,
       "submetrics": {},
       "assurance": "evidence-complete",
-      "status": "valid",
+      "status": "superseded",
       "license_category": "open-source-ai"
     },
     {
@@ -162,6 +162,329 @@
       "status": "retracted",
       "license_category": "open-source-ai",
       "note": "retracted example — wrong backend; retained, hidden from list"
+    },
+    {
+      "result_id": "hunyuan-ocr__linux-rocm__llama-cpp__bf16__v1-6__9afe77319b08",
+      "model_id": "hunyuan-ocr",
+      "platform": "linux-rocm",
+      "backend": "llama-cpp",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 92.09,
+      "producer_assurance": "submitted",
+      "assurance": "submitted",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:e96cbcc89f7884d5a447de819d35058e3d76b700e8c930b09b0fef50f6b5b25e",
+      "status": "valid",
+      "primary": false,
+      "source": {
+        "repository": "AIwork4me/HunyuanOCR-ROCm",
+        "commit": "117bca8a60c2da2f40a5c9bddb45d746486ccb5b",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:6207cfe30674890d36653d8937ca3ecc65e89e0cb13ff3941be0673e6091df6d",
+        "json_pointer": "/results/1"
+      }
+    },
+    {
+      "result_id": "hunyuan-ocr__linux-rocm__vllm__bf16__v1-6__38a99096c23d",
+      "model_id": "hunyuan-ocr",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 93.64,
+      "producer_assurance": "evidence-complete",
+      "assurance": "evidence-complete",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:2f79b7db85e6ee89ab39fad93611890e7c99b40f8f90e6e8c9d15419a0641880",
+      "status": "valid",
+      "primary": true,
+      "source": {
+        "repository": "AIwork4me/HunyuanOCR-ROCm",
+        "commit": "117bca8a60c2da2f40a5c9bddb45d746486ccb5b",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:6207cfe30674890d36653d8937ca3ecc65e89e0cb13ff3941be0673e6091df6d",
+        "json_pointer": "/results/0"
+      }
+    },
+    {
+      "result_id": "logics-parsing-v2__linux-rocm__vllm__bf16__v1-6__4bee8ff0de24",
+      "model_id": "logics-parsing-v2",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 93.19,
+      "producer_assurance": "evidence-complete",
+      "assurance": "evidence-complete",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:fa765236dac34bcad1bf13a72683edaeaab71e9af7bc190f080d240c4797035d",
+      "status": "valid",
+      "primary": true,
+      "source": {
+        "repository": "AIwork4me/Logics-Parsing-ROCm",
+        "commit": "86ca0c932d27b224ac609ec13d41e7ec13cec5fd",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:0abe3e2ac4f0e125569c97cc4fa430eeaa5d25992cc2c0460030bdda896ec55f",
+        "json_pointer": "/results/0"
+      }
+    },
+    {
+      "result_id": "mineru2-5__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec",
+      "model_id": "mineru2.5",
+      "platform": "linux-rocm",
+      "backend": "pipeline",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 86.48,
+      "producer_assurance": "evidence-complete",
+      "assurance": "evidence-complete",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:fe8e35574e4f6853b1297e12e24163fbbc5b945f399d3cf1a4e7fa7548201938",
+      "status": "valid",
+      "primary": false,
+      "source": {
+        "repository": "AIwork4me/MinerU-ROCm",
+        "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:de112d70eda758f77dd8d0dfeb696df9f82f5cca265843e2db3ce453b9ce094f",
+        "json_pointer": "/results/2"
+      }
+    },
+    {
+      "result_id": "mineru2-5__linux-rocm__vlm-vllm__bf16__v1-6__69a85af9bd8e",
+      "model_id": "mineru2.5",
+      "platform": "linux-rocm",
+      "backend": "vlm-vllm",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 95.56,
+      "producer_assurance": "evidence-complete",
+      "assurance": "evidence-complete",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:1c46d5c3a85f856f485c1fa74aab0e57a1819e99c659b3a221466cd343f56c95",
+      "status": "valid",
+      "primary": true,
+      "source": {
+        "repository": "AIwork4me/MinerU-ROCm",
+        "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:de112d70eda758f77dd8d0dfeb696df9f82f5cca265843e2db3ce453b9ce094f",
+        "json_pointer": "/results/0"
+      }
+    },
+    {
+      "result_id": "mineru2-5__windows-hip__pipeline__bf16__v1-6__99dc6bf5a1b9",
+      "model_id": "mineru2.5",
+      "platform": "windows-hip",
+      "backend": "pipeline",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 86.59,
+      "producer_assurance": "evidence-complete",
+      "assurance": "evidence-complete",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:79a59d78931b65750863659faf3c6cbe0151502149219c33d72b0b47d88e80ab",
+      "status": "valid",
+      "primary": false,
+      "source": {
+        "repository": "AIwork4me/MinerU-ROCm",
+        "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:de112d70eda758f77dd8d0dfeb696df9f82f5cca265843e2db3ce453b9ce094f",
+        "json_pointer": "/results/3"
+      }
+    },
+    {
+      "result_id": "mineru2-5__windows-hip__vlm-llamacpp__bf16__v1-6__ae0d908ab9d6",
+      "model_id": "mineru2.5",
+      "platform": "windows-hip",
+      "backend": "vlm-llamacpp",
+      "precision": "q8_0",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 95.46,
+      "producer_assurance": "evidence-complete",
+      "assurance": "evidence-complete",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:bb21fbc7a05c14e7266701e904cd61e329d65987de6884bf957de9b1694b1df5",
+      "status": "valid",
+      "primary": true,
+      "source": {
+        "repository": "AIwork4me/MinerU-ROCm",
+        "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:de112d70eda758f77dd8d0dfeb696df9f82f5cca265843e2db3ce453b9ce094f",
+        "json_pointer": "/results/1"
+      }
+    },
+    {
+      "result_id": "ovisocr2__linux-rocm__vllm__bf16__v1-6__7d3d44f37a91",
+      "model_id": "ovisocr2",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 95.88,
+      "producer_assurance": "submitted",
+      "assurance": "submitted",
+      "platform_review": {
+        "status": "accepted",
+        "assurance": "evidence-accepted",
+        "reviewer": {
+          "id": "reviewer-1",
+          "type": "human"
+        },
+        "reviewed_at": "2026-07-28T00:00:00Z",
+        "review_artifacts": [
+          "hub/imports/ovisocr2/ovisocr2__linux-rocm__vllm__bf16__v1-6__7d3d44f37a91/imported-result.json"
+        ]
+      },
+      "status": "valid",
+      "primary": true,
+      "source": {
+        "repository": "AIwork4me/OvisOCR2-ROCm",
+        "commit": "8511898432e7bb58821f2c85751157a438d56c2e",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:5ac8fa85ec629dd5fd4dbe37c314b6742037dc2ca110b60d436285f07b86423d"
+      }
+    },
+    {
+      "result_id": "paddleocr-vl-1-6__windows-hip__llama-cpp__bf16__v1-6__4bc79b7f2fd0",
+      "model_id": "paddleocr-vl-1.6",
+      "platform": "windows-hip",
+      "backend": "llama-cpp",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 95.77,
+      "producer_assurance": "submitted",
+      "assurance": "submitted",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:9f3c4798eda3454a634e46393a121f5a3930d267b8a89ab9633f486adbf54d1e",
+      "status": "valid",
+      "primary": true,
+      "source": {
+        "repository": "AIwork4me/PaddleOCR-VL-ROCm",
+        "commit": "d32c5c2d4f27af131490fce82d8a482ecac0b4cc",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:33d82663e4d485c5a701a1b8e0a1c367475b0207161c50daafbfda8409549c26",
+        "json_pointer": "/results/0"
+      }
+    },
+    {
+      "result_id": "unlimited-ocr__linux-rocm__pytorch-fast__bf16__v1-6__9a8dee1433b4",
+      "model_id": "unlimited-ocr",
+      "platform": "linux-rocm",
+      "backend": "pytorch-fast",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "official-leaderboard methodology (page CDM/TEDS aggregates)"
+      },
+      "overall": 92.451,
+      "producer_assurance": "submitted",
+      "assurance": "submitted",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:aae973ebf080685edeb24d99f62bc2005904ffa75cc143e925a10a2ea48ff000",
+      "status": "valid",
+      "primary": true,
+      "source": {
+        "repository": "AIwork4me/Unlimited-OCR-ROCm",
+        "commit": "12515f6aca9e86d72c0756087cf7af5c2001830f",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:8d13d8cebb2664c868c5693f5be9626f60a69e6833ef20c3ec77d9412d7ebffc",
+        "json_pointer": "/results/0"
+      }
+    },
+    {
+      "result_id": "unlimited-ocr__linux-rocm__vllm__bf16__v1-6__6bf73567be17",
+      "model_id": "unlimited-ocr",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 22.3,
+      "producer_assurance": "submitted",
+      "assurance": "submitted",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-canary-default-11666b79",
+      "run_spec_hash": "sha256:528aac8f285d8c344b493d7ce4fa75a3f9fdf3acaca1fc4fab02be20564ead1b",
+      "status": "valid",
+      "primary": false,
+      "source": {
+        "repository": "AIwork4me/Unlimited-OCR-ROCm",
+        "commit": "12515f6aca9e86d72c0756087cf7af5c2001830f",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:8d13d8cebb2664c868c5693f5be9626f60a69e6833ef20c3ec77d9412d7ebffc",
+        "json_pointer": "/results/1"
+      }
     }
   ]
 }
