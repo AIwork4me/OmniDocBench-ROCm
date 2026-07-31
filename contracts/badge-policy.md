@@ -1,4 +1,13 @@
-# Badge Policy
+> **⚠ DEPRECATED — legacy.** This badge policy is superseded by
+> [`ROCMDOC_STANDARD.md` §8 (Evidence & trust)](ROCMDOC_STANDARD.md) and
+> [`COMPATIBILITY.md` §4](COMPATIBILITY.md). The `verified` / `community` /
+> `community-wanted` tiers below are retained **only** as a *lossy* compatibility
+> projection of `producer_assurance` + `platform_review`. v2 model cards use
+> assurance directly and **MUST NOT** carry a model-wide `badge` / `verified`
+> field. Do not extend this policy — new results use the producer/platform trust
+> split. This file documents the precise legacy mapping only.
+
+# Badge Policy (legacy)
 
 Each per-model repo carries a per-platform badge in its `model_card.json`
 (`badge.linux-rocm`, `badge.windows-hip`), drawn from three tiers. Badges are
