@@ -1,4 +1,4 @@
-.PHONY: provision-cdm repro-score test setup-linux
+.PHONY: provision-cdm repro-score test setup-linux hub-regen
 
 setup-linux:
 	bash engine/omnidocbench_rocm/evalenv/setup-linux.sh
@@ -14,3 +14,7 @@ repro-score:
 
 test:
 	python -m pytest -q
+
+hub-regen:
+	@echo "Rebuilding canonical (imports+legacy) + README (results section + comparison table)..."
+	python scripts/regen_hub.py

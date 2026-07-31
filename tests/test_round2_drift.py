@@ -75,6 +75,32 @@ def test_license_code_and_model_separated():
     assert errs
 
 
+def test_rebuild_canonical_quarantines_legacy_and_keeps_imports(tmp_path):
+    """rebuild_canonical = quarantined legacy (valid->superseded) + imports; the
+    single deterministic producer of the public canonical store (Round-2 §8/§9)."""
+    from omnidocbench_rocm import hub, source_import as SI
+    import json as _json
+    (tmp_path / "legacy").mkdir(parents=True)
+    _row = {"model_id": "m", "platform": "linux-rocm", "backend": "vllm", "precision": "fp16",
+            "benchmark": {"name": "omnidocbench", "version": "v1.6"}, "overall": 90.0,
+            "assurance": "submitted", "license_category": "open-weights"}
+    (tmp_path / "legacy" / "canonical_results.legacy.json").write_text(_json.dumps({"results": [
+        {**_row, "result_id": "old", "status": "valid"},          # -> quarantined superseded
+        {**_row, "result_id": "ret", "status": "retracted"}]}))   # retained as-is
+    src = SI.build_source(repository="AIwork4me/O", commit="a" * 40, path="c.json", content="{}")
+    ir = {"result_id": "new", "model_id": "m", "status": "valid", "assurance": "submitted",
+          "license_category": "open-weights",
+          "benchmark": {"name": "omnidocbench", "version": "v1.6"},
+          "implementation": {"backend": "vllm", "precision": "fp16"},
+          "coverage": {"platform": "linux-rocm"}, "metrics": {"overall": 95.0}}
+    imp = SI.build_import(source=src, imported_result=ir, importer_version="0.4.0",
+                          imported_at="2026-07-28T00:00:00Z", producer_assurance="submitted")
+    SI.write_import(tmp_path, imp)
+    doc = hub.rebuild_canonical(tmp_path)
+    statuses = {r["result_id"]: r["status"] for r in doc["results"]}
+    assert statuses == {"old": "superseded", "ret": "retracted", "new": "valid"}
+
+
 def test_generate_hub_is_deterministic(tmp_path):
     from omnidocbench_rocm import source_import as SI
     src = SI.build_source(repository="AIwork4me/O", commit="a" * 40, path="c.json",
