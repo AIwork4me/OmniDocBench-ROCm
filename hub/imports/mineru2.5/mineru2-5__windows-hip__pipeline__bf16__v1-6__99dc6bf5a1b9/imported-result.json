@@ -74,5 +74,6 @@
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
   "model_id": "mineru2.5",
+  "license_category": "source-available",
   "primary": false
 }

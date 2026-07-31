@@ -85,5 +85,6 @@
   "run_spec_hash": "sha256:fa765236dac34bcad1bf13a72683edaeaab71e9af7bc190f080d240c4797035d",
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
-  "model_id": "logics-parsing-v2"
+  "model_id": "logics-parsing-v2",
+  "license_category": "open-weights"
 }

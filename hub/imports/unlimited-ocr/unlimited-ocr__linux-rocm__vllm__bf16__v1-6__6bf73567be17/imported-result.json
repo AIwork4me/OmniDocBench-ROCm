@@ -60,5 +60,6 @@
   "comparison_track_id": "omnidocbench-v1-6-canary-default-11666b79",
   "accelerator_family": "rocm",
   "model_id": "unlimited-ocr",
+  "license_category": "unknown",
   "primary": false
 }

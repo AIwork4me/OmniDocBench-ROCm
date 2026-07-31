@@ -2,7 +2,46 @@
   "result_id": "ovisocr2__linux-rocm__vllm__bf16__v1-6__7d3d44f37a91",
   "status": "valid",
   "assurance": "submitted",
+  "producer_assurance": "submitted",
   "primary": true,
+  "topology": {
+    "type": "embedded-python"
+  },
+  "accelerator_family": "rocm",
+  "run_spec": {
+    "model": {
+      "model_id": "ovisocr2",
+      "model_revision": "unknown",
+      "weights_sha256": "unknown"
+    },
+    "implementation": {
+      "implementation_id": "ovisocr2-vllm-embedded",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "backend_version": "0.22.1",
+      "precision": "bf16",
+      "quantization": "none",
+      "architecture": "vlm",
+      "topology": "embedded-python"
+    },
+    "benchmark": {
+      "benchmark_id": "omnidocbench",
+      "benchmark_version": "v1.6",
+      "dataset_revision": "2b161d0",
+      "dataset_subset": "full",
+      "scorer_revision": "2b161d0",
+      "scoring_protocol": "default",
+      "page_set_hash": "unknown"
+    },
+    "inference": {
+      "prompt_hash": "unknown",
+      "preprocessing_config_hash": "unknown",
+      "postprocessing_config_hash": "unknown",
+      "runtime_config_hash": "unknown"
+    }
+  },
+  "run_spec_hash": "sha256:a3454bf678dd01edda666fafe6194f24bdb50ec061f02c374c2f89a9845bf42d",
+  "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "benchmark": {
     "name": "OmniDocBench",
     "version": "v1.6"
@@ -56,5 +95,6 @@
     "dataset_revision": "2b161d0"
   },
   "note": "Migrated from model_card.json v1 (history preserved there). Overall 95.88 preserved unchanged; submetrics from run_summary. efficiency.latency was 0.0 in the raw run_summary (not honestly measured) and is intentionally OMITTED here rather than carried as fake data.",
-  "model_id": "ovisocr2"
+  "model_id": "ovisocr2",
+  "license_category": "open-weights"
 }

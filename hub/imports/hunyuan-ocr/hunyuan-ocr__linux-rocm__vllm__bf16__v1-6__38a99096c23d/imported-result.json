@@ -95,5 +95,6 @@
   "run_spec_hash": "sha256:2f79b7db85e6ee89ab39fad93611890e7c99b40f8f90e6e8c9d15419a0641880",
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
-  "model_id": "hunyuan-ocr"
+  "model_id": "hunyuan-ocr",
+  "license_category": "restricted"
 }

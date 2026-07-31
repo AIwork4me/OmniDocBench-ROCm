@@ -79,5 +79,6 @@
   "run_spec_hash": "sha256:aae973ebf080685edeb24d99f62bc2005904ffa75cc143e925a10a2ea48ff000",
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
-  "model_id": "unlimited-ocr"
+  "model_id": "unlimited-ocr",
+  "license_category": "unknown"
 }

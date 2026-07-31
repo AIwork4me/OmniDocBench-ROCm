@@ -177,6 +177,7 @@
       "overall": 92.09,
       "producer_assurance": "submitted",
       "assurance": "submitted",
+      "source_assurance": "submitted",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -184,6 +185,7 @@
       "run_spec_hash": "sha256:e96cbcc89f7884d5a447de819d35058e3d76b700e8c930b09b0fef50f6b5b25e",
       "status": "valid",
       "primary": false,
+      "license_category": "restricted",
       "source": {
         "repository": "AIwork4me/HunyuanOCR-ROCm",
         "commit": "117bca8a60c2da2f40a5c9bddb45d746486ccb5b",
@@ -206,6 +208,7 @@
       "overall": 93.64,
       "producer_assurance": "evidence-complete",
       "assurance": "evidence-complete",
+      "source_assurance": "evidence-complete",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -213,6 +216,7 @@
       "run_spec_hash": "sha256:2f79b7db85e6ee89ab39fad93611890e7c99b40f8f90e6e8c9d15419a0641880",
       "status": "valid",
       "primary": true,
+      "license_category": "restricted",
       "source": {
         "repository": "AIwork4me/HunyuanOCR-ROCm",
         "commit": "117bca8a60c2da2f40a5c9bddb45d746486ccb5b",
@@ -235,6 +239,7 @@
       "overall": 93.19,
       "producer_assurance": "evidence-complete",
       "assurance": "evidence-complete",
+      "source_assurance": "evidence-complete",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -242,6 +247,7 @@
       "run_spec_hash": "sha256:fa765236dac34bcad1bf13a72683edaeaab71e9af7bc190f080d240c4797035d",
       "status": "valid",
       "primary": true,
+      "license_category": "open-weights",
       "source": {
         "repository": "AIwork4me/Logics-Parsing-ROCm",
         "commit": "86ca0c932d27b224ac609ec13d41e7ec13cec5fd",
@@ -264,6 +270,7 @@
       "overall": 86.48,
       "producer_assurance": "evidence-complete",
       "assurance": "evidence-complete",
+      "source_assurance": "evidence-complete",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -271,6 +278,7 @@
       "run_spec_hash": "sha256:fe8e35574e4f6853b1297e12e24163fbbc5b945f399d3cf1a4e7fa7548201938",
       "status": "valid",
       "primary": false,
+      "license_category": "source-available",
       "source": {
         "repository": "AIwork4me/MinerU-ROCm",
         "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
@@ -293,6 +301,7 @@
       "overall": 95.56,
       "producer_assurance": "evidence-complete",
       "assurance": "evidence-complete",
+      "source_assurance": "evidence-complete",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -300,6 +309,7 @@
       "run_spec_hash": "sha256:1c46d5c3a85f856f485c1fa74aab0e57a1819e99c659b3a221466cd343f56c95",
       "status": "valid",
       "primary": true,
+      "license_category": "source-available",
       "source": {
         "repository": "AIwork4me/MinerU-ROCm",
         "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
@@ -322,6 +332,7 @@
       "overall": 86.59,
       "producer_assurance": "evidence-complete",
       "assurance": "evidence-complete",
+      "source_assurance": "evidence-complete",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -329,6 +340,7 @@
       "run_spec_hash": "sha256:79a59d78931b65750863659faf3c6cbe0151502149219c33d72b0b47d88e80ab",
       "status": "valid",
       "primary": false,
+      "license_category": "source-available",
       "source": {
         "repository": "AIwork4me/MinerU-ROCm",
         "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
@@ -351,6 +363,7 @@
       "overall": 95.46,
       "producer_assurance": "evidence-complete",
       "assurance": "evidence-complete",
+      "source_assurance": "evidence-complete",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -358,6 +371,7 @@
       "run_spec_hash": "sha256:bb21fbc7a05c14e7266701e904cd61e329d65987de6884bf957de9b1694b1df5",
       "status": "valid",
       "primary": true,
+      "license_category": "source-available",
       "source": {
         "repository": "AIwork4me/MinerU-ROCm",
         "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
@@ -379,25 +393,21 @@
       "overall": 95.88,
       "producer_assurance": "submitted",
       "assurance": "submitted",
+      "source_assurance": "submitted",
       "platform_review": {
-        "status": "accepted",
-        "assurance": "evidence-accepted",
-        "reviewer": {
-          "id": "reviewer-1",
-          "type": "human"
-        },
-        "reviewed_at": "2026-07-28T00:00:00Z",
-        "review_artifacts": [
-          "hub/imports/ovisocr2/ovisocr2__linux-rocm__vllm__bf16__v1-6__7d3d44f37a91/imported-result.json"
-        ]
+        "status": "not-reviewed"
       },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:a3454bf678dd01edda666fafe6194f24bdb50ec061f02c374c2f89a9845bf42d",
       "status": "valid",
       "primary": true,
+      "license_category": "open-weights",
       "source": {
         "repository": "AIwork4me/OvisOCR2-ROCm",
-        "commit": "8511898432e7bb58821f2c85751157a438d56c2e",
+        "commit": "a606f4dc49c2c7e67c74b4a7a6ae3577560b31f7",
         "path": "model_card_v2.json",
-        "source_sha256": "sha256:5ac8fa85ec629dd5fd4dbe37c314b6742037dc2ca110b60d436285f07b86423d"
+        "source_sha256": "sha256:57b6e24c44362632ec33a65002a508c4038a1b8fc276d39c9f360959ee41496a",
+        "json_pointer": "/results/0"
       }
     },
     {
@@ -414,6 +424,7 @@
       "overall": 95.77,
       "producer_assurance": "submitted",
       "assurance": "submitted",
+      "source_assurance": "submitted",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -421,9 +432,10 @@
       "run_spec_hash": "sha256:9f3c4798eda3454a634e46393a121f5a3930d267b8a89ab9633f486adbf54d1e",
       "status": "valid",
       "primary": true,
+      "license_category": "open-weights",
       "source": {
         "repository": "AIwork4me/PaddleOCR-VL-ROCm",
-        "commit": "d32c5c2d4f27af131490fce82d8a482ecac0b4cc",
+        "commit": "e8a0feb4a5c6722b61071940307be7f9b77fedfa",
         "path": "model_card_v2.json",
         "source_sha256": "sha256:33d82663e4d485c5a701a1b8e0a1c367475b0207161c50daafbfda8409549c26",
         "json_pointer": "/results/0"
@@ -443,6 +455,7 @@
       "overall": 92.451,
       "producer_assurance": "submitted",
       "assurance": "submitted",
+      "source_assurance": "submitted",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -450,6 +463,7 @@
       "run_spec_hash": "sha256:aae973ebf080685edeb24d99f62bc2005904ffa75cc143e925a10a2ea48ff000",
       "status": "valid",
       "primary": true,
+      "license_category": "unknown",
       "source": {
         "repository": "AIwork4me/Unlimited-OCR-ROCm",
         "commit": "12515f6aca9e86d72c0756087cf7af5c2001830f",
@@ -471,6 +485,7 @@
       "overall": 22.3,
       "producer_assurance": "submitted",
       "assurance": "submitted",
+      "source_assurance": "submitted",
       "platform_review": {
         "status": "not-reviewed"
       },
@@ -478,6 +493,7 @@
       "run_spec_hash": "sha256:528aac8f285d8c344b493d7ce4fa75a3f9fdf3acaca1fc4fab02be20564ead1b",
       "status": "valid",
       "primary": false,
+      "license_category": "unknown",
       "source": {
         "repository": "AIwork4me/Unlimited-OCR-ROCm",
         "commit": "12515f6aca9e86d72c0756087cf7af5c2001830f",

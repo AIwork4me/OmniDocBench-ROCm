@@ -72,5 +72,6 @@
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
   "model_id": "hunyuan-ocr",
+  "license_category": "restricted",
   "primary": false
 }

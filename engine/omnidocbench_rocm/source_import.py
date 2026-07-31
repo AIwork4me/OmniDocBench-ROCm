@@ -359,6 +359,7 @@ def to_public_row(record: dict) -> dict:
         "run_spec_hash": ir.get("run_spec_hash"),
         "status": ir.get("status", "valid"),
         "primary": ir.get("primary"),
+        "license_category": ir.get("license_category"),
         "source": src,
     }
     # drop None values to keep the derived row clean

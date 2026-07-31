@@ -85,5 +85,6 @@
   "run_spec_hash": "sha256:1c46d5c3a85f856f485c1fa74aab0e57a1819e99c659b3a221466cd343f56c95",
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
-  "model_id": "mineru2.5"
+  "model_id": "mineru2.5",
+  "license_category": "source-available"
 }

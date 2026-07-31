@@ -90,5 +90,6 @@
   "run_spec_hash": "sha256:9f3c4798eda3454a634e46393a121f5a3930d267b8a89ab9633f486adbf54d1e",
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "mixed",
-  "model_id": "paddleocr-vl-1.6"
+  "model_id": "paddleocr-vl-1.6",
+  "license_category": "open-weights"
 }
