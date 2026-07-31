@@ -1,0 +1,31 @@
+OmniDocBench-ROCm
+Copyright 2026 AIwork4me
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the LICENSE file for the specific language governing permissions and
+limitations under the License.
+
+------------------------------------------------------------------------------
+
+This product is the central evaluation platform for the ROCm document-parsing
+zone (ROCmDoc Standard 1.0). It includes:
+
+  - Original adapter/evaluation/hub code (Apache-2.0).
+  - A reference to the upstream OmniDocBench benchmark
+    (https://github.com/opendatalab/OmniDocBench), which has its own license;
+    benchmark datasets and scorer are governed by their upstream licenses and
+    are NOT redistributed here. Results reference upstream by immutable
+    commit + dataset revision (ROCmDoc Standard §7.2).
+
+Model weights, adapter code, and per-model evidence live in the separate
+AIwork4me/<Model>-ROCm repositories, each under its own LICENSE/NOTICE with the
+code/model/weights license split required by ROCmDoc Standard §10 QS-1. This
+central NOTICE covers only the central platform code.

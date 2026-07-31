@@ -1,0 +1,31 @@
+# MAINTAINERS.yaml — {{cookiecutter.repo_name}} ownership & review scope
+#
+# ROCmDoc Standard 1.0 §10 QS-6 requires an explicit owner/reviewer structure
+# (MAINTAINERS.yaml OR equivalent, e.g. CODEOWNERS). Fill in real handles for
+# this adapter; do NOT fabricate. The central platform ownership lives in
+# AIwork4me/OmniDocBench-ROCm/MAINTAINERS.yaml.
+
+schema_version: 1
+repo: AIwork4me/{{cookiecutter.repo_name}}
+model_id: {{cookiecutter.model_id}}
+default_owner: "@AIwork4me"            # replace with the real adapter owner
+default_reviewers: ["@AIwork4me"]
+
+areas:
+  - area: adapter
+    path: adapter/
+    owners: ["@AIwork4me"]             # adapter author(s)
+    reviewers: ["@AIwork4me"]
+  - area: backend-{{cookiecutter.backend}}
+    path: src/
+    owners: ["@AIwork4me"]
+    reviewers: ["@AIwork4me"]
+    notes: "Backend: {{cookiecutter.backend}} on {{cookiecutter.gpu}}."
+  - area: evidence
+    path: results/
+    owners: ["@AIwork4me"]
+    reviewers: ["@AIwork4me"]
+    notes: "Provenance + prediction manifest; importer-generated canonical rows are not hand-edited."
+
+# Contract lock: this repo locks the central ROCmDoc contract commit recorded
+# in .rocmdoc/spec-lock.json. Spec/contract changes are owned centrally.

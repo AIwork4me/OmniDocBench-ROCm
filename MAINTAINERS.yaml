@@ -1,0 +1,62 @@
+# MAINTAINERS.yaml — OmniDocBench-ROCm (central) ownership & review scope
+#
+# ROCmDoc Standard 1.0 §10 QS-6 requires an explicit owner/reviewer structure
+# (MAINTAINERS.yaml OR equivalent, e.g. CODEOWNERS). This file records ownership
+# for the CENTRAL repo only; each model adapter repo carries its own ownership
+# (CODEOWNERS / MAINTAINERS.yaml) for its adapter/backend/platform surface.
+#
+# Individuals are intentionally omitted where unconfirmed — do NOT fabricate
+# handles. Add real maintainer handles via PR with their consent.
+
+schema_version: 1
+repo: AIwork4me/OmniDocBench-ROCm
+role: central-platform
+default_owner: "@AIwork4me"           # matches CODEOWNERS `* @AIwork4me`
+default_reviewers: ["@AIwork4me"]
+
+# Ownership by surface area. `owners` are default approvers; `reviewers` should
+# be CC'd. Per-adapter ownership lives in the model repo.
+areas:
+  - area: contracts
+    path: contracts/
+    owners: ["@AIwork4me"]
+    reviewers: ["@AIwork4me"]
+    notes: "ROCmDoc Standard, schemas, profiles, conformance contract."
+
+  - area: engine
+    path: engine/omnidocbench_rocm/
+    owners: ["@AIwork4me"]
+    reviewers: ["@AIwork4me"]
+    notes: "Evaluation engine, CLI, hub/canonical store, source-import."
+
+  - area: hub
+    path: hub/
+    owners: ["@AIwork4me"]
+    reviewers: ["@AIwork4me"]
+    notes: "Canonical result store + registry (importer-generated; not hand-edited)."
+
+  - area: template
+    path: template/
+    owners: ["@AIwork4me"]
+    reviewers: ["@AIwork4me"]
+    notes: "Cookiecutter model-repo template."
+
+  - area: governance
+    paths: [".github/", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md", "MAINTAINERS.yaml", "NOTICE"]
+    owners: ["@AIwork4me"]
+    reviewers: ["@AIwork4me"]
+
+# Model adapter ownership is decentralized: each AIwork4me/<Model>-ROCm repo
+# owns its adapter, backend, platform limits, license declarations, and evidence.
+# The central hub imports immutable results from them but does not own them.
+model_repos:
+  - repo: AIwork4me/OvisOCR2-ROCm
+  - repo: AIwork4me/PaddleOCR-VL-ROCm
+  - repo: AIwork4me/MinerU-ROCm
+  - repo: AIwork4me/Logics-Parsing-ROCm
+  - repo: AIwork4me/HunyuanOCR-ROCm
+  - repo: AIwork4me/Unlimited-OCR-ROCm
+
+# External (non-AIwork4me) repos may join the registry by locking a compatible
+# contract + passing conformance (Standard §12, §13.1). They retain their own
+# ownership; central only imports immutable result references.
