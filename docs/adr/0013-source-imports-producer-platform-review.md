@@ -21,7 +21,7 @@ orthogonal dimensions.
 
 ```
 model-repo canonical result
-   -> hub/imports/<model>/<result>/{source.json, imported-result.json, review.json}
+   -> hub/imports/<model>/<result>/{source.json, imported-result.json, review.json, meta.json}
         -> generate-hub  ->  hub/canonical_results.json   (DERIVED, never hand-edited)
 ```
 
@@ -32,6 +32,11 @@ model-repo canonical result
   never mutated on import.
 - **`review.json`** — the central `platform_review`; defaults to
   `not-reviewed`; raised only by a separate, evidence-carrying review step.
+- **`meta.json`** — the import envelope (`imported_at`, `importer_version`,
+  `import_schema_version`, `producer_assurance`) so `load_import` reconstructs a
+  complete, schema-valid `import_record` (the three spec files alone lack these).
+  Amendment to the original 3-file layout — recorded here so the on-disk contract
+  matches the implementation.
 
 Split (enforced in `assurance.py`, schema `$defs platform_review_record` /
 `source_reference_record` / `import_record`):
