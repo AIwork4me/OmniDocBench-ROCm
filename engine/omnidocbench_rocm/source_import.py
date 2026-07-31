@@ -121,6 +121,27 @@ def derive_producer_assurance(imported_result: dict) -> str:
 # validation
 # --------------------------------------------------------------------------- #
 
+def _extract_source_overall(source_content, result_id):
+    """Best-effort overall score of ``result_id`` within a source blob.
+
+    Handles a model_card_v2 (dict with ``results``) or a standalone result record.
+    Returns None if not found / unparseable (the caller treats None as 'cannot
+    compare'). Used to enforce the score-not-mutated-on-import invariant (ADR-0013).
+    """
+    try:
+        doc = json.loads(source_content) if isinstance(source_content, str) else source_content
+    except (json.JSONDecodeError, TypeError):
+        return None
+    if isinstance(doc, dict) and isinstance(doc.get("results"), list):
+        for r in doc["results"]:
+            if r.get("result_id") == result_id:
+                return (r.get("metrics") or {}).get("overall", r.get("overall"))
+        return None
+    if isinstance(doc, dict):
+        return (doc.get("metrics") or {}).get("overall", doc.get("overall"))
+    return None
+
+
 def validate_import(record: dict, *, source_content: str | bytes | None = None) -> list[str]:
     """All problems with an import_record (empty = clean).
 
@@ -159,12 +180,15 @@ def validate_import(record: dict, *, source_content: str | bytes | None = None) 
     elif rec_pa is None:
         problems.append("import: producer_assurance not recorded (copy it from the source)")
 
-    # score not mutated: if both record and source carry an overall, they must agree.
-    rec_overall = (ir.get("metrics") or {}).get("overall", ir.get("overall"))
-    if rec_overall is not None and source_content is None:
-        # we cannot compare against an absent source blob, but we CAN guard against
-        # the record declaring a different score than its own imported_result.
-        pass
+    # score never mutated on import (ADR-0013): when the source blob is supplied,
+    # the imported_result's overall must equal the source's corresponding result.
+    if source_content is not None:
+        rec_overall = (ir.get("metrics") or {}).get("overall", ir.get("overall"))
+        src_overall = _extract_source_overall(source_content, ir.get("result_id"))
+        if rec_overall is not None and src_overall is not None \
+                and abs(float(rec_overall) - float(src_overall)) > 1e-9:
+            problems.append(f"import: imported_result overall {rec_overall} != source overall "
+                            f"{src_overall} (score must not be mutated on import — ADR-0013)")
 
     # platform_review never auto-raised + structurally valid
     pr = record.get("platform_review") or {}
@@ -329,6 +353,7 @@ def to_public_row(record: dict) -> dict:
         "producer_assurance": record.get("producer_assurance")
                               or derive_producer_assurance(ir),
         "assurance": record.get("producer_assurance") or derive_producer_assurance(ir),
+        "source_assurance": ir.get("assurance"),
         "platform_review": record.get("platform_review") or assurance.default_platform_review(),
         "comparison_track_id": ir.get("comparison_track_id"),
         "run_spec_hash": ir.get("run_spec_hash"),

@@ -64,7 +64,6 @@ ALIAS = {
     "benchmark-omnidocbench-v16": "benchmark-contract",
     "reproducible-score": "evidence-integrity",
 }
-_ALIAS_REVERSE = {v: k for k, v in ALIAS.items()}
 
 
 def _resolve(name: str) -> str:

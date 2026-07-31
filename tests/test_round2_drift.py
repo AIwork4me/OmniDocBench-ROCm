@@ -116,3 +116,23 @@ def test_registry_score_check_only_applies_to_primary():
     f2 = hub.check_drift(canonical_rows=rows, registry_scores={("m", "linux-rocm"): 99.0})
     assert any(x["kind"] == "registry-score-as-fact" and x["result_id"] == "m-a" for x in f2)
     assert not any(x["result_id"] == "m-b" for x in f2)
+
+
+def test_source_assurance_overclaim_flagged_without_review():
+    """W1: a row whose retained source_assurance claims a reproduction, with no
+    accepted platform_review, is flagged verified-without-review (ADR-0013)."""
+    row = {"result_id": "r", "status": "valid", "model_id": "m", "platform": "linux-rocm",
+           "backend": "vllm", "precision": "fp16", "overall": 90.0,
+           "producer_assurance": "evidence-complete", "assurance": "evidence-complete",
+           "source_assurance": "score-reproduced",  # original producer claim, retained
+           "source": {"commit": "a" * 40, "source_sha256": "sha256:" + "f" * 64},
+           "platform_review": {"status": "not-reviewed"}}
+    f = hub.check_drift(canonical_rows=[row])
+    assert any(x["kind"] == "verified-without-review" and "source_assurance" in x["detail"] for x in f), f
+    # once reviewed + accepted, the claim is no longer flagged
+    row["platform_review"] = {"status": "accepted",
+                              "assurance": "score-reproduced",
+                              "reviewer": {"id": "r", "type": "human"},
+                              "reviewed_at": "2026-07-28T00:00:00Z",
+                              "review_artifacts": ["replay.json"]}
+    assert not any(x["kind"] == "verified-without-review" for x in hub.check_drift(canonical_rows=[row]))

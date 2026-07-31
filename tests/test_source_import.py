@@ -124,3 +124,33 @@ def test_public_row_carries_source_and_split_assurance(tmp_path):
     assert row["producer_assurance"] == "submitted"
     assert row["platform_review"]["status"] == "not-reviewed"
     assert row["overall"] == 95.88
+
+
+def test_score_mutation_on_import_detected():
+    """ADR-0013: the imported score must equal the source score (enforced at import)."""
+    card = json.dumps({"results": [{"result_id": "r", "metrics": {"overall": 95.88}}]})
+    src = SI.build_source(repository="AIwork4me/O", commit="a" * 40, path="c.json", content=card)
+    tampered = SI.build_import(source=src, imported_result={"result_id": "r", "metrics": {"overall": 99.0}},
+                               importer_version="0.4.0", imported_at="2026-07-28T00:00:00Z",
+                               producer_assurance="submitted")
+    probs = SI.validate_import(tampered, source_content=card)
+    assert any("score must not be mutated" in p for p in probs), probs
+    # matching score -> no such problem
+    ok = SI.build_import(source=src, imported_result={"result_id": "r", "metrics": {"overall": 95.88}},
+                         importer_version="0.4.0", imported_at="2026-07-28T00:00:00Z",
+                         producer_assurance="submitted")
+    assert not any("score must not be mutated" in p for p in SI.validate_import(ok, source_content=card))
+
+
+def test_source_assurance_retained_on_public_row():
+    """W1: the source's original assurance claim is retained as `source_assurance`
+    (audit trail) even though producer_assurance/assurance are honestly downgraded."""
+    src = SI.build_source(repository="AIwork4me/O", commit="a" * 40, path="c.json", content="{}")
+    ir = {"result_id": "r", "model_id": "m", "status": "valid", "assurance": "score-reproduced",
+          "metrics": {"overall": 90.0}, "implementation": {"backend": "vllm", "precision": "fp16"}}
+    imp = SI.build_import(source=src, imported_result=ir, importer_version="0.4.0",
+                          imported_at="2026-07-28T00:00:00Z", producer_assurance="evidence-complete")
+    row = SI.to_public_row(imp)
+    assert row["source_assurance"] == "score-reproduced"      # original claim retained
+    assert row["producer_assurance"] == "evidence-complete"   # honest producer bucket
+    assert row["assurance"] == "evidence-complete"            # public assurance stays honest

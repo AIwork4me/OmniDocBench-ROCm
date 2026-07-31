@@ -155,14 +155,22 @@ def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None
                                  "result_id": rid,
                                  "detail": f"registry score {reg} != canonical {row['overall']} (registry is not a fact source)"})
 
-        # verified-without-review
+        # verified-without-review — a reproduction claim (in `assurance` OR the
+        # retained `source_assurance`) without an accepted platform_review is a
+        # claim the platform has not backed (ADR-0013). Checking source_assurance
+        # catches imports whose original *-reproduced claim was honestly mapped to
+        # producer_assurance but still requires review before it counts.
         pr = row.get("platform_review") or {}
-        legacy = row.get("assurance")
-        if legacy in ("score-reproduced", "inference-reproduced", "cross-hardware-reproduced") \
-                and pr.get("status") != "accepted":
+        claim = None
+        for _field in ("assurance", "source_assurance"):
+            _v = row.get(_field)
+            if _v in ("score-reproduced", "inference-reproduced", "cross-hardware-reproduced"):
+                claim = (_field, _v)
+                break
+        if claim and pr.get("status") != "accepted":
             findings.append({"kind": "verified-without-review", "severity": "high",
                              "result_id": rid,
-                             "detail": f"assurance={legacy!r} but platform_review.status={pr.get('status')!r} (no review record backs it)"})
+                             "detail": f"{claim[0]}={claim[1]!r} but platform_review.status={pr.get('status')!r} (no review record backs the reproduction claim)"})
 
     for rid, n in by_id.items():
         if n > 1:
