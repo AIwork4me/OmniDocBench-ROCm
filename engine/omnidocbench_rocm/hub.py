@@ -64,6 +64,37 @@ def generate_hub(hub_dir: Path | str) -> dict:
             "results": rows}
 
 
+def rebuild_canonical(hub_dir: Path | str) -> dict:
+    """Rebuild the FULL canonical_results document: quarantined legacy rows
+    (from ``hub/legacy/``, valid→superseded) + every imported result
+    (from ``hub/imports/``). This is the single deterministic producer of the
+    public Hub's canonical store (Round-2 §8/§9) — run it after any import
+    change; ``regen_hub`` wires it together with the README regeneration.
+
+    Schema-validates every row (raises on any invalid). Idempotent.
+    """
+    from .schema import iter_validation_errors
+    hub_dir = Path(hub_dir)
+    rows: list[dict] = []
+    legacy_path = hub_dir / "legacy" / "canonical_results.legacy.json"
+    if legacy_path.exists():
+        for r in json.loads(legacy_path.read_text(encoding="utf-8")).get("results", []):
+            r2 = dict(r)
+            if r2.get("status") == "valid":           # quarantine old default/default stubs
+                r2["status"] = "superseded"
+            rows.append(r2)
+    for _model, _rid, rec in SI.iter_imports(hub_dir):
+        rows.append(SI.to_public_row(rec))
+    problems = [f"canonical[{i}] {r.get('result_id')}: {m}"
+                for i, r in enumerate(rows) for m in iter_validation_errors("canonical_result", r)]
+    if problems:
+        raise ValueError("invalid canonical rows:\n  - " + "\n  - ".join(problems[:8]))
+    rows.sort(key=lambda r: (str(r.get("model_id")), str(r.get("result_id"))))
+    return {"schema_version": 2,
+            "source_of_truth": "derived from hub/imports/ (ADR-0013); quarantined legacy retained from hub/legacy/.",
+            "results": rows}
+
+
 # --------------------------------------------------------------------------- #
 # drift
 # --------------------------------------------------------------------------- #
