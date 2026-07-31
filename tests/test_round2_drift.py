@@ -75,6 +75,35 @@ def test_license_code_and_model_separated():
     assert errs
 
 
+def test_e2e_import_to_renders(tmp_path):
+    """End-to-end integration: import -> rebuild canonical -> render the results
+    section + the comparison table. The imported score must surface in the results
+    section and the model in the table. Exercises the chain the stale-table incident
+    broke (regeneration consistency across the two README blocks)."""
+    from omnidocbench_rocm import hub, source_import as SI
+    from omnidocbench_rocm.registry import render_results_section, generate_registry, render_hub
+    import json as _json
+    (tmp_path / "legacy").mkdir(parents=True)
+    (tmp_path / "legacy" / "canonical_results.legacy.json").write_text(_json.dumps({"results": []}))
+    src = SI.build_source(repository="AIwork4me/Demo-ROCm", commit="a" * 40, path="card.json", content="{}")
+    ir = {"result_id": "demo-1", "model_id": "demo", "status": "valid", "assurance": "submitted",
+          "license_category": "open-weights", "benchmark": {"name": "omnidocbench", "version": "v1.6"},
+          "implementation": {"backend": "vllm", "precision": "fp16"},
+          "coverage": {"platform": "linux-rocm"}, "metrics": {"overall": 94.2}}
+    SI.write_import(tmp_path, SI.build_import(source=src, imported_result=ir, importer_version="0.4.0",
+                          imported_at="2026-07-28T00:00:00Z", producer_assurance="submitted"))
+    (tmp_path / "registry.yaml").write_text(
+        "- model_id: demo\n  name: Demo\n  repo: AIwork4me/Demo-ROCm\n"
+        "  license: Apache-2.0\n  license_category: open-weights\n"
+        "  platforms:\n    linux-rocm: {badge: community, overall: null}\n", encoding="utf-8")
+    doc = hub.rebuild_canonical(tmp_path)
+    section = render_results_section(doc["results"], tmp_path / "registry.yaml")
+    table = render_hub(generate_registry(tmp_path / "registry.yaml"))
+    assert doc["results"][0]["result_id"] == "demo-1" and doc["results"][0]["status"] == "valid"
+    assert "94.2" in section              # imported score surfaces in the results section
+    assert "Demo-ROCm" in table           # model appears in the comparison table (by repo)
+
+
 def test_rebuild_canonical_quarantines_legacy_and_keeps_imports(tmp_path):
     """rebuild_canonical = quarantined legacy (valid->superseded) + imports; the
     single deterministic producer of the public canonical store (Round-2 §8/§9)."""
