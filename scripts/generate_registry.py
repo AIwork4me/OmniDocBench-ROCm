@@ -33,6 +33,7 @@ __all__ = ["generate_registry", "render_table", "render_hub", "_best_badge", "_c
 
 if __name__ == "__main__":  # pragma: no cover - manual CLI for hub authors
     import argparse
+    import sys
 
     ap = argparse.ArgumentParser(description="Render hub/registry.yaml to a Markdown table.")
     ap.add_argument(
@@ -41,7 +42,25 @@ if __name__ == "__main__":  # pragma: no cover - manual CLI for hub authors
         default="hub/registry.yaml",
         help="Path to registry.yaml (default: hub/registry.yaml).",
     )
+    ap.add_argument("--check", action="store_true",
+                    help="compare the rendered table to the README <!-- registry-table --> "
+                         "block; exit 1 on drift (the CI freshness gate).")
     args = ap.parse_args()
-    # render_hub (3-tier Flagship/Community/Incoming) is what the README
-    # <!-- registry-table --> block holds; the CI drift gate compares against this.
-    print(render_hub(generate_registry(args.yaml_path)))
+    table = render_hub(generate_registry(args.yaml_path))
+    if args.check:
+        import re
+        readme = Path("README.md").read_text(encoding="utf-8") if Path("README.md").exists() else ""
+        m = re.search(r"<!-- registry-table -->\n(.*?)\n<!-- /registry-table -->", readme, re.S)
+        current = m.group(1) if m else ""
+        current = re.sub(r"^<!-- generated.*-->\n", "", current, flags=re.M)
+        # normalize blank lines for the comparison (matches the ci.yml gate)
+        norm = lambda s: "\n".join(x for x in s.splitlines() if x.strip())
+        if norm(table) != norm(current):
+            print("ERROR: README <!-- registry-table --> block is stale — run `make hub-regen`.",
+                  file=sys.stderr)
+            sys.exit(1)
+        print("comparison-table: up to date ✓")
+    else:
+        # render_hub (3-tier Flagship/Community/Incoming) is what the README
+        # <!-- registry-table --> block holds; the CI drift gate compares against this.
+        print(table)
