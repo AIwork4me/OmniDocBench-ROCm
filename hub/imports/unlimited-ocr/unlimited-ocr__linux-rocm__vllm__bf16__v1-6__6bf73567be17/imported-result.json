@@ -1,6 +1,6 @@
 {
   "result_id": "unlimited-ocr__linux-rocm__vllm__bf16__v1-6__6bf73567be17",
-  "status": "valid",
+  "status": "invalid",
   "assurance": "submitted",
   "benchmark": {
     "name": "OmniDocBench",
@@ -61,5 +61,6 @@
   "accelerator_family": "rocm",
   "model_id": "unlimited-ocr",
   "license_category": "unknown",
-  "primary": false
+  "primary": false,
+  "lifecycle_note": "Phase-0 Commit 2 (2026-08-01, detectors-first): status set invalid -- canary/sample-track (150-page, full_set=false, comparison_track_id ...canary...) failing result (own metrics.overall_note: FAILING, regresses to first-token EOS). Retained in canonical as history; hidden from the leaderboard."
 }

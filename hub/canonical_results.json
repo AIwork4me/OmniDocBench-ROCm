@@ -149,7 +149,7 @@
       "run_spec_hash": "sha256:fa765236dac34bcad1bf13a72683edaeaab71e9af7bc190f080d240c4797035d",
       "status": "valid",
       "primary": true,
-      "license_category": "open-weights",
+      "license_category": "open-source-ai",
       "source": {
         "repository": "AIwork4me/Logics-Parsing-ROCm",
         "commit": "86ca0c932d27b224ac609ec13d41e7ec13cec5fd",
@@ -175,40 +175,8 @@
       "license_category": "restricted"
     },
     {
-      "result_id": "mineru-pipeline__windows-hip__default__default__v1-6__3b0291a2a300",
+      "result_id": "mineru-pipeline__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec",
       "model_id": "mineru-pipeline",
-      "platform": "windows-hip",
-      "backend": "",
-      "precision": "",
-      "benchmark": {
-        "name": "OmniDocBench",
-        "version": "v1.6"
-      },
-      "overall": 86.59,
-      "submetrics": {},
-      "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "restricted"
-    },
-    {
-      "result_id": "mineru2-5__linux-rocm__default__default__v1-6__63c733102e3f",
-      "model_id": "mineru2.5",
-      "platform": "linux-rocm",
-      "backend": "",
-      "precision": "",
-      "benchmark": {
-        "name": "OmniDocBench",
-        "version": "v1.6"
-      },
-      "overall": 95.56,
-      "submetrics": {},
-      "assurance": "evidence-complete",
-      "status": "superseded",
-      "license_category": "restricted"
-    },
-    {
-      "result_id": "mineru2-5__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec",
-      "model_id": "mineru2.5",
       "platform": "linux-rocm",
       "backend": "pipeline",
       "precision": "bf16",
@@ -227,8 +195,8 @@
       "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
       "run_spec_hash": "sha256:fe8e35574e4f6853b1297e12e24163fbbc5b945f399d3cf1a4e7fa7548201938",
       "status": "valid",
-      "primary": false,
-      "license_category": "source-available",
+      "primary": true,
+      "license_category": "restricted",
       "source": {
         "repository": "AIwork4me/MinerU-ROCm",
         "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
@@ -236,6 +204,69 @@
         "source_sha256": "sha256:de112d70eda758f77dd8d0dfeb696df9f82f5cca265843e2db3ce453b9ce094f",
         "json_pointer": "/results/2"
       }
+    },
+    {
+      "result_id": "mineru-pipeline__windows-hip__default__default__v1-6__3b0291a2a300",
+      "model_id": "mineru-pipeline",
+      "platform": "windows-hip",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 86.59,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "restricted"
+    },
+    {
+      "result_id": "mineru-pipeline__windows-hip__pipeline__bf16__v1-6__99dc6bf5a1b9",
+      "model_id": "mineru-pipeline",
+      "platform": "windows-hip",
+      "backend": "pipeline",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6",
+        "metric_set": "quick_match + cdm"
+      },
+      "overall": 86.59,
+      "producer_assurance": "submitted",
+      "assurance": "submitted",
+      "source_assurance": "submitted",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:79a59d78931b65750863659faf3c6cbe0151502149219c33d72b0b47d88e80ab",
+      "status": "valid",
+      "primary": true,
+      "license_category": "restricted",
+      "source": {
+        "repository": "AIwork4me/MinerU-ROCm",
+        "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:de112d70eda758f77dd8d0dfeb696df9f82f5cca265843e2db3ce453b9ce094f",
+        "json_pointer": "/results/3"
+      }
+    },
+    {
+      "result_id": "mineru2-5__linux-rocm__default__default__v1-6__63c733102e3f",
+      "model_id": "mineru2.5",
+      "platform": "linux-rocm",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 95.56,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "restricted"
     },
     {
       "result_id": "mineru2-5__linux-rocm__vlm-vllm__bf16__v1-6__69a85af9bd8e",
@@ -259,7 +290,7 @@
       "run_spec_hash": "sha256:1c46d5c3a85f856f485c1fa74aab0e57a1819e99c659b3a221466cd343f56c95",
       "status": "valid",
       "primary": true,
-      "license_category": "source-available",
+      "license_category": "restricted",
       "source": {
         "repository": "AIwork4me/MinerU-ROCm",
         "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
@@ -285,37 +316,6 @@
       "license_category": "restricted"
     },
     {
-      "result_id": "mineru2-5__windows-hip__pipeline__bf16__v1-6__99dc6bf5a1b9",
-      "model_id": "mineru2.5",
-      "platform": "windows-hip",
-      "backend": "pipeline",
-      "precision": "bf16",
-      "benchmark": {
-        "name": "OmniDocBench",
-        "version": "v1.6",
-        "metric_set": "quick_match + cdm"
-      },
-      "overall": 86.59,
-      "producer_assurance": "submitted",
-      "assurance": "submitted",
-      "source_assurance": "submitted",
-      "platform_review": {
-        "status": "not-reviewed"
-      },
-      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
-      "run_spec_hash": "sha256:79a59d78931b65750863659faf3c6cbe0151502149219c33d72b0b47d88e80ab",
-      "status": "valid",
-      "primary": false,
-      "license_category": "source-available",
-      "source": {
-        "repository": "AIwork4me/MinerU-ROCm",
-        "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
-        "path": "model_card_v2.json",
-        "source_sha256": "sha256:de112d70eda758f77dd8d0dfeb696df9f82f5cca265843e2db3ce453b9ce094f",
-        "json_pointer": "/results/3"
-      }
-    },
-    {
       "result_id": "mineru2-5__windows-hip__vlm-llamacpp__bf16__v1-6__ae0d908ab9d6",
       "model_id": "mineru2.5",
       "platform": "windows-hip",
@@ -337,7 +337,7 @@
       "run_spec_hash": "sha256:bb21fbc7a05c14e7266701e904cd61e329d65987de6884bf957de9b1694b1df5",
       "status": "valid",
       "primary": true,
-      "license_category": "source-available",
+      "license_category": "restricted",
       "source": {
         "repository": "AIwork4me/MinerU-ROCm",
         "commit": "389944e4e3fb2fabbdbcc4de68842aa518682367",
@@ -383,7 +383,7 @@
       "run_spec_hash": "sha256:a3454bf678dd01edda666fafe6194f24bdb50ec061f02c374c2f89a9845bf42d",
       "status": "valid",
       "primary": true,
-      "license_category": "open-weights",
+      "license_category": "open-source-ai",
       "source": {
         "repository": "AIwork4me/OvisOCR2-ROCm",
         "commit": "a606f4dc49c2c7e67c74b4a7a6ae3577560b31f7",
@@ -463,7 +463,7 @@
       "run_spec_hash": "sha256:9f3c4798eda3454a634e46393a121f5a3930d267b8a89ab9633f486adbf54d1e",
       "status": "valid",
       "primary": true,
-      "license_category": "open-weights",
+      "license_category": "open-source-ai",
       "source": {
         "repository": "AIwork4me/PaddleOCR-VL-ROCm",
         "commit": "e8a0feb4a5c6722b61071940307be7f9b77fedfa",
@@ -522,7 +522,7 @@
       },
       "comparison_track_id": "omnidocbench-v1-6-canary-default-11666b79",
       "run_spec_hash": "sha256:528aac8f285d8c344b493d7ce4fa75a3f9fdf3acaca1fc4fab02be20564ead1b",
-      "status": "valid",
+      "status": "invalid",
       "primary": false,
       "license_category": "unknown",
       "source": {

@@ -17,7 +17,7 @@
 - `omnidocbench-v1-6-canary-default-11666b79` — subset `canary`, pages `None`, page_set_hash `unknown`
 
 ## Hub / canonical store
-- results: **22** (1 retracted, 10 superseded, 11 valid)
+- results: **22** (1 invalid, 1 retracted, 10 superseded, 10 valid)
 - check_drift findings: **0**
   - none
 

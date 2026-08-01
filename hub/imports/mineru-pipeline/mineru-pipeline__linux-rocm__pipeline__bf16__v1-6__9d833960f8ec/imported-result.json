@@ -1,5 +1,5 @@
 {
-  "result_id": "mineru2-5__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec",
+  "result_id": "mineru-pipeline__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec",
   "status": "valid",
   "assurance": "submitted",
   "benchmark": {
@@ -73,9 +73,9 @@
   "run_spec_hash": "sha256:fe8e35574e4f6853b1297e12e24163fbbc5b945f399d3cf1a4e7fa7548201938",
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
-  "model_id": "mineru2.5",
-  "license_category": "source-available",
-  "primary": false,
+  "model_id": "mineru-pipeline",
+  "license_category": "restricted",
+  "primary": true,
   "assurance_migration": {
     "migrated_at": "2026-08-01",
     "policy": "D2-A retroactive (round-2 P0-5 / maintainer decision 2026-08-01): a result whose reproduction-critical run_spec identity is unknown cannot honestly hold producer_assurance=evidence-complete; downgraded to submitted until identity is pinned (Decision 2 Option A).",
@@ -88,5 +88,6 @@
       "producer_assurance": "submitted",
       "assurance": "submitted"
     }
-  }
+  },
+  "classification_note": "Phase-0 Commit 2 (2026-08-01, detectors-first): re-filed from model_id mineru2.5 to mineru-pipeline per ADR-0017 (composite pipeline must be its own model_id, not under a VLM). run_spec records the original producer run unchanged; only the zone classification (model_id/result_id) changed. license_category 'source-available'->restricted."
 }

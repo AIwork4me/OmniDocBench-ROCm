@@ -96,5 +96,6 @@
   },
   "note": "Migrated from model_card.json v1 (history preserved there). Overall 95.88 preserved unchanged; submetrics from run_summary. efficiency.latency was 0.0 in the raw run_summary (not honestly measured) and is intentionally OMITTED here rather than carried as fake data.",
   "model_id": "ovisocr2",
-  "license_category": "open-weights"
+  "license_category": "open-source-ai",
+  "license_category_note": "Phase-0 Commit 2 (2026-08-01, detectors-first): license_category unified to open-source-ai (was 'open-weights'), derived from the model repo model_card_v2 code+model sections (ADR-0010/0014 roll-up: Apache code + open weights -> open-source-ai; commercial/geo threshold -> restricted)."
 }

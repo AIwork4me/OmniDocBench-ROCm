@@ -104,7 +104,8 @@ def _is_defaultish(v) -> bool:
 
 
 def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None,
-                registry_scores: dict | None = None) -> list[dict]:
+                registry_scores: dict | None = None,
+                registry_rows: list[dict] | None = None) -> list[dict]:
     """Return a list of machine-readable drift findings (empty = no drift).
 
     Each finding: {kind, severity, result_id?, detail}. Findings:
@@ -119,6 +120,16 @@ def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None
         canonical row (old score must NOT be a fact source — §3.6).
       * ``verified-without-review``   a row implies a verified/score-reproduced
         assurance but has no platform_review backing it (§11).
+      * ``pipeline-and-vlm-same-model-id``  a VALID pipeline-backend result is filed
+        under a model_id that also carries direct/VLM backends (ADR-0017: composite
+        pipelines must be their own model_id, e.g. mineru2.5 must not carry 86.x
+        pipeline scores alongside its 95.x VLM scores).
+      * ``canary-track-result-valid``  a VALID result sits on a canary/sample
+        comparison track (e.g. the 150-page canary) — must be invalid/diagnostic,
+        not leaderboard-valid (§7).
+      * ``license-category-drift``     a model's registry license_category disagrees
+        with its VALID canonical rows' license_category (two labels, one model).
+        Inert unless ``registry_rows`` is supplied (CLI / quality_status pass it).
     """
     imports = imports or []
     findings: list[dict] = []
@@ -249,5 +260,64 @@ def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None
                                        f"platform={plat!r} track={tid!r}: {rids} "
                                        "(Standard §7.3 / ADR-0021: at most one primary "
                                        "per model+platform+track)"})
+
+    # pipeline backend co-located with VLM backends under one model_id (ADR-0017:
+    # composite pipelines must be filed under their own model_id, not under a VLM).
+    # A model_id whose VALID rows span both pipeline-type and direct backends is
+    # mis-filing the pipeline result. Reported, NOT auto-refiled.
+    _pipe_backs: dict[str, dict[str, list[str]]] = {}
+    for row in canonical_rows:
+        if row.get("status", "valid") != "valid":
+            continue
+        b = str(row.get("backend") or "")
+        if not b or b == "default":
+            continue
+        slot = _pipe_backs.setdefault(str(row.get("model_id")), {"pipe": [], "direct": []})
+        (slot["pipe"] if b.startswith("pipeline") else slot["direct"]).append(b)
+    for mid, slots in _pipe_backs.items():
+        if slots["pipe"] and slots["direct"]:
+            findings.append({"kind": "pipeline-and-vlm-same-model-id", "severity": "high",
+                             "result_id": mid,
+                             "detail": f"model_id={mid!r} carries VALID results with both pipeline "
+                                       f"backends {sorted(set(slots['pipe']))} and direct/VLM backends "
+                                       f"{sorted(set(slots['direct']))} (ADR-0017: pipeline results "
+                                       "must be filed under their own model_id)"})
+
+    # canary / sample-track result flagged valid (§7): a result on a non-full
+    # comparison track (e.g. the 150-page canary sample) must not be a
+    # leaderboard-valid result. Reported, NOT auto-invalidated.
+    for row in canonical_rows:
+        if row.get("status", "valid") != "valid":
+            continue
+        tid = str(row.get("comparison_track_id") or "")
+        if "canary" in tid:
+            findings.append({"kind": "canary-track-result-valid", "severity": "high",
+                             "result_id": row.get("result_id"),
+                             "detail": f"valid result on canary/sample track {tid!r} "
+                                       "(must be invalid/diagnostic, not leaderboard-valid)"})
+
+    # license_category drift between the registry (display classification) and a
+    # model's VALID canonical rows (carried from the model repo's model_card_v2).
+    # Two different non-unknown labels for one model is a reader-visible
+    # contradiction (e.g. registry open-source-ai vs canonical open-weights).
+    # Inert unless registry_rows is supplied.
+    if registry_rows:
+        reg_cat = {str(r.get("model_id")): r.get("license_category")
+                   for r in registry_rows if isinstance(r, dict)}
+        cats_by_model: dict[str, set[str]] = {}
+        for row in canonical_rows:
+            if row.get("status", "valid") != "valid":
+                continue
+            lc = row.get("license_category")
+            if lc and lc != "unknown":
+                cats_by_model.setdefault(str(row.get("model_id")), set()).add(lc)
+        for mid, cats in cats_by_model.items():
+            rc = reg_cat.get(mid)
+            if rc and rc != "unknown" and rc not in cats:
+                findings.append({"kind": "license-category-drift", "severity": "medium",
+                                 "result_id": mid,
+                                 "detail": f"model_id={mid!r}: registry license_category={rc!r} "
+                                           f"!= canonical valid rows {sorted(cats)} (must agree; "
+                                           "derive both from model_card_v2)"})
 
     return findings

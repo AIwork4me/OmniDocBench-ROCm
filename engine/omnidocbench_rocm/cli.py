@@ -581,6 +581,7 @@ def main(argv: list[str] | None = None) -> int:
         rows = H.load_canonical(a.canonical)
         imports = H.load_imports_store(a.hub_dir)
         reg_scores: dict = {}
+        entries: list = []
         regp = Path(a.registry)
         if regp.exists():
             try:
@@ -602,7 +603,8 @@ def main(argv: list[str] | None = None) -> int:
             except Exception as e:
                 sys.stderr.write(f"[check-drift] registry parse skipped: {e}\n")
         findings = H.check_drift(canonical_rows=rows, imports=imports,
-                                 registry_scores=reg_scores or None)
+                                 registry_scores=reg_scores or None,
+                                 registry_rows=entries or None)
         print(_json.dumps({"findings": findings, "count": len(findings)}, indent=2, ensure_ascii=False))
         return 0 if not findings else 1
     return 1

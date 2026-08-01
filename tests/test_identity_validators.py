@@ -117,3 +117,77 @@ def test_two_primaries_on_different_tracks_ok():
     rows = [_prow("m-a", primary=True, track="track-1"), _prow("m-b", primary=True, track="track-2")]
     f = hub.check_drift(canonical_rows=rows)
     assert not any(x["kind"] == "multiple-primaries-per-track" for x in f), f
+
+
+# --- pipeline backend must be its own model_id (ADR-0017) -------------------
+
+def _vrow(rid, model="m", backend="vllm",
+          track="omnidocbench-v1-6-full-default-f23c37da", lic="open-source-ai"):
+    return {"result_id": rid, "status": "valid", "model_id": model, "backend": backend,
+            "precision": "bf16", "platform": "linux-rocm", "license_category": lic,
+            "comparison_track_id": track, "source": _src()}
+
+
+def test_pipeline_and_vlm_same_model_id_flagged():
+    # a VLM model_id carrying a pipeline-backend VALID result alongside VLM results
+    # is mis-filing the pipeline (e.g. mineru2.5 + 86.x pipeline). ADR-0017.
+    rows = [_vrow("m-vlm", backend="vlm-vllm"), _vrow("m-pipe", backend="pipeline")]
+    f = hub.check_drift(canonical_rows=rows)
+    assert any(x["kind"] == "pipeline-and-vlm-same-model-id" for x in f), f
+
+
+def test_pipeline_only_model_id_ok():
+    # a model_id whose VALID results are ALL pipeline-type is fine (e.g. a future
+    # pipeline-tool model). Not flagged.
+    rows = [_vrow("p1", backend="pipeline")]
+    f = hub.check_drift(canonical_rows=rows)
+    assert not any(x["kind"] == "pipeline-and-vlm-same-model-id" for x in f), f
+
+
+def test_vlm_only_model_id_ok():
+    rows = [_vrow("v1", backend="vllm")]
+    f = hub.check_drift(canonical_rows=rows)
+    assert not any(x["kind"] == "pipeline-and-vlm-same-model-id" for x in f), f
+
+
+# --- canary / sample-track result must not be valid (§7) --------------------
+
+def test_canary_track_valid_flagged():
+    rows = [_vrow("c1", track="omnidocbench-v1-6-canary-default-11666b79")]
+    f = hub.check_drift(canonical_rows=rows)
+    assert any(x["kind"] == "canary-track-result-valid" for x in f), f
+
+
+def test_full_track_valid_ok():
+    rows = [_vrow("f1", track="omnidocbench-v1-6-full-default-f23c37da")]
+    f = hub.check_drift(canonical_rows=rows)
+    assert not any(x["kind"] == "canary-track-result-valid" for x in f), f
+
+
+# --- license_category drift between registry and canonical (§6) -------------
+
+def test_license_category_drift_flagged():
+    rows = [_vrow("l1", lic="open-weights")]
+    reg = [{"model_id": "m", "license_category": "open-source-ai"}]
+    f = hub.check_drift(canonical_rows=rows, registry_rows=reg)
+    assert any(x["kind"] == "license-category-drift" for x in f), f
+
+
+def test_license_category_agrees_ok():
+    rows = [_vrow("l1", lic="open-source-ai")]
+    reg = [{"model_id": "m", "license_category": "open-source-ai"}]
+    f = hub.check_drift(canonical_rows=rows, registry_rows=reg)
+    assert not any(x["kind"] == "license-category-drift" for x in f), f
+
+
+def test_license_drift_inert_without_registry_rows():
+    rows = [_vrow("l1", lic="open-weights")]
+    f = hub.check_drift(canonical_rows=rows)  # no registry_rows -> inert
+    assert not any(x["kind"] == "license-category-drift" for x in f), f
+
+
+def test_license_unknown_not_treated_as_drift():
+    rows = [_vrow("l1", lic="unknown")]
+    reg = [{"model_id": "m", "license_category": "open-source-ai"}]
+    f = hub.check_drift(canonical_rows=rows, registry_rows=reg)
+    assert not any(x["kind"] == "license-category-drift" for x in f), f

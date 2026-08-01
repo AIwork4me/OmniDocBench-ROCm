@@ -36,7 +36,9 @@ def test_content_derived_from_facts():
     # leave a stale mention.
     rows = hub.load_canonical(REPO / "hub" / "canonical_results.json")
     imports = hub.load_imports_store(REPO / "hub")
-    findings = hub.check_drift(canonical_rows=rows, imports=imports)
+    import yaml as _yaml
+    _reg = _yaml.safe_load((REPO / "hub" / "registry.yaml").read_text(encoding="utf-8"))
+    findings = hub.check_drift(canonical_rows=rows, imports=imports, registry_rows=_reg)
     assert f"check_drift findings: **{len(findings)}**" in txt
     for f in findings:
         assert f["kind"] in txt, f"finding {f['kind']!r} not surfaced in QUALITY_STATUS"

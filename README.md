@@ -19,7 +19,7 @@
 |---|---|---|---|---|
 | PaddleOCR-VL 1.6 | [AIwork4me/PaddleOCR-VL-ROCm](https://github.com/AIwork4me/PaddleOCR-VL-ROCm) | Apache-2.0 | community () | community (95.77) |
 | MinerU2.5-Pro | [AIwork4me/MinerU-ROCm](https://github.com/AIwork4me/MinerU-ROCm) | MinerU Open Source License | community (95.56) | community (95.46) |
-| MinerU Pipeline | [AIwork4me/MinerU-ROCm](https://github.com/AIwork4me/MinerU-ROCm) | MinerU Open Source License | community () | community () |
+| MinerU Pipeline | [AIwork4me/MinerU-ROCm](https://github.com/AIwork4me/MinerU-ROCm) | MinerU Open Source License | community (86.48) | community (86.59) |
 | HunyuanOCR 1.5 | [AIwork4me/HunyuanOCR-ROCm](https://github.com/AIwork4me/HunyuanOCR-ROCm) | Tencent Hunyuan Community License | community (93.64) | community-wanted () |
 | Logics-Parsing v2 | [AIwork4me/Logics-Parsing-ROCm](https://github.com/AIwork4me/Logics-Parsing-ROCm) | Apache-2.0 | community (93.19) | community-wanted () |
 | OvisOCR2 | [AIwork4me/OvisOCR2-ROCm](https://github.com/AIwork4me/OvisOCR2-ROCm) | Apache-2.0 | community (95.88) | community-wanted () |
@@ -48,24 +48,23 @@ by hand. Retracted/invalid results are retained in the store but hidden here.
 | `hunyuan-ocr` | linux-rocm | 94.05 | evidence-complete | restricted | superseded (superseded) |
 | `hunyuan-ocr` | linux-rocm | 93.64 | submitted | restricted | valid |
 | `logics-parsing-v2` | linux-rocm | 93.19 | evidence-complete | open-source-ai | superseded (superseded) |
-| `logics-parsing-v2` | linux-rocm | 93.19 | submitted | open-weights | valid |
+| `logics-parsing-v2` | linux-rocm | 93.19 | submitted | open-source-ai | valid |
 | `mineru-pipeline` | linux-rocm | 86.48 | evidence-complete | restricted | superseded (superseded) |
+| `mineru-pipeline` | linux-rocm | 86.48 | submitted | restricted | valid |
 | `mineru-pipeline` | windows-hip | 86.59 | evidence-complete | restricted | superseded (superseded) |
+| `mineru-pipeline` | windows-hip | 86.59 | submitted | restricted | valid |
 | `mineru2.5` | linux-rocm | 95.56 | evidence-complete | restricted | superseded (superseded) |
-| `mineru2.5` | linux-rocm | 86.48 | submitted | source-available | valid |
-| `mineru2.5` | linux-rocm | 95.56 | submitted | source-available | valid |
+| `mineru2.5` | linux-rocm | 95.56 | submitted | restricted | valid |
 | `mineru2.5` | windows-hip | 95.46 | evidence-complete | restricted | superseded (superseded) |
-| `mineru2.5` | windows-hip | 86.59 | submitted | source-available | valid |
-| `mineru2.5` | windows-hip | 95.46 | submitted | source-available | valid |
+| `mineru2.5` | windows-hip | 95.46 | submitted | restricted | valid |
 | `ovisocr2` | linux-rocm | 95.88 | evidence-complete | open-source-ai | superseded (superseded) |
-| `ovisocr2` | linux-rocm | 95.88 | submitted | open-weights | valid |
+| `ovisocr2` | linux-rocm | 95.88 | submitted | open-source-ai | valid |
 | `paddleocr-vl-1.6` | linux-rocm | 95.77 | evidence-complete | open-source-ai | superseded (superseded) |
 | `paddleocr-vl-1.6` | windows-hip | 95.77 | evidence-complete | open-source-ai | superseded (superseded) |
-| `paddleocr-vl-1.6` | windows-hip | 95.77 | submitted | open-weights | valid |
+| `paddleocr-vl-1.6` | windows-hip | 95.77 | submitted | open-source-ai | valid |
 | `unlimited-ocr` | linux-rocm | 92.451 | submitted | unknown | valid |
-| `unlimited-ocr` | linux-rocm | 22.3 | submitted | unknown | valid |
 
-<sub>1 result(s) hidden (status retracted/invalid); retained in canonical_results.json, never deleted.</sub>
+<sub>2 result(s) hidden (status retracted/invalid); retained in canonical_results.json, never deleted.</sub>
 <!-- END GENERATED RESULTS -->
 
 Run `python -m omnidocbench_rocm.registry generate --check` in CI to catch drift.

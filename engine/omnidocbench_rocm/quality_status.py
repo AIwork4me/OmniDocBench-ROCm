@@ -14,6 +14,8 @@ import json
 from collections import Counter
 from pathlib import Path
 
+import yaml
+
 from . import hub
 
 
@@ -26,7 +28,9 @@ def render_quality_status(repo_root: Path | str) -> str:
     rows = canonical.get("results", [])
     status_dist = dict(Counter(r.get("status", "valid") for r in rows))
     imports = hub.load_imports_store(repo / "hub")
-    findings = hub.check_drift(canonical_rows=rows, imports=imports)
+    _regp = repo / "hub" / "registry.yaml"
+    registry_rows = yaml.safe_load(_regp.read_text(encoding="utf-8")) if _regp.exists() else None
+    findings = hub.check_drift(canonical_rows=rows, imports=imports, registry_rows=registry_rows)
     fbyk = Counter(f["kind"] for f in findings)
 
     L: list[str] = []

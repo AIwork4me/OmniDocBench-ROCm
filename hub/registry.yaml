@@ -69,15 +69,16 @@
   license_category: restricted
   commercial_use: commercial threshold MAU>100M or revenue>$20M
   supplementary: true
-  note: Supplementary model card in MinerU-ROCm repo. Pipeline backend (DirectML on
-    windows-hip).
+  note: Supplementary model card in MinerU-ROCm repo. Composite pipeline backend
+    (MinerU 3.4.4 layout+OCR+MFR), filed as its own model_id per ADR-0017
+    (Phase-0 Commit 2, 2026-08-01; re-filed from mineru2.5).
   platforms:
     linux-rocm:
       badge: community
-      overall: null
+      overall: 86.48
     windows-hip:
       badge: community
-      overall: null
+      overall: 86.59
 - model_id: hunyuan-ocr
   name: HunyuanOCR 1.5
   repo: AIwork4me/HunyuanOCR-ROCm

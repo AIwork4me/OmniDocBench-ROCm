@@ -80,7 +80,7 @@
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
   "model_id": "mineru2.5",
-  "license_category": "source-available",
+  "license_category": "restricted",
   "primary": true,
   "assurance_migration": {
     "migrated_at": "2026-08-01",
@@ -94,5 +94,6 @@
       "producer_assurance": "submitted",
       "assurance": "submitted"
     }
-  }
+  },
+  "license_category_note": "Phase-0 Commit 2 (2026-08-01, detectors-first): license_category unified to restricted (was 'source-available'), derived from the model repo model_card_v2 code+model sections (ADR-0010/0014 roll-up: Apache code + open weights -> open-source-ai; commercial/geo threshold -> restricted)."
 }
