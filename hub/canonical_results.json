@@ -347,6 +347,36 @@
       }
     },
     {
+      "result_id": "ovisocr2-omnidocbench-adbfdda55e75b346",
+      "model_id": "ovisocr2",
+      "platform": "linux-rocm",
+      "backend": "vllm",
+      "precision": "bf16",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 95.88,
+      "producer_assurance": "evidence-complete",
+      "assurance": "evidence-complete",
+      "source_assurance": "evidence-complete",
+      "platform_review": {
+        "status": "not-reviewed"
+      },
+      "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "run_spec_hash": "sha256:adbfdda55e75b346c769aa0fff534b47f6d3c74e3204615867b621e17f54f18f",
+      "status": "valid",
+      "primary": true,
+      "license_category": "open-source-ai",
+      "source": {
+        "repository": "AIwork4me/OvisOCR2-ROCm",
+        "commit": "8059b2ee79ae44b6b25d5430c2930662369a8639",
+        "path": "model_card_v2.json",
+        "source_sha256": "sha256:7fba0038eead2dea7342d39469f64f6c2f15767d5e50b520783bc29e961f1c8b",
+        "json_pointer": "/results/0"
+      }
+    },
+    {
       "result_id": "ovisocr2__linux-rocm__default__default__v1-6__de96c5d3699c",
       "model_id": "ovisocr2",
       "platform": "linux-rocm",
@@ -381,7 +411,7 @@
       },
       "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
       "run_spec_hash": "sha256:a3454bf678dd01edda666fafe6194f24bdb50ec061f02c374c2f89a9845bf42d",
-      "status": "valid",
+      "status": "superseded",
       "primary": true,
       "license_category": "open-source-ai",
       "source": {

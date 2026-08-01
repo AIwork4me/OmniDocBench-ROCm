@@ -57,8 +57,9 @@ by hand. Retracted/invalid results are retained in the store but hidden here.
 | `mineru2.5` | linux-rocm | 95.56 | submitted | restricted | valid |
 | `mineru2.5` | windows-hip | 95.46 | evidence-complete | restricted | superseded (superseded) |
 | `mineru2.5` | windows-hip | 95.46 | submitted | restricted | valid |
+| `ovisocr2` | linux-rocm | 95.88 | evidence-complete | open-source-ai | valid |
 | `ovisocr2` | linux-rocm | 95.88 | evidence-complete | open-source-ai | superseded (superseded) |
-| `ovisocr2` | linux-rocm | 95.88 | submitted | open-source-ai | valid |
+| `ovisocr2` | linux-rocm | 95.88 | submitted | open-source-ai | superseded (superseded) |
 | `paddleocr-vl-1.6` | linux-rocm | 95.77 | evidence-complete | open-source-ai | superseded (superseded) |
 | `paddleocr-vl-1.6` | windows-hip | 95.77 | evidence-complete | open-source-ai | superseded (superseded) |
 | `paddleocr-vl-1.6` | windows-hip | 95.77 | submitted | open-source-ai | valid |
