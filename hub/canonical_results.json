@@ -1,7 +1,23 @@
 {
   "schema_version": 2,
-  "source_of_truth": "derived from hub/imports/ (Round-2 ADR-0013); README + table are derived",
+  "source_of_truth": "derived from hub/imports/ (ADR-0013); quarantined legacy retained from hub/legacy/.",
   "results": [
+    {
+      "result_id": "hunyuan-ocr__linux-rocm__default__default__v1-6__8bae5c861c6d",
+      "model_id": "hunyuan-ocr",
+      "platform": "linux-rocm",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 93.64,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "restricted"
+    },
     {
       "result_id": "hunyuan-ocr__linux-rocm__llama-cpp__bf16__v1-6__9afe77319b08",
       "model_id": "hunyuan-ocr",
@@ -53,8 +69,9 @@
       },
       "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
       "run_spec_hash": "sha256:4274954d607b73b0baf6cafd77427c62917c5fb0c8004fc7b3c28ac9a0d26d47",
-      "status": "valid",
+      "status": "superseded",
       "primary": false,
+      "license_category": "restricted",
       "source": {
         "repository": "https://github.com/AIwork4me/HunyuanOCR-ROCm",
         "commit": "2a9700031defe970d29c61d970fc601ea549d3c0",
@@ -95,6 +112,22 @@
       }
     },
     {
+      "result_id": "logics-parsing-v2__linux-rocm__default__default__v1-6__54b49c85ab0a",
+      "model_id": "logics-parsing-v2",
+      "platform": "linux-rocm",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 93.19,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "open-source-ai"
+    },
+    {
       "result_id": "logics-parsing-v2__linux-rocm__vllm__bf16__v1-6__4bee8ff0de24",
       "model_id": "logics-parsing-v2",
       "platform": "linux-rocm",
@@ -124,6 +157,54 @@
         "source_sha256": "sha256:0abe3e2ac4f0e125569c97cc4fa430eeaa5d25992cc2c0460030bdda896ec55f",
         "json_pointer": "/results/0"
       }
+    },
+    {
+      "result_id": "mineru-pipeline__linux-rocm__default__default__v1-6__ef3df41a8e4e",
+      "model_id": "mineru-pipeline",
+      "platform": "linux-rocm",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 86.48,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "restricted"
+    },
+    {
+      "result_id": "mineru-pipeline__windows-hip__default__default__v1-6__3b0291a2a300",
+      "model_id": "mineru-pipeline",
+      "platform": "windows-hip",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 86.59,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "restricted"
+    },
+    {
+      "result_id": "mineru2-5__linux-rocm__default__default__v1-6__63c733102e3f",
+      "model_id": "mineru2.5",
+      "platform": "linux-rocm",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 95.56,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "restricted"
     },
     {
       "result_id": "mineru2-5__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec",
@@ -188,6 +269,22 @@
       }
     },
     {
+      "result_id": "mineru2-5__windows-hip__default__default__v1-6__da529f9df4ad",
+      "model_id": "mineru2.5",
+      "platform": "windows-hip",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 95.46,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "restricted"
+    },
+    {
       "result_id": "mineru2-5__windows-hip__pipeline__bf16__v1-6__99dc6bf5a1b9",
       "model_id": "mineru2.5",
       "platform": "windows-hip",
@@ -250,6 +347,22 @@
       }
     },
     {
+      "result_id": "ovisocr2__linux-rocm__default__default__v1-6__de96c5d3699c",
+      "model_id": "ovisocr2",
+      "platform": "linux-rocm",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 95.88,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "open-source-ai"
+    },
+    {
       "result_id": "ovisocr2__linux-rocm__vllm__bf16__v1-6__7d3d44f37a91",
       "model_id": "ovisocr2",
       "platform": "linux-rocm",
@@ -278,6 +391,55 @@
         "source_sha256": "sha256:57b6e24c44362632ec33a65002a508c4038a1b8fc276d39c9f360959ee41496a",
         "json_pointer": "/results/0"
       }
+    },
+    {
+      "result_id": "paddleocr-vl-1-6__linux-rocm__default__default__v1-6__61885a1a6159",
+      "model_id": "paddleocr-vl-1.6",
+      "platform": "linux-rocm",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 95.77,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "open-source-ai"
+    },
+    {
+      "result_id": "paddleocr-vl-1-6__linux-rocm__mistake__default__v1-6__a8aa19703e4f",
+      "model_id": "paddleocr-vl-1.6",
+      "platform": "linux-rocm",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 91.0,
+      "submetrics": {},
+      "assurance": "submitted",
+      "status": "retracted",
+      "license_category": "open-source-ai",
+      "note": "retracted example — wrong backend; retained, hidden from list"
+    },
+    {
+      "result_id": "paddleocr-vl-1-6__windows-hip__default__default__v1-6__755f46d26fb7",
+      "model_id": "paddleocr-vl-1.6",
+      "platform": "windows-hip",
+      "backend": "",
+      "precision": "",
+      "benchmark": {
+        "name": "OmniDocBench",
+        "version": "v1.6"
+      },
+      "overall": 95.77,
+      "submetrics": {},
+      "assurance": "evidence-complete",
+      "status": "superseded",
+      "license_category": "open-source-ai"
     },
     {
       "result_id": "paddleocr-vl-1-6__windows-hip__llama-cpp__bf16__v1-6__4bc79b7f2fd0",

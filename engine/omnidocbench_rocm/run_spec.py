@@ -51,6 +51,22 @@ CRITICAL_IDENTITY_FIELDS = (
     "benchmark.benchmark_version",
 )
 
+# Reproduction-critical identity fields (Round-2 P0-5). A result whose value for
+# ANY of these is absent or ``unknown`` has NOT pinned its reproduction inputs,
+# so its producer_assurance cannot honestly exceed ``submitted`` — the ceiling a
+# validator reports (it does NOT auto-downgrade; that is a maintainer decision).
+# Distinct from CRITICAL_IDENTITY_FIELDS (which gate comparison-table
+# eligibility): these gate producer ASSURANCE depth.
+REPRODUCTION_CRITICAL_FIELDS = (
+    "model.model_revision",
+    "model.weights_sha256",
+    "benchmark.page_set_hash",
+    "inference.prompt_hash",
+    "inference.preprocessing_config_hash",
+    "inference.postprocessing_config_hash",
+    "inference.runtime_config_hash",
+)
+
 
 def _slug(value: Any) -> str:
     """Lowercase alphanumeric slug; non-alnum collapses to '-'; empty -> 'x'."""
@@ -128,6 +144,22 @@ def insufficient_identity(run_spec: dict) -> list[str]:
     """
     out: list[str] = []
     for p in CRITICAL_IDENTITY_FIELDS:
+        v = _dotted(run_spec, p)
+        if v is None or v == UNKNOWN:
+            out.append(p)
+    return out
+
+
+def unknown_reproduction_critical(run_spec: dict) -> list[str]:
+    """Reproduction-critical fields that are absent or explicitly ``unknown``.
+
+    Non-empty => the result has not pinned its reproduction inputs; per Round-2
+    P0-5 its producer_assurance cannot honestly exceed ``submitted``. A validator
+    reports this as an assurance-ceiling violation; it does NOT auto-downgrade
+    (downgrade is a maintainer decision, not an automatic one).
+    """
+    out: list[str] = []
+    for p in REPRODUCTION_CRITICAL_FIELDS:
         v = _dotted(run_spec, p)
         if v is None or v == UNKNOWN:
             out.append(p)

@@ -208,4 +208,46 @@ def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None
             findings.append({"kind": "duplicate-result-id", "severity": "high",
                              "result_id": rid, "detail": f"result_id appears {n} times (must be globally unique)"})
 
+    # unknown-identity assurance ceiling (Round-2 P0-5): a result whose
+    # producer_assurance exceeds `submitted` but whose run_spec reproduction-
+    # critical fields are unknown is overclaiming producer evidence depth — the
+    # platform did not receive reproduction-pinning inputs. Reported, NOT
+    # auto-downgraded (a downgrade is a maintainer decision, never automatic).
+    from . import run_spec as rs
+    for row in canonical_rows:
+        if row.get("status", "valid") != "valid":
+            continue
+        if row.get("producer_assurance") != "evidence-complete":
+            continue
+        rec = imports_by_id.get(row.get("result_id"))
+        spec = (rec.get("imported_result") or {}).get("run_spec") if rec else None
+        if isinstance(spec, dict):
+            unk = rs.unknown_reproduction_critical(spec)
+            if unk:
+                findings.append({"kind": "unknown-identity-assurance-ceiling",
+                                 "severity": "high", "result_id": row.get("result_id"),
+                                 "detail": f"producer_assurance=evidence-complete but reproduction-critical "
+                                           f"identity unknown {unk} (P0-5: cap at submitted until pinned)"})
+
+    # multiple primaries per (model_id, comparison_track_id) — Standard §7.3.
+    # NOTE: registry.check keys on (model, platform) to permit multi-backend
+    # results (ADR-0016, enshrined in test_primary_per_track). This is the
+    # STRICTER track-level uniqueness the Standard §7.3 mandates, reported
+    # separately so a maintainer can reconcile the two semantics (e.g. mineru2.5
+    # has one primary per platform but two on the full track across platforms).
+    # Reported, NOT auto-demoted.
+    _prim: dict[tuple, list[str]] = {}
+    for row in canonical_rows:
+        if row.get("status", "valid") != "valid" or row.get("primary") is not True:
+            continue
+        key = (row.get("model_id"), row.get("comparison_track_id"))
+        _prim.setdefault(key, []).append(str(row.get("result_id")))
+    for (mid, tid), rids in _prim.items():
+        if len(rids) > 1:
+            findings.append({"kind": "multiple-primaries-per-track", "severity": "high",
+                             "result_id": rids[0],
+                             "detail": f"{len(rids)} primary results for model={mid!r} "
+                                       f"track={tid!r}: {rids} (Standard §7.3: at most one "
+                                       "primary per model+track)"})
+
     return findings

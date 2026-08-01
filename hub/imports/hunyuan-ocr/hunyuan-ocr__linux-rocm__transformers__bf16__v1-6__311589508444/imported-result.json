@@ -1,8 +1,16 @@
 {
   "result_id": "hunyuan-ocr__linux-rocm__transformers__bf16__v1-6__311589508444",
-  "status": "valid",
+  "status": "superseded",
   "assurance": "evidence-complete",
   "primary": false,
+  "note": "SUPERSEDED 2026-08-01 (ROCmDoc round-2 remediation): this full-set transformers/bf16 result (Overall 94.05) was imported while its reproduction-critical run_spec identity hashes were still 'unknown' (model.model_revision, model.weights_sha256, benchmark.page_set_hash, and all inference.* hashes). Per Standard §7.1/§8 and round-2 P0-5, a result with unknown reproduction-critical identity cannot honestly hold producer_assurance=evidence-complete, so it is superseded until the identity is completed. The old result_id is retained as an alias; a NEW result_id, recomputed from the completed run_spec, will be imported once model_revision / weights_sha256 / page_set_hash / inference hashes are filled. prediction_manifest_sha256 (sha256:c5f80b...) and scorer_revision (2b161d0) ARE present and retained.",
+  "supersession": {
+    "superseded_at": "2026-08-01",
+    "reason": "unknown reproduction-critical run_spec identity (model_revision, weights_sha256, page_set_hash, inference.* hashes) cannot support producer_assurance=evidence-complete (Standard §8 / round-2 P0-5)",
+    "successor_result_id": null,
+    "successor_status": "pending identity-hash completion; to be re-imported under a new result_id derived from the completed run_spec",
+    "retained_alias_result_id": "hunyuan-ocr__linux-rocm__transformers__bf16__v1-6__311589508444"
+  },
   "benchmark": {
     "name": "OmniDocBench",
     "version": "v1.6",
@@ -94,5 +102,6 @@
   "run_spec_hash": "sha256:4274954d607b73b0baf6cafd77427c62917c5fb0c8004fc7b3c28ac9a0d26d47",
   "comparison_track_id": "omnidocbench-v1-6-full-default-f23c37da",
   "accelerator_family": "rocm",
-  "model_id": "hunyuan-ocr"
+  "model_id": "hunyuan-ocr",
+  "license_category": "restricted"
 }

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "cohort_id": "rocmdoc-1.0",
+  "central_repository": "AIwork4me/OmniDocBench-ROCm",
+  "central_commit": "17b5d65652ddab342a1abedad487d90ec2c4393f",
+  "central_commit_date": "2026-07-31T12:32:40+00:00",
+  "central_branch_at_lock": "main",
+  "contract_release": "rocmdoc-contracts-0.4.0",
+  "conformance_release": "rocmdoc-conformance-0.4.0",
+  "central_package_version": "0.3.3",
+  "standard_version": "1.0.0-draft.1",
+  "artifact_schema": {
+    "$id": "https://omnidocbench-rocm/schemas/artifact-schema.json",
+    "schema_version": 1,
+    "sha256": "eed086d58904054b3d13a40de874e64583d18df6af2dde88432d34c1a74094b4"
+  },
+  "conformance_profiles": [
+    "base",
+    "runtime-core",
+    "benchmark-omnidocbench-v16",
+    "reproducible-score"
+  ],
+  "result_identity": "v3",
+  "cli_exit_codes": {
+    "0": "OK",
+    "1": "PARTIAL",
+    "2": "USAGE",
+    "3": "BACKEND_MISMATCH",
+    "4": "CONTRACT",
+    "5": "FATAL"
+  },
+  "generator": {
+    "tool": "omnidocbench-rocm",
+    "command": "python scripts/freeze_cohort.py",
+    "module": "omnidocbench_rocm.cohort.freeze_cohort",
+    "version": "0.3.3"
+  }
+}

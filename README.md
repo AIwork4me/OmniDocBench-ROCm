@@ -45,6 +45,7 @@ by hand. Retracted/invalid results are retained in the store but hidden here.
 |---|---|---|---|---|---|
 | `hunyuan-ocr` | linux-rocm | 93.64 | evidence-complete | restricted | superseded (superseded) |
 | `hunyuan-ocr` | linux-rocm | 92.09 | submitted | restricted | valid |
+| `hunyuan-ocr` | linux-rocm | 94.05 | evidence-complete | restricted | superseded (superseded) |
 | `hunyuan-ocr` | linux-rocm | 93.64 | evidence-complete | restricted | valid |
 | `logics-parsing-v2` | linux-rocm | 93.19 | evidence-complete | open-source-ai | superseded (superseded) |
 | `logics-parsing-v2` | linux-rocm | 93.19 | evidence-complete | open-weights | valid |

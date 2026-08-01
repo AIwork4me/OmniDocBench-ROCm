@@ -53,16 +53,18 @@ ROCmDoc 规定两个接口边界和三个事实源。
 <model>-rocm parse --img-dir D --out-dir O --platform P --backend B --json
 ```
 
-标准 exit codes：
+标准 exit codes（与 `contracts/cli-contract.md` §2 和 `omnidocbench_rocm.cli_contract.EXIT_CODES` 一致；模型仓 spec-lock 锁定同一映射，三者必须同步）：
 
-| Code | 语义 |
-| ---: | --- |
-| 0 | 请求成功；所有预期页均成功 |
-| 1 | 请求完成但部分页失败 |
-| 2 | 用户输入或配置错误 |
-| 3 | 环境、依赖、设备或模型未就绪 |
-| 4 | backend/platform 不支持或不匹配 |
-| 5 | 适配器内部致命错误 |
+| Code | Name | 语义 |
+| ---: | --- | --- |
+| 0 | OK | 全部成功 |
+| 1 | PARTIAL | 运行完成，但部分页失败（per-page 失败已捕获、运行继续，R2） |
+| 2 | USAGE | 参数或误用错误 |
+| 3 | BACKEND_MISMATCH | 请求的 `--backend` 与实际运行的 backend 不一致 |
+| 4 | CONTRACT | stdout 不是合法 JSON 或缺失必需字段 |
+| 5 | FATAL | 未捕获崩溃 / 无输出 |
+
+环境/依赖/设备/模型是否就绪由 `doctor --json`（`status: ready|not-ready`）诊断，**不**作为单独的 parse 进程码；若 parse 因环境原因无法运行，按 FATAL(5) 退出，就绪细节归于 `doctor`。本表是唯一规范映射，**不得静默重编号**；确需新增进程码时必须以兼容方式追加（不占用 0–5）并走 RFC/ADR（§10 QS-6）。
 
 ### 3.2 面向评测的 subprocess/filesystem adapter
 

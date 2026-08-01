@@ -9,6 +9,27 @@ def test_exit_codes_normative():
     assert cc.STANDARD_COMMANDS == ("version", "capabilities", "doctor", "parse")
 
 
+def test_standard_doc_exit_codes_match_implementation():
+    """ROCMDOC_STANDARD.md §3.1 exit-code table must match cli_contract.EXIT_CODES.
+
+    Round-2 P1-1: the umbrella normative doc had drifted from the implemented+
+    locked contract (it read 3=env-ready/4=backend-mismatch vs the real
+    3=BACKEND_MISMATCH/4=CONTRACT). This guard asserts the doc carries every
+    implemented code<->name pair so the drift cannot recur silently. The locked
+    contract of record is cli_contract.EXIT_CODES (mirrored in cli-contract.md §2
+    and each model repo's spec-lock cli_exit_codes).
+    """
+    from pathlib import Path
+    standard = Path(__file__).resolve().parents[1] / "contracts" / "ROCMDOC_STANDARD.md"
+    text = standard.read_text(encoding="utf-8")
+    for name, code in cc.EXIT_CODES.items():
+        assert f"| {code} | {name} |" in text, (
+            f"ROCMDOC_STANDARD.md §3.1 missing/mismatched exit-code row for code {code} "
+            f"(expected name {name}); umbrella doc must match cli_contract.EXIT_CODES "
+            "(see cli-contract.md §2)"
+        )
+
+
 def test_parse_json_stdout_pure_and_impure():
     clean = cc.CLIRun(stdout='{"name": "x", "version": "1"}', stderr="", returncode=0)
     obj, err = cc.parse_json_stdout(clean)

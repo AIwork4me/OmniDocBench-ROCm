@@ -28,4 +28,5 @@ ci: ## run the full local CI gate set (quality + contracts) BEFORE push
 	@echo "==> check_result_ids"; python scripts/check_result_ids.py
 	@echo "==> build"; python -m build
 	@echo "==> pytest"; python -m pytest -q
+	@echo "==> quality-status freshness"; python scripts/render_quality_status.py --check
 	@echo "ci: all gates green ✓"

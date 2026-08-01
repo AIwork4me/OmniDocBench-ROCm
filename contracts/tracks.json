@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "tracks": [
+    {
+      "track_id": "omnidocbench-v1-6-full-default-f23c37da",
+      "version": "1",
+      "benchmark": {
+        "id": "omnidocbench",
+        "version": "v1.6"
+      },
+      "dataset": {
+        "subset": "full",
+        "upstream_repository": "opendatalab/OmniDocBench",
+        "upstream_commit": "2b161d010d2e3aff77a0edef359ea3a6411d23cd",
+        "dataset_revision": "2b161d010d2e3aff77a0edef359ea3a6411d23cd",
+        "page_count": 1651,
+        "gt_manifest": "OmniDocBench.json",
+        "gt_manifest_sha256": "sha256:a45cd84b04ad8b793e775089640e6b681209abea33ead54c1828ddca35fae496",
+        "page_set_hash": "sha256:ffd94b8e2b2a150015c77a64bc827ab7c6358a09a1f99c0323315d8fb324027b"
+      },
+      "scorer": {
+        "protocol": "default",
+        "revision": "2b161d010d2e3aff77a0edef359ea3a6411d23cd",
+        "metric_set": "quick_match + cdm"
+      },
+      "eligibility": {
+        "excluded_statuses": [
+          "superseded",
+          "retracted",
+          "invalid"
+        ],
+        "must_match": [
+          "dataset.page_set_hash",
+          "dataset.gt_manifest_sha256",
+          "scorer.revision"
+        ]
+      }
+    },
+    {
+      "track_id": "omnidocbench-v1-6-canary-default-11666b79",
+      "version": "1",
+      "benchmark": {
+        "id": "omnidocbench",
+        "version": "v1.6"
+      },
+      "dataset": {
+        "subset": "canary",
+        "upstream_repository": "opendatalab/OmniDocBench",
+        "upstream_commit": "2b161d010d2e3aff77a0edef359ea3a6411d23cd",
+        "dataset_revision": "2b161d010d2e3aff77a0edef359ea3a6411d23cd",
+        "page_count": null,
+        "gt_manifest": "OmniDocBench.json",
+        "gt_manifest_sha256": "sha256:a45cd84b04ad8b793e775089640e6b681209abea33ead54c1828ddca35fae496",
+        "page_set_hash": "unknown"
+      },
+      "scorer": {
+        "protocol": "default",
+        "revision": "2b161d010d2e3aff77a0edef359ea3a6411d23cd",
+        "metric_set": "quick_match + cdm"
+      },
+      "eligibility": {
+        "excluded_statuses": [
+          "superseded",
+          "retracted",
+          "invalid"
+        ],
+        "must_match": [
+          "dataset.gt_manifest_sha256",
+          "scorer.revision"
+        ]
+      },
+      "note": "canary = quick-smoke subset drawn from the same GT; the exact canary page selection is not pinned in this catalog (page_set_hash unknown). Define the canary page list to make results head-to-head comparable on this track."
+    }
+  ]
+}

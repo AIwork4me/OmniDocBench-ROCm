@@ -1,0 +1,91 @@
+{
+  "audit_date": "2026-08-01",
+  "audit_kind": "point-in-time snapshot (current PR/shipping/drift state)",
+  "method": "every claim verified by an independent subagent per step; commands re-run, not trusted",
+  "scope": {
+    "central": "AIwork4me/OmniDocBench-ROCm",
+    "models": ["OvisOCR2-ROCm", "PaddleOCR-VL-ROCm", "HunyuanOCR-ROCm", "MinerU-ROCm", "Logics-Parsing-ROCm", "Unlimited-OCR-ROCm"]
+  },
+  "session": {
+    "branch": "feat/rocmdoc-1.0-governance",
+    "head": "8a4ecee24aef8a1c7cd41abc32ed95fe51627a6f",
+    "committed": false,
+    "pushed": false,
+    "merged": false,
+    "tagged": false,
+    "steps_executed": 8,
+    "steps_independently_verified": 8,
+    "central_ci": "make ci -> 307 passed, all gates green"
+  },
+  "deliverables": [
+    {"step": 3, "artifact": "94.05 superseded + 10 legacy rows restored", "status": "DONE", "verifier": "PASS"},
+    {"step": 4, "artifact": "exit-code doc divergence fixed + recurrence guard", "status": "DONE", "verifier": "PASS"},
+    {"step": 5, "artifact": "contracts/cohort.json (deterministic, cross-repo consistent)", "status": "DONE", "verifier": "PASS"},
+    {"step": 6, "artifact": "contracts/tracks.json (real hashes, Option B)", "status": "DONE", "verifier": "PASS"},
+    {"step": 7, "artifact": "QUALITY_STATUS generator (deterministic, CI-wired)", "status": "DONE", "verifier": "PASS"},
+    {"step": 8, "artifact": "unknown-assurance-ceiling + primary-per-track validators (report-only)", "status": "DONE", "verifier": "PASS"}
+  ],
+  "document_reconciliation": [
+    {"item": "P0-1 source reachability / shipped to default", "status": "PARTIAL", "evidence": "3/6 shipped (Ovis/Paddle/Hunyuan on default @17b5d65); 3/6 not (MinerU/Logics/Unlimited); cohort centralized (task 5); merge is USER gate"},
+    {"item": "P0-2 freeze a real cohort", "status": "DONE", "evidence": "contracts/cohort.json pins 17b5d65; 5/6 model spec-locks pin 17b5d65 on their round-2 branch (Ovis/Paddle/Hunyuan main, MinerU/Unlimited feat/rocmdoc-standard-v2); Logics re-lock (17b5d65) is on chore/rocmdoc-1.0-relock while PR #1 head pins ancestor 4556ee1 (retarget #1 before merge); deterministic freeze"},
+    {"item": "P0-3 single fact source, legacy demoted", "status": "DONE", "evidence": "badge->legacy, COMPATIBILITY.md, canonical generated; QUALITY_STATUS generated"},
+    {"item": "P0-4 immutable v1.6 dataset identity", "status": "DONE", "evidence": "contracts/tracks.json: gt_manifest_sha256 a45cd84b, page_set_hash ffd94b8e, 1651 pages, upstream/scorer 2b161d0"},
+    {"item": "P0-5 unknown assurance ceiling + platform-review matrix", "status": "DETECTOR-DONE/ENFORCEMENT-BLOCKED", "evidence": "ceiling validator in check_drift (task 8); platform_review_record 4-field matrix exists; applying = maintainer decision"},
+    {"item": "P0-6 primary decisions + result-truth conflicts", "status": "94.05-RESOLVED/PRIMARY-BLOCKED", "evidence": "94.05 superseded (task 3); per-(model,track) detector added; mineru2.5 dual-primary + Hunyuan primary = maintainer decisions"},
+    {"item": "P1-1 unified CLI + exit codes", "status": "EXIT-CODE-DONE/CLI-UNIFY-PER-REPO", "evidence": "exit-code doc fixed + guarded (task 4); cross-repo CLI unification is per-repo"},
+    {"item": "P1-2 table_tides->teds typo", "status": "DONE", "evidence": "zone-wide, 0 remaining"},
+    {"item": "P1-3 README/QUALITY_STATUS generated", "status": "DONE", "evidence": "QUALITY_STATUS generator (task 7); README generated blocks"},
+    {"item": "P1-4 license split", "status": "DONE", "evidence": "license_record/code_license_record/model_openness_record in schema"},
+    {"item": "P1-5 per-result hardware/backend", "status": "DONE", "evidence": "accelerator_family (incl mixed) + components per-stage"}
+  ],
+  "drift_findings": [
+    {"kind": "unknown-identity-assurance-ceiling", "count": 6, "result_ids": ["hunyuan-ocr__linux-rocm__vllm__bf16__v1-6__38a99096c23d", "logics-parsing-v2__linux-rocm__vllm__bf16__v1-6__4bee8ff0de24", "mineru2-5__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec", "mineru2-5__linux-rocm__vlm-vllm__bf16__v1-6__69a85af9bd8e", "mineru2-5__windows-hip__pipeline__bf16__v1-6__99dc6bf5a1b9", "mineru2-5__windows-hip__vlm-llamacpp__bf16__v1-6__ae0d908ab9d6"], "decision_owner": "maintainer", "decision": "retroactive downgrade to submitted vs prospective-only vs pin real identity hashes"},
+    {"kind": "multiple-primaries-per-track", "count": 1, "model": "mineru2.5", "track": "omnidocbench-v1-6-full-default-f23c37da", "primaries": ["mineru2-5__linux-rocm__vlm-vllm__bf16__v1-6__69a85af9bd8e", "mineru2-5__windows-hip__vlm-llamacpp__bf16__v1-6__ae0d908ab9d6"], "decision_owner": "maintainer", "decision": "reconcile (model,platform) vs (model,track) primary semantics; spec/code reconciliation (do not silently change registry.check)"}
+  ],
+  "shipping": [
+    {"repo": "OvisOCR2-ROCm", "default_branch": "main", "round2_on_default": true},
+    {"repo": "PaddleOCR-VL-ROCm", "default_branch": "main", "round2_on_default": true},
+    {"repo": "HunyuanOCR-ROCm", "default_branch": "main", "round2_on_default": true},
+    {"repo": "MinerU-ROCm", "default_branch": "main", "round2_on_default": false, "open_pr": "#20 draft feat/rocmdoc-standard-v2"},
+    {"repo": "Logics-Parsing-ROCm", "default_branch": "master", "round2_on_default": false, "open_pr": "#1 draft feat/rocmdoc-standard-v2", "pr_head_lock": "4556ee1 (ancestor of 17b5d65; re-lock 17b5d65 is on chore/rocmdoc-1.0-relock — retarget #1 before merge)"},
+    {"repo": "Unlimited-OCR-ROCm", "default_branch": "main", "round2_on_default": false, "open_pr": "#66 draft feat/rocmdoc-standard-v2"}
+  ],
+  "blockers": {
+    "maintainer_decisions": [
+      "Hunyuan primary selection (P0-6)",
+      "6-result assurance-ceiling enforcement policy (P0-5)",
+      "mineru2.5 dual-primary + (model,platform) vs (model,track) semantics (P0-6)"
+    ],
+    "user_gates": [
+      "merge MinerU #20 / Logics #1 / Unlimited #66 to default once CI green",
+      "commit + push this session's central work",
+      "merge central governance branch to main (then re-freeze cohort + re-lock spec-locks)"
+    ],
+    "owner_side_github": [
+      "MinerU PAT revoke/rotate on GitHub (local clean != remediated)",
+      "GitHub About/description sync (maintainer checklist, not scripted)"
+    ],
+    "environment": [
+      "no GPU -> score/inference/cross-hardware reproduction = NOT_RUN",
+      "git transport to github.com flaky; gh/api.github.com work"
+    ]
+  },
+  "completion_gates": [
+    {"gate": "central standard + cohort on default, parseable", "status": "PARTIAL", "note": "standard on main; cohort.json not yet on main (uncommitted)"},
+    {"gate": "six repos same-cohort or explicitly incoming", "status": "PARTIAL", "note": "3 shipped / 3 incoming"},
+    {"gate": "all central source commits reachable from default/tag", "status": "NOT_RUN", "note": "reachability gate is a follow-on (network-constrained)"},
+    {"gate": "default leaderboard clean (no unknown-page-set pseudo-track / invalid backend / duplicate primary)", "status": "BLOCKED", "note": "7 drift findings; maintainer decisions"},
+    {"gate": "producer_assurance vs platform_review fully split", "status": "DONE"},
+    {"gate": "README/QUALITY_STATUS/package/canonical no conflicting headline", "status": "MOSTLY-DONE", "note": "Hunyuan primary headline pending"},
+    {"gate": "Hunyuan primary decided by maintainer", "status": "BLOCKED", "note": "human decision"},
+    {"gate": "MinerU PAT revoked/rotated by owner or remains BLOCKER", "status": "BLOCKED", "note": "owner-side"},
+    {"gate": "zone audit no unexplained FAIL; GPU reproduction NOT_RUN", "status": "DONE", "note": "this audit"}
+  ],
+  "pr_plan": [
+    "1. Central contract PR (this session): cohort + tracks + exit-code + QUALITY_STATUS + validators + 94.05 remediation (one cohesive change, make ci green)",
+    "2. Model migration PRs: finish MinerU #20 / Logics #1 / Unlimited #66 (USER gate)",
+    "3. Central re-import / re-freeze after #1 merges to main (lock advances, re-lock 3 repos)",
+    "4. Community/quality + enforcement-policy PR once maintainer decides ceiling + primary policies"
+  ],
+  "overall": "Stage A (central gating artifacts + detectors) DONE and verified-green. Zone not yet a released cohort: 3 repos unshipped, cohort->main pending, 3 maintainer value-decisions open. None should be decided/done by Claude Code without explicit authorization."
+}
