@@ -218,7 +218,7 @@ OmniDocBench v1.6 track MUST 固定 upstream commit、dataset revision 和 page-
 
 ### 7.3 Primary selection
 
-每个 `model_id + comparison_track_id` MUST 最多有一个 primary result。选择记录 MUST 包含 `result_id`、`selected_by`、`selected_at`、`rationale` 和 `policy_version`。
+每个 `(model_id, platform, comparison_track_id)` MUST 最多有一个 primary result —— 一个模型在 `linux-rocm` 与 `windows-hip` 上可各有一个 primary（见 ADR-0021）。选择记录 MUST 包含 `result_id`、`selected_by`、`selected_at`、`rationale` 和 `policy_version`。
 
 系统 MUST NOT 自动把最高分选为 primary。实验 backend、fallback、不同精度或已知缺陷可能使最高分不适合作为推荐结果。
 

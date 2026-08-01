@@ -46,17 +46,17 @@ by hand. Retracted/invalid results are retained in the store but hidden here.
 | `hunyuan-ocr` | linux-rocm | 93.64 | evidence-complete | restricted | superseded (superseded) |
 | `hunyuan-ocr` | linux-rocm | 92.09 | submitted | restricted | valid |
 | `hunyuan-ocr` | linux-rocm | 94.05 | evidence-complete | restricted | superseded (superseded) |
-| `hunyuan-ocr` | linux-rocm | 93.64 | evidence-complete | restricted | valid |
+| `hunyuan-ocr` | linux-rocm | 93.64 | submitted | restricted | valid |
 | `logics-parsing-v2` | linux-rocm | 93.19 | evidence-complete | open-source-ai | superseded (superseded) |
-| `logics-parsing-v2` | linux-rocm | 93.19 | evidence-complete | open-weights | valid |
+| `logics-parsing-v2` | linux-rocm | 93.19 | submitted | open-weights | valid |
 | `mineru-pipeline` | linux-rocm | 86.48 | evidence-complete | restricted | superseded (superseded) |
 | `mineru-pipeline` | windows-hip | 86.59 | evidence-complete | restricted | superseded (superseded) |
 | `mineru2.5` | linux-rocm | 95.56 | evidence-complete | restricted | superseded (superseded) |
-| `mineru2.5` | linux-rocm | 86.48 | evidence-complete | source-available | valid |
-| `mineru2.5` | linux-rocm | 95.56 | evidence-complete | source-available | valid |
+| `mineru2.5` | linux-rocm | 86.48 | submitted | source-available | valid |
+| `mineru2.5` | linux-rocm | 95.56 | submitted | source-available | valid |
 | `mineru2.5` | windows-hip | 95.46 | evidence-complete | restricted | superseded (superseded) |
-| `mineru2.5` | windows-hip | 86.59 | evidence-complete | source-available | valid |
-| `mineru2.5` | windows-hip | 95.46 | evidence-complete | source-available | valid |
+| `mineru2.5` | windows-hip | 86.59 | submitted | source-available | valid |
+| `mineru2.5` | windows-hip | 95.46 | submitted | source-available | valid |
 | `ovisocr2` | linux-rocm | 95.88 | evidence-complete | open-source-ai | superseded (superseded) |
 | `ovisocr2` | linux-rocm | 95.88 | submitted | open-weights | valid |
 | `paddleocr-vl-1.6` | linux-rocm | 95.77 | evidence-complete | open-source-ai | superseded (superseded) |

@@ -82,18 +82,29 @@ def test_ceiling_inert_without_imports():
 
 # --- primary-uniqueness per (model, track) (P0-6 / Standard §7.3) -----------
 
-def _prow(rid, primary=False, track="omnidocbench-v1-6-full-default-f23c37da", model="m"):
+def _prow(rid, primary=False, track="omnidocbench-v1-6-full-default-f23c37da", model="m",
+          platform="linux-rocm"):
     r = {"result_id": rid, "status": "valid", "model_id": model, "backend": "vllm",
-         "precision": "bf16", "comparison_track_id": track, "source": _src()}
+         "precision": "bf16", "platform": platform, "comparison_track_id": track, "source": _src()}
     if primary:
         r["primary"] = True
     return r
 
 
-def test_multiple_primaries_per_model_track_flagged():
-    rows = [_prow("m-linux", primary=True), _prow("m-win", primary=True)]  # 2 primaries, same model+track
+def test_two_primaries_same_model_platform_track_flagged():
+    # the real ambiguity: 2 primaries on the SAME (model, platform, track)
+    rows = [_prow("m-linux", primary=True), _prow("m-win", primary=True)]  # both default linux-rocm
     f = hub.check_drift(canonical_rows=rows)
     assert any(x["kind"] == "multiple-primaries-per-track" for x in f), f
+
+
+def test_two_primaries_same_track_different_platform_ok():
+    # ADR-0021: one primary per platform on the same track is legitimate (e.g. mineru2.5
+    # linux vlm-vllm + windows vlm-llamacpp on the full track) — NOT flagged.
+    rows = [_prow("m-linux", primary=True, platform="linux-rocm"),
+            _prow("m-win", primary=True, platform="windows-hip")]
+    f = hub.check_drift(canonical_rows=rows)
+    assert not any(x["kind"] == "multiple-primaries-per-track" for x in f), f
 
 
 def test_one_primary_per_model_track_ok():

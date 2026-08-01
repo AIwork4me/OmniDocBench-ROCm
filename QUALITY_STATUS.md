@@ -18,10 +18,8 @@
 
 ## Hub / canonical store
 - results: **22** (1 retracted, 10 superseded, 11 valid)
-- check_drift findings: **7**
-  - **multiple-primaries-per-track: 1** — `['mineru2-5__linux-rocm__vlm-vllm__bf16__v1-6__69a85af9bd8e']`
-  - **unknown-identity-assurance-ceiling: 6** — `['hunyuan-ocr__linux-rocm__vllm__bf16__v1-6__38a99096c23d', 'logics-parsing-v2__linux-rocm__vllm__bf16__v1-6__4bee8ff0de24', 'mineru2-5__linux-rocm__pipeline__bf16__v1-6__9d833960f8ec', 'mineru2-5__linux-rocm__vlm-vllm__bf16__v1-6__69a85af9bd8e', 'mineru2-5__windows-hip__pipeline__bf16__v1-6__99dc6bf5a1b9', 'mineru2-5__windows-hip__vlm-llamacpp__bf16__v1-6__ae0d908ab9d6']`
-  - Reported for a maintainer decision (validators DETECT, they do not auto-fix). See the zone audit for the resolution options.
+- check_drift findings: **0**
+  - none
 
 ## Honesty
 - GPU inference / score / inference / cross-hardware reproduction: **NOT_RUN** in this environment (no GPU). Never reported as passed.

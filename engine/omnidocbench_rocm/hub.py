@@ -229,25 +229,25 @@ def check_drift(*, canonical_rows: list[dict], imports: list[dict] | None = None
                                  "detail": f"producer_assurance=evidence-complete but reproduction-critical "
                                            f"identity unknown {unk} (P0-5: cap at submitted until pinned)"})
 
-    # multiple primaries per (model_id, comparison_track_id) — Standard §7.3.
-    # NOTE: registry.check keys on (model, platform) to permit multi-backend
-    # results (ADR-0016, enshrined in test_primary_per_track). This is the
-    # STRICTER track-level uniqueness the Standard §7.3 mandates, reported
-    # separately so a maintainer can reconcile the two semantics (e.g. mineru2.5
-    # has one primary per platform but two on the full track across platforms).
-    # Reported, NOT auto-demoted.
+    # multiple primaries per (model_id, platform, comparison_track_id) — Standard §7.3
+    # (reconciled by ADR-0021). A multi-platform model legitimately has one primary per
+    # platform on the same track (e.g. mineru2.5 linux vlm-vllm + windows vlm-llamacpp),
+    # so the key is (model, platform, track), matching registry.check's (model, platform)
+    # multi-backend semantics at the track level. Two primaries on the SAME
+    # (model, platform, track) is the real ambiguity this catches. Reported, NOT auto-demoted.
     _prim: dict[tuple, list[str]] = {}
     for row in canonical_rows:
         if row.get("status", "valid") != "valid" or row.get("primary") is not True:
             continue
-        key = (row.get("model_id"), row.get("comparison_track_id"))
+        key = (row.get("model_id"), row.get("platform"), row.get("comparison_track_id"))
         _prim.setdefault(key, []).append(str(row.get("result_id")))
-    for (mid, tid), rids in _prim.items():
+    for (mid, plat, tid), rids in _prim.items():
         if len(rids) > 1:
             findings.append({"kind": "multiple-primaries-per-track", "severity": "high",
                              "result_id": rids[0],
                              "detail": f"{len(rids)} primary results for model={mid!r} "
-                                       f"track={tid!r}: {rids} (Standard §7.3: at most one "
-                                       "primary per model+track)"})
+                                       f"platform={plat!r} track={tid!r}: {rids} "
+                                       "(Standard §7.3 / ADR-0021: at most one primary "
+                                       "per model+platform+track)"})
 
     return findings
